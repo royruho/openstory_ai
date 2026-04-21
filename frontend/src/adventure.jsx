@@ -142,6 +142,13 @@ const TR = {
   helpHowTo3:       { English: "When the story begins, type your own action or pick from the suggestions. The AI responds in kind.", Hebrew: "כשהסיפור מתחיל, הקלד פעולה משלך או בחר מההצעות. ה-AI מגיב בהתאם.", Arabic: "عندما تبدأ القصة، اكتب فعلك الخاص أو اختر من الاقتراحات. يستجيب الذكاء الاصطناعي وفقاً لذلك.", Portuguese: "Quando a história começar, digite sua própria ação ou escolha entre as sugestões. A IA responde em conformidade." },
   helpDice:         { English: "Dice & fate checks", Hebrew: "קוביות ובדיקות גורל", Arabic: "النرد وفحوص القدر", Portuguese: "Dados e verificações do destino" },
   helpDiceBody:     { English: "Risky actions trigger a dice roll. A 1 is a critical failure; a 6 is a critical success. If the action matches one of your skills, you roll twice and keep the better result.", Hebrew: "פעולות מסוכנות מפעילות הטלת קובייה. 1 הוא כישלון חרוץ; 6 הוא הצלחה מוחלטת. אם הפעולה תואמת אחד מהכישורים שלך, אתה מטיל פעמיים ושומר על התוצאה הטובה יותר.", Arabic: "الأفعال الخطرة تستدعي رمي النرد. 1 هو فشل ذريع؛ 6 هو نجاح استثنائي. إذا تطابق الفعل مع إحدى مهاراتك، ترمي مرتين وتحتفظ بالنتيجة الأفضل.", Portuguese: "Ações arriscadas acionam uma rolagem de dado. 1 é falha crítica; 6 é sucesso crítico. Se a ação corresponder a uma de suas habilidades, você rola duas vezes e mantém o melhor resultado." },
+  helpLearn:        { English: "Learn a language as you play", Hebrew: "למד שפה תוך כדי משחק", Arabic: "تعلّم لغة أثناء اللعب", Portuguese: "Aprenda um idioma enquanto joga" },
+  helpLearnBody:    {
+    English:    "An optional educational mode. Pick your interface language on the home screen, then pick a second language under 'Learn' — every narrator passage shows a small Translate button that renders it in the language you're studying. Play in English and peek at Portuguese, or play in Hebrew and peek at Arabic — the original stays visible, the translation appears beneath it, and you control when to look. Set the Learn dropdown to 'Off' to hide the feature entirely.",
+    Hebrew:     "מצב למידה אופציונלי. בחר את שפת הממשק במסך הראשי, ואז בחר שפה שנייה תחת 'למידה' — כל קטע של המספר מציג כפתור תרגום קטן שמציג אותו בשפה שאתה לומד. שחק באנגלית והצץ לפורטוגזית, או שחק בעברית והצץ לערבית — הטקסט המקורי נשאר גלוי, התרגום מופיע מתחתיו, ואתה שולט מתי להסתכל. הגדר את תפריט 'למידה' ל'כבוי' כדי להסתיר את התכונה לחלוטין.",
+    Arabic:     "وضع تعليمي اختياري. اختر لغة الواجهة من الشاشة الرئيسية، ثم اختر لغة ثانية ضمن 'تعلّم' — سيظهر زر ترجمة صغير أسفل كل مقطع من الراوي يعرضه باللغة التي تدرسها. العب بالإنجليزية وألقِ نظرة على البرتغالية، أو العب بالعبرية وألقِ نظرة على العربية — يبقى النص الأصلي ظاهراً، وتظهر الترجمة أسفله، وأنت تتحكم في متى تنظر إليها. اضبط قائمة 'تعلّم' على 'معطّل' لإخفاء الميزة تماماً.",
+    Portuguese: "Um modo educacional opcional. Escolha o idioma da interface no ecrã inicial e depois escolha um segundo idioma em 'Aprender' — cada passagem do narrador mostrará um pequeno botão Traduzir que a apresenta no idioma que está a estudar. Jogue em inglês e espreite em português, ou jogue em hebraico e espreite em árabe — o texto original fica visível, a tradução aparece por baixo e você controla quando olhar. Defina o menu 'Aprender' como 'Desativado' para ocultar totalmente a funcionalidade.",
+  },
   helpChapters:     { English: "Chapters", Hebrew: "פרקים", Arabic: "الفصول", Portuguese: "Capítulos" },
   helpChaptersBody: { English: "Longer adventures split into chapters, each with one overarching goal. Explore freely — a chapter ends only when you conclusively achieve its goal.", Hebrew: "הרפתקאות ארוכות מתחלקות לפרקים, לכל אחד מטרה מרכזית אחת. חקור בחופשיות — פרק מסתיים רק כשאתה משיג את מטרתו באופן חד-משמעי.", Arabic: "المغامرات الأطول تنقسم إلى فصول، لكل فصل هدف رئيسي واحد. استكشف بحرية — ينتهي الفصل فقط عندما تحقق هدفه بشكل قاطع.", Portuguese: "Aventuras mais longas se dividem em capítulos, cada um com um objetivo central. Explore livremente — um capítulo só termina quando você alcança seu objetivo de forma conclusiva." },
   helpSaveLoad:     { English: "Save & Load", Hebrew: "שמירה וטעינה", Arabic: "الحفظ والتحميل", Portuguese: "Salvar e Carregar" },
@@ -158,6 +165,14 @@ const TR = {
   translateTo:      { English: "Translate to…",  Hebrew: "תרגם ל…",      Arabic: "ترجم إلى…",     Portuguese: "Traduzir para…" },
   languageLabel:    { English: "Language",       Hebrew: "שפה",          Arabic: "اللغة",          Portuguese: "Idioma" },
   translateToLabel: { English: "Translate to",   Hebrew: "תרגם ל",       Arabic: "ترجم إلى",       Portuguese: "Traduzir para" },
+  learnLangLabel:   { English: "Learn",          Hebrew: "למידה",         Arabic: "تعلّم",           Portuguese: "Aprender" },
+  translateOff:     { English: "Off",            Hebrew: "כבוי",          Arabic: "معطّل",           Portuguese: "Desativado" },
+  learnLangHint:    {
+    English:    "Optional educational mode: pick a language you're learning and a small Translate button will appear beneath each passage so you can compare it to your native text.",
+    Hebrew:     "מצב למידה אופציונלי: בחר שפה שאתה לומד, וכפתור תרגום קטן יופיע מתחת לכל קטע כדי שתוכל להשוות אותו לטקסט בשפת האם שלך.",
+    Arabic:     "وضع تعليمي اختياري: اختر لغةً تتعلمها وسيظهر زر ترجمة صغير أسفل كل مقطع لتتمكن من مقارنته بنصّك بلغتك الأم.",
+    Portuguese: "Modo educacional opcional: escolha um idioma que está a aprender e um pequeno botão Traduzir aparecerá sob cada passagem para poder compará-la com o texto na sua língua nativa.",
+  },
   translating:      { English: "Translating…",   Hebrew: "מתרגם…",       Arabic: "جارٍ الترجمة…", Portuguese: "Traduzindo…" },
   hideTranslation:  { English: "Hide translation", Hebrew: "הסתר תרגום", Arabic: "إخفاء الترجمة", Portuguese: "Ocultar tradução" },
   translationError: { English: "Translation failed — try again.", Hebrew: "התרגום נכשל — נסה שוב.", Arabic: "فشلت الترجمة — حاول مرة أخرى.", Portuguese: "Falha na tradução — tente novamente." },
@@ -879,13 +894,19 @@ function LangMenu({ value, onChange, theme, options, label, isRTL = false, compa
           letterSpacing: "0.02em", whiteSpace: "nowrap",
         }}
       >
-        <img
-          src={flagSrc(current.flag)}
-          srcSet={`${flagSrc(current.flag)} 1x, ${flagSrc2x(current.flag)} 2x`}
-          alt=""
-          width={18} height={13}
-          style={{ borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", display: "block", objectFit: "cover" }}
-        />
+        {current.flag ? (
+          <img
+            src={flagSrc(current.flag)}
+            srcSet={`${flagSrc(current.flag)} 1x, ${flagSrc2x(current.flag)} 2x`}
+            alt=""
+            width={18} height={13}
+            style={{ borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", display: "block", objectFit: "cover" }}
+          />
+        ) : (
+          <span style={{ display: "inline-flex", alignItems: "center", color: theme.textMuted, opacity: 0.7 }}>
+            <Icon name={current.icon || "close"} size={14} />
+          </span>
+        )}
         <span>{current.label}</span>
         <Icon name="chevronDown" size={12} style={{ opacity: 0.6 }} />
       </button>
@@ -920,13 +941,19 @@ function LangMenu({ value, onChange, theme, options, label, isRTL = false, compa
                   onMouseEnter={e => { if (!active) e.currentTarget.style.background = theme.border; }}
                   onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
                 >
-                  <img
-                    src={flagSrc(o.flag)}
-                    srcSet={`${flagSrc(o.flag)} 1x, ${flagSrc2x(o.flag)} 2x`}
-                    alt=""
-                    width={18} height={13}
-                    style={{ borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", objectFit: "cover" }}
-                  />
+                  {o.flag ? (
+                    <img
+                      src={flagSrc(o.flag)}
+                      srcSet={`${flagSrc(o.flag)} 1x, ${flagSrc2x(o.flag)} 2x`}
+                      alt=""
+                      width={18} height={13}
+                      style={{ borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <span style={{ display: "inline-flex", alignItems: "center", width: 18, justifyContent: "center", color: theme.textMuted, opacity: 0.7 }}>
+                      <Icon name={o.icon || "close"} size={14} />
+                    </span>
+                  )}
                   <span>{o.label}</span>
                   {active && <Icon name="check" size={12} style={{ marginInlineStart: "auto" }} />}
                 </button>
@@ -1065,6 +1092,7 @@ function HelpModal({ theme, t, isRTL, onClose }) {
     { titleKey: "helpHowTo",    body: null,                  icon: "clapper", steps: ["helpHowTo1", "helpHowTo2", "helpHowTo3"] },
     { titleKey: "helpDice",     bodyKey: "helpDiceBody",     icon: "dice" },
     { titleKey: "helpChapters", bodyKey: "helpChaptersBody", icon: "book" },
+    { titleKey: "helpLearn",    bodyKey: "helpLearnBody",    icon: "speech" },
     { titleKey: "helpSaveLoad", bodyKey: "helpSaveLoadBody", icon: "save" },
     { titleKey: "helpFreemium", bodyKey: "helpFreemiumBody", icon: "key" },
     { titleKey: "helpOpenRouter", icon: "key", custom: "openrouter" },
@@ -1363,9 +1391,7 @@ export default function AdventureGame() {
   // User preferences (theme, font, size) — persisted to localStorage
   const [prefs, setPrefs] = useState(() => {
     const loaded = loadPrefs() || { themeMode: "dark", font: "auto", size: "m", language: "English" };
-    if (!loaded.translationLanguage) {
-      loaded.translationLanguage = loaded.language === "English" ? "Hebrew" : "English";
-    }
+    if (loaded.translationLanguage === undefined) loaded.translationLanguage = "off";
     return loaded;
   });
   useEffect(() => { savePrefs(prefs); }, [prefs]);
@@ -2377,10 +2403,9 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
               );
             }
             const tr = translations[i];
-            const targetLang = prefs.translationLanguage && prefs.translationLanguage !== lang
-              ? prefs.translationLanguage
-              : (LANGUAGES.find(L => L.code !== lang)?.code || "English");
-            const targetLangMeta = LANGUAGES.find(L => L.code === targetLang);
+            const translateEnabled = prefs.translationLanguage && prefs.translationLanguage !== "off" && prefs.translationLanguage !== lang;
+            const targetLang = translateEnabled ? prefs.translationLanguage : null;
+            const targetLangMeta = targetLang ? LANGUAGES.find(L => L.code === targetLang) : null;
             return (
               <div key={i} style={{
                 marginBottom: 16, padding: entry.role === "player" ? "8px 14px" : 0,
@@ -2399,7 +2424,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 }}>{entry.text}</p>
                 {entry.role === "narrator" && entry.text && (
                   <div style={{ marginTop: 8, position: "relative" }}>
-                    {!tr && (
+                    {!tr && translateEnabled && (
                       <button
                         onClick={() => translatePassage(i, entry.text, targetLang)}
                         style={{
@@ -2788,7 +2813,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
               {/* Language + translation target selectors */}
               <div style={{
                 display: "flex", justifyContent: "center", alignItems: "flex-start",
-                gap: 18, marginBottom: 22, flexWrap: "wrap",
+                gap: 18, marginBottom: 8, flexWrap: "wrap",
               }}>
                 <LangMenu
                   value={config.language}
@@ -2796,10 +2821,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                     setConfig(c => ({ ...c, language: code }));
                     setPrefs(p => {
                       const next = { ...p, language: code };
-                      if (next.translationLanguage === code) {
-                        const alt = LANGUAGES.find(L => L.code !== code);
-                        if (alt) next.translationLanguage = alt.code;
-                      }
+                      if (next.translationLanguage === code) next.translationLanguage = "off";
                       return next;
                     });
                   }}
@@ -2809,14 +2831,24 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                   isRTL={isRTL}
                 />
                 <LangMenu
-                  value={prefs.translationLanguage}
+                  value={prefs.translationLanguage || "off"}
                   onChange={code => setPrefs(p => ({ ...p, translationLanguage: code }))}
                   theme={theme}
-                  options={LANGUAGES.filter(L => L.code !== config.language)}
-                  label={t("translateToLabel")}
+                  options={[
+                    { code: "off", label: t("translateOff"), flag: null, icon: "speech" },
+                    ...LANGUAGES.filter(L => L.code !== config.language),
+                  ]}
+                  label={t("learnLangLabel")}
                   isRTL={isRTL}
                 />
               </div>
+              <p style={{
+                fontFamily: theme.body, color: theme.textMuted, fontSize: 12,
+                lineHeight: 1.5, margin: "0 auto 18px", maxWidth: 480, textAlign: "center",
+                opacity: 0.85,
+              }}>
+                {t("learnLangHint")}
+              </p>
 
               {/* Feature bullets */}
               <div style={{
