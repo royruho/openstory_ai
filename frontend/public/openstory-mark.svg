@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-label="OpenStory mark">
+  <line x1="32" y1="14" x2="32" y2="52" stroke="#f1ece2" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M32 14 C 22 14, 14 18, 10 22 L 10 50 C 14 46, 22 44, 32 46 Z"
+        fill="none" stroke="#f1ece2" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M32 14 C 42 14, 50 18, 54 22 L 54 50 C 50 46, 42 44, 32 46 Z"
+        fill="none" stroke="#f1ece2" stroke-width="1.5" stroke-linejoin="round"/>
+  <circle cx="32" cy="9" r="1.8" fill="#c9a24a"/>
+</svg>

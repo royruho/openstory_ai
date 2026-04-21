@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv/
+.venv/
+.env
+.env.*
+
+# SQLite database
+*.db
+*.sqlite3
+
+# Alembic migration cache (not the versions themselves)
+alembic/__pycache__/
+alembic/versions/__pycache__/
+
+# Node / React (if using Vite or CRA)
+node_modules/
+dist/
+build/
+.vite/
+*.log
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# System
+.DS_Store
+Thumbs.db
+
+# Testing artifacts
+htmlcov/
+.coverage
+.cache/
+pytest_cache/
+results*.json
+results*.txt
+
+# Claude Code
+.claude/
+.claude/settings.local.json
+.vercel
+.env*.local

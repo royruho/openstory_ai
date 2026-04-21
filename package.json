@@ -1,0 +1,14 @@
+{
+  "name": "openstory-ai",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test:story":          "node test/story-run.mjs",
+    "test:story:verbose":  "node test/story-run.mjs --verbose",
+    "test:story:mystery":  "node test/story-run.mjs --genre mystery",
+    "test:story:fast":     "node test/story-run.mjs --turns 5",
+    "test:story:hebrew":     "node test/story-run.mjs --lang Hebrew --turns 5",
+    "test:story:arabic":     "node test/story-run.mjs --lang Arabic --turns 5",
+    "test:story:portuguese": "node test/story-run.mjs --lang Portuguese --turns 5"
+  }
+}
