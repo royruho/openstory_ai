@@ -239,3 +239,5 @@ docker-compose.yml Local dev orchestration
 deployment.md      Detailed deployment guide (local + cloud)
 CLAUDE.md          Guide for Claude Code (AI assistant context)
 ```
+#   o p e n s t o r y _ a i  
+ 
