@@ -1,8 +1,6 @@
-# Choose Your Adventure
+# OpenStory AI
 
-An AI-powered choose-your-own-adventure game with a FastAPI backend and React/Vite frontend.
-
-![Adventure Image](./static/pixiquest_small1.png "Choose Your Adventure")
+Become the author of your own story. An AI-powered choose-your-own-adventure game with a chapter-based structure and dice-roll fate checks.
 
 ---
 
@@ -11,16 +9,29 @@ An AI-powered choose-your-own-adventure game with a FastAPI backend and React/Vi
 ```
 Browser
   │
-  └─► React/Vite frontend (port 5173)
+  └─► React/Vite frontend (static, deployed on Vercel)
         │
-        └─► FastAPI backend (port 8000)
-              │
-              ├─► LLM API (Groq / Gemini / Anthropic)
-              │
-              └─► SQLite (local) or PostgreSQL (cloud)
+        ├─► /api/proxy  (Vercel serverless function — turns 1–19)
+        │     │
+        │     └─► OpenRouter (server-side OPENROUTER_KEY, never exposed)
+        │
+        └─► OpenRouter directly (turn 20+, using player's own key)
 ```
 
-The frontend never calls the LLM directly. All AI requests go through the backend, which holds the API key, handles provider differences, and retries on rate limits.
+No backend, no database, no accounts. The app's free key is hidden behind a serverless proxy for the first 20 turns; after that the player supplies their own OpenRouter key, stored only in `localStorage`.
+
+Save/load is file-based — players download a `.json` snapshot and reload it later.
+
+---
+
+## Freemium model
+
+| Turns | Key used | Stored |
+|---|---|---|
+| 1–19 | App's `OPENROUTER_KEY` via `/api/proxy` | Server-side env var only |
+| 20+ | Player's own OpenRouter key | Browser `localStorage("openrouter_key")` |
+
+At turn 20 a modal prompts the player to paste an OpenRouter key. Free keys work — `openai/gpt-oss-20b:free` is the locked model.
 
 ---
 
@@ -28,28 +39,24 @@ The frontend never calls the LLM directly. All AI requests go through the backen
 
 ### Setup wizard (9 steps)
 
-1. **Language** — English, Hebrew, Arabic (full RTL support for Hebrew and Arabic)
-2. **Genre** — Fantasy, Sci-Fi, Reality, Mystery — each with its own theme, fonts, and icon set
+1. **Language** — English, Hebrew, Arabic (full RTL support)
+2. **Genre** — Fantasy, Sci-Fi, Reality, Mystery (each with its own theme, fonts, icon set)
 3. **Content rating** — Kids (8+), Teen (13+), Adult (18+)
-4. **Story pacing** — Quick & Punchy (1–2 sentences), Balanced (paragraph), Rich & Immersive (2–3 paragraphs)
+4. **Story pacing** — Quick & Punchy / Balanced / Rich & Immersive
 5. **Adventure length** — Sprint (5 turns / 1 chapter), Short (10 / 2), Standard (20 / 4), Epic (40 / 8)
 6. **Game rules** — death possible / not; stat tracking on / off
-7. **Narrative perspective** — First person ("I drew my sword") or Second person ("You draw your sword")
-8. **Story seed** — optional premise text to steer the opening
-9. **Character** — name, gender, age, appearance, and up to 3 skills (genre-specific list)
+7. **Narrative perspective** — First or second person
+8. **Story seed** — optional premise text
+9. **Character** — name, gender, age, appearance, up to 3 skills
 
 ### Chapter-based structure
 
-Adventures are divided into chapters, each with a **single overarching goal** the player must earn through play:
+Each chapter has **one overarching goal** the player must earn through play:
 
-- The LLM generates a hidden chapter brief (`{title, goal, obstacle}`) once at the start of each chapter via a background call — it never changes mid-chapter
-- The goal is always one broad objective, never a list of specific items or steps — the path to the goal emerges through play
-- Chapter length is not fixed — it ends when the player achieves the goal, regardless of turn count
-- Players can explore freely, hit dead ends, and attempt multiple approaches
+- A hidden chapter brief (`{title, goal, obstacle}`) is generated once per chapter by a background LLM call and never changes mid-chapter
+- The goal is one broad objective, never a list of items or steps — the path emerges through play
+- Chapter ends when the LLM signals `chapterComplete: true`, not by turn count
 - A cinematic banner fades in when a new chapter begins
-- The active chapter title is shown in the game header
-
-**Chapter count per adventure length:**
 
 | Length | Turns | Chapters |
 |---|---|---|
@@ -60,62 +67,30 @@ Adventures are divided into chapters, each with a **single overarching goal** th
 
 ### Dice rolling (fate checks)
 
-When the player attempts something risky, the LLM signals a fate check. A d6 overlay appears before the action resolves:
+When the LLM flags a risky action, a d6 overlay appears before it resolves:
 
-| Roll | Outcome | Effect |
-|---|---|---|
-| 1 | Critical Failure | Serious setback; health may drop |
-| 2–3 | Setback | Complication or failure |
-| 4–5 | Partial Success | Works, but with a catch |
-| 6 | Critical Success | Exceptional result |
+| Roll | Outcome |
+|---|---|
+| 1 | Critical Failure |
+| 2–3 | Setback |
+| 4–5 | Partial Success |
+| 6 | Critical Success |
 
-**Skill bonus**: if the attempt matches one of the character's skills, the die is rolled twice and the higher result is kept.
+**Skill bonus** — if the attempt matches one of the character's skills, the die is rolled twice and the higher value is kept.
 
-### Chapter progress tracking
+### State consistency & long-story context
 
-Every turn, the LLM updates `chapterProgress`:
+- Every outgoing LLM message carries a `[CURRENT STATE]` block with current stats and cumulative chapter progress (achieved milestones + clues)
+- A rolling summary is generated every 5 turns in the background; only the last ~6 turns of raw dialogue are sent once a summary exists
+- Summarisation is skipped for Sprint/Short adventures (≤ 10 turns)
 
-- **Achieved** — milestones completed toward the chapter goal (cumulative)
-- **Clues** — hints and info discovered (cumulative)
+### Save / Load / Export
 
-Shown as tags in the game header and a sidebar panel.
-
-### State consistency
-
-The current values of stats and chapter progress are stamped into every outgoing LLM message. This prevents drift on long adventures where early history has been trimmed from the context window.
-
-### Gameplay
-
-- AI narrates the story in the chosen language and perspective
-- Free-text action input is the primary way to play — players write what they want to do
-- 2–5 suggested choices are shown below as quick-pick alternatives
-- Optional stat tracking: health bar, inventory, relationships
-- Story arc pacing — the LLM receives its current phase (Opening / Early / Middle / Late / Climax / Finale) so the story develops and concludes naturally
-
-### Long-story context management
-
-For long adventures the app uses a **rolling summary** to prevent the LLM from losing early details:
-
-- Every 5 turns a background call (fired 20 s after the main turn) summarises key events, NPC relationships, locations, decisions, and active plot threads
-- Only the last ~6 turns of raw dialogue are sent to the LLM; earlier history is covered by the summary
-- Summarisation is skipped entirely for Sprint and Short adventures (≤ 10 turns)
-- The LLM is told not to contradict any established facts
-
-### Save / Export
-
-- **Save Game** — downloads a `.json` snapshot of the full game state (including summary, chapter progress) — can be resumed later
-- **Load Game** — file picker on the setup screen restores any saved `.json`
-- **Export Story** — downloads a human-readable `.txt` transcript with character info, full story log (including dice results and chapter breaks), and final stats
-
-### User accounts and persistence
-
-- Play as a guest (no account required) — stories are not saved server-side
-- Register / log in — each adventure is saved to the database as a `Story` with ordered `StoryPart` rows
-- Auth uses JWT stored in `localStorage`
+- **Save Game** — downloads a `.json` snapshot of the full game state (version 3)
+- **Load Game** — file picker restores any saved `.json` (v2 and v3 accepted)
+- **Export Story** — downloads a human-readable `.txt` transcript
 
 ### Theming
-
-Each genre has its own colour palette, fonts, background, and persistent icon strip:
 
 | Genre | Colour | Font | Icons |
 |---|---|---|---|
@@ -126,62 +101,17 @@ Each genre has its own colour palette, fonts, background, and persistent icon st
 
 ---
 
-## Supported LLM providers
+## Running locally
 
-| Provider | Free tier | Model | Endpoint |
-|---|---|---|---|
-| **Gemini** (recommended) | 1,500 req/day, 1M TPM | `gemini-2.5-flash` | `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions` |
-| **Groq** | 14,400 req/day, 6K TPM | `llama-3.3-70b-versatile` | `https://api.groq.com/openai/v1/chat/completions` |
-| **Anthropic** | Paid | `claude-sonnet-4-6` | `https://api.anthropic.com/v1/messages` |
+Two terminals.
 
-**Gemini 2.5 Flash** is recommended — 1,000,000 TPM means no rate-limit issues during play. Use model `gemini-2.5-flash` (not `gemini-2.0-flash`, which has zero free-tier quota in some regions). Get a free key at [aistudio.google.com](https://aistudio.google.com) → Get API key → Create API key in new project.
-
-**Groq** works but its 6,000 TPM free-tier limit causes 429 errors during active play sessions.
-
-The backend automatically retries on rate-limit (429) errors, parsing the `"try again in Xs"` hint from the error body and sleeping the exact wait time before retrying (up to 2 retries).
-
-For Gemini models the backend automatically disables thinking (`reasoning_effort: none`) so all tokens go to the actual JSON response rather than internal reasoning.
-
-LLM configuration can be changed at runtime without restarting the server via `POST /api/config/llm`.
-
----
-
-## Quick start (Docker)
+**Terminal 1 — proxy server** (reads `.env`, serves OpenRouter key on port 3001):
 
 ```bash
-git clone <repo-url>
-cd choose_your_adventure_claude
-
-cp .env.example .env
-# Edit .env — set LLM_API_KEY and LLM_ENDPOINT at minimum
-
-docker compose up --build
-
-# First run only:
-docker compose exec backend alembic upgrade head
+node api/dev-server.js
 ```
 
-Open **http://localhost:5173**
-
-See [deployment.md](./deployment.md) for detailed instructions including cloud deployment.
-
----
-
-## Manual setup (without Docker)
-
-### Backend
-
-```bash
-pip install -r requirements.txt
-cp .env.example .env        # fill in your values
-alembic upgrade head
-uvicorn app.main:app --reload
-```
-
-Backend: http://localhost:8000  
-API docs: http://localhost:8000/docs
-
-### Frontend
+**Terminal 2 — frontend** (Vite on 5173, proxies `/api/*` to 3001):
 
 ```bash
 cd frontend
@@ -189,55 +119,58 @@ npm install
 npm run dev
 ```
 
-Frontend: http://localhost:5173
+Open **http://localhost:5173**. Turns 1–19 call the proxy; turn 20+ shows the user-key modal.
+
+### Local `.env` (repo root, gitignored)
+
+```env
+OPENROUTER_KEY=sk-or-v1-...
+```
+
+Get a free OpenRouter key at [openrouter.ai](https://openrouter.ai). The free `openai/gpt-oss-20b:free` model is the only one the proxy will use.
+
+---
+
+## Deploying to Vercel
+
+1. Push the repo to GitHub
+2. Import the project in Vercel — **leave Root Directory blank**
+3. Vercel auto-detects `vercel.json` and uses:
+   - Build: `cd frontend && npm install && npm run build`
+   - Output: `frontend/dist`
+4. Add environment variable in **Settings → Environment Variables**:
+   - `OPENROUTER_KEY` = `sk-or-v1-...` (Production + Preview)
+5. Deploy
+
+See [deployment.md](./deployment.md) for full instructions.
 
 ---
 
 ## Environment variables
 
-**Backend (`.env`)**
-
-| Variable | Description | Example |
+| Variable | Where set | Description |
 |---|---|---|
-| `LLM_ENDPOINT` | LLM API URL | `https://generativelanguage.googleapis.com/v1beta/openai/chat/completions` |
-| `LLM_API_KEY` | API key | `AIza...` (Gemini) or `gsk_...` (Groq) |
-| `LLM_MODEL` | Model name | `gemini-2.5-flash` |
-| `LLM_MAX_TOKENS` | Max output tokens per call | `2000` |
-| `SECRET_KEY` | JWT signing secret | any long random string |
-| `DATABASE_URL` | DB connection | `sqlite:///./stories.db` |
-| `CORS_ORIGINS` | Allowed origins | `http://localhost:5173` |
-
-**Frontend (`frontend/.env`)**
-
-| Variable | Description | Default |
-|---|---|---|
-| `VITE_API_URL` | Backend base URL | `http://localhost:8000` |
+| `OPENROUTER_KEY` | `.env` (local) / Vercel dashboard (prod) | OpenRouter API key — server-side only |
+| `ALLOWED_ORIGIN` | Vercel dashboard (optional) | Extra allowed CORS origin for a custom domain |
 
 ---
 
 ## Project structure
 
 ```
-app/
-  main.py         FastAPI app entry point, CORS, startup LLM check
-  db_api.py       All API routes + rate-limit retry logic
-  auth.py         JWT + bcrypt
-  models.py       SQLAlchemy models (User, Story, StoryPart)
-  crud.py         Database operations
-  db.py           Engine — SQLite locally, PostgreSQL in cloud
+api/
+  proxy.js         Vercel serverless function — proxies LLM calls with OPENROUTER_KEY
+  dev-server.js    Local dev only — runs proxy.js on port 3001
 
 frontend/
   src/
-    adventure.jsx  Entire game UI (setup wizard + gameplay + dice + chapters)
-    api.js         API client (all backend calls)
-  Dockerfile
+    adventure.jsx  Entire game UI — setup wizard, gameplay, all state
+    api.js         LLM client — routes via /api/proxy or user's key
+  vite.config.js   Proxies /api/* → localhost:3001 in dev
 
-alembic/           Database migrations
-Dockerfile         Backend container
-docker-compose.yml Local dev orchestration
-.env.example
-deployment.md      Detailed deployment guide (local + cloud)
-CLAUDE.md          Guide for Claude Code (AI assistant context)
+package.json       Minimal root package.json (required for Vercel function detection)
+vercel.json        Build config + SPA catch-all rewrite
+CLAUDE.md          Deep project guide for Claude Code
 ```
-#   o p e n s t o r y _ a i  
- 
+
+The `app/` FastAPI backend from the previous version has been removed. All runtime state lives in the browser; the only server-side code is the OpenRouter proxy.

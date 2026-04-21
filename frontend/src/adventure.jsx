@@ -156,6 +156,8 @@ const TR = {
   // ── Translate (inline section translation) ──
   translate:        { English: "Translate",      Hebrew: "תרגם",         Arabic: "ترجم",          Portuguese: "Traduzir" },
   translateTo:      { English: "Translate to…",  Hebrew: "תרגם ל…",      Arabic: "ترجم إلى…",     Portuguese: "Traduzir para…" },
+  languageLabel:    { English: "Language",       Hebrew: "שפה",          Arabic: "اللغة",          Portuguese: "Idioma" },
+  translateToLabel: { English: "Translate to",   Hebrew: "תרגם ל",       Arabic: "ترجم إلى",       Portuguese: "Traduzir para" },
   translating:      { English: "Translating…",   Hebrew: "מתרגם…",       Arabic: "جارٍ الترجمة…", Portuguese: "Traduzindo…" },
   hideTranslation:  { English: "Hide translation", Hebrew: "הסתר תרגום", Arabic: "إخفاء الترجمة", Portuguese: "Ocultar tradução" },
   translationError: { English: "Translation failed — try again.", Hebrew: "התרגום נכשל — נסה שוב.", Arabic: "فشلت الترجمة — حاول مرة أخرى.", Portuguese: "Falha na tradução — tente novamente." },
@@ -183,14 +185,14 @@ const TR = {
   sizeXL:           { English: "XL", Hebrew: "XL", Arabic: "XL", Portuguese: "XL" },
   music_:           { English: "Music", Hebrew: "מוזיקה", Arabic: "موسيقى", Portuguese: "Música" },
   // ── Adventure length options ──
-  sprint:           { English: "Sprint",   Hebrew: "ספרינט",  Arabic: "سريع" },
-  sprintDesc:       { English: "~5 turns — 1 chapter",   Hebrew: "~5 תורות — פרק אחד",   Arabic: "~5 جولات — فصل واحد" },
-  shortAdv:         { English: "Short",    Hebrew: "קצר",     Arabic: "قصير" },
-  shortAdvDesc:     { English: "~10 turns — 2 chapters", Hebrew: "~10 תורות — 2 פרקים",  Arabic: "~10 جولات — فصلان" },
-  standard:         { English: "Standard", Hebrew: "רגיל",    Arabic: "عادي" },
-  standardDesc:     { English: "~20 turns — 4 chapters", Hebrew: "~20 תורות — 4 פרקים",  Arabic: "~20 جولات — 4 فصول" },
-  epic:             { English: "Epic",     Hebrew: "אפי",     Arabic: "ملحمي" },
-  epicDesc:         { English: "~40 turns — 8 chapters", Hebrew: "~40 תורות — 8 פרקים",  Arabic: "~40 جولات — 8 فصول" },
+  sprint:           { English: "Sprint",   Hebrew: "ספרינט",  Arabic: "سريع",   Portuguese: "Sprint" },
+  sprintDesc:       { English: "~5 turns — 1 chapter",   Hebrew: "~5 תורות — פרק אחד",   Arabic: "~5 جولات — فصل واحد",  Portuguese: "~5 turnos — 1 capítulo" },
+  shortAdv:         { English: "Short",    Hebrew: "קצר",     Arabic: "قصير",   Portuguese: "Curta" },
+  shortAdvDesc:     { English: "~10 turns — 2 chapters", Hebrew: "~10 תורות — 2 פרקים",  Arabic: "~10 جولات — فصلان",    Portuguese: "~10 turnos — 2 capítulos" },
+  standard:         { English: "Standard", Hebrew: "רגיל",    Arabic: "عادي",   Portuguese: "Padrão" },
+  standardDesc:     { English: "~20 turns — 4 chapters", Hebrew: "~20 תורות — 4 פרקים",  Arabic: "~20 جولات — 4 فصول",   Portuguese: "~20 turnos — 4 capítulos" },
+  epic:             { English: "Epic",     Hebrew: "אפי",     Arabic: "ملحمي",  Portuguese: "Épica" },
+  epicDesc:         { English: "~40 turns — 8 chapters", Hebrew: "~40 תורות — 8 פרקים",  Arabic: "~40 جولات — 8 فصول",   Portuguese: "~40 turnos — 8 capítulos" },
 };
 
 // ─── GENRE THEMES ──────────────────────────────────────────────
@@ -372,6 +374,7 @@ const ICONS = {
   wand: (<><path d="M14 3h6v6"/><path d="M20 3 9 14"/><path d="M10 13l-4 4 2 2 4-4"/><path d="M6 17l-3 3"/></>),
   chevronLeft:  (<><path d="M15 6l-6 6 6 6"/></>),
   chevronRight: (<><path d="M9 6l6 6-6 6"/></>),
+  chevronDown:  (<><path d="M6 9l6 6 6-6"/></>),
 
   // Genre motifs — fantasy (gold)
   fantasySword:   (<><path d="M14 3h6v6"/><path d="M20 3 9 14"/><path d="M10 13l-4 4 2 2 4-4"/><path d="M6 17l-3 3"/></>),
@@ -480,47 +483,115 @@ function Wordmark({ size = "md", theme, align = "center", style }) {
 
 // ─── CHARACTER GENERATION ──────────────────────────────────────
 const CHARACTER_NAMES = {
-  fantasy: {
-    male:   ["Aldric", "Theron", "Kael", "Dorian", "Soren", "Varen"],
-    female: ["Lyra", "Seraphine", "Elara", "Miryn", "Vesper", "Nara"],
+  English: {
+    fantasy: { male: ["Aldric", "Theron", "Kael", "Dorian", "Soren", "Varen"],       female: ["Lyra", "Seraphine", "Elara", "Miryn", "Vesper", "Nara"] },
+    scifi:   { male: ["Zephyr", "Axon", "Riven", "Coda", "Voss", "Nex"],             female: ["Nova", "Sable", "Zara", "Kira", "Aria", "Cyra"] },
+    reality: { male: ["Marcus", "Leo", "Dante", "Finn", "Eli", "Rafael"],            female: ["Maya", "Nora", "Cass", "Elena", "Jade", "Iris"] },
+    mystery: { male: ["Victor", "Edmund", "Felix", "Caine", "Lucian", "Dorian"],     female: ["Vera", "Madeleine", "Petra", "Cleo", "Margot", "Isolde"] },
   },
-  scifi: {
-    male:   ["Zephyr", "Axon", "Riven", "Coda", "Voss", "Nex"],
-    female: ["Nova", "Sable", "Zara", "Kira", "Aria", "Cyra"],
+  Hebrew: {
+    fantasy: { male: ["אביב", "איתן", "תומר", "דורון", "יאיר", "בועז"],             female: ["יעל", "טליה", "נעה", "מאיה", "הילה", "שיר"] },
+    scifi:   { male: ["רוני", "עומר", "נדב", "איתי", "לירון", "עידו"],              female: ["נגה", "טל", "מיכל", "סתיו", "עדי", "ליאור"] },
+    reality: { male: ["יוסי", "אמיר", "דניאל", "אופיר", "רועי", "אייל"],            female: ["מאיה", "שירה", "רותם", "נעמי", "ענבל", "תמר"] },
+    mystery: { male: ["אסף", "גל", "איתן", "אריאל", "שחר", "רונן"],                 female: ["איריס", "ליאת", "ורד", "סיגל", "אורית", "שירי"] },
   },
-  reality: {
-    male:   ["Marcus", "Leo", "Dante", "Finn", "Eli", "Rafael"],
-    female: ["Maya", "Nora", "Cass", "Elena", "Jade", "Iris"],
+  Arabic: {
+    fantasy: { male: ["خالد", "عمر", "طارق", "ياسر", "زيد", "فارس"],               female: ["ليلى", "زهرة", "نور", "ريم", "لمى", "سلمى"] },
+    scifi:   { male: ["يوسف", "عمار", "كريم", "آدم", "أمين", "رامي"],              female: ["رنا", "سحر", "دانيا", "نادين", "لانا", "مايا"] },
+    reality: { male: ["محمد", "أحمد", "علي", "حسن", "سامي", "مازن"],              female: ["فاطمة", "عائشة", "مريم", "هدى", "سارة", "لينا"] },
+    mystery: { male: ["مصطفى", "إلياس", "نبيل", "جواد", "جلال", "نجيب"],           female: ["نادية", "عبير", "فيروز", "سعاد", "ثريا", "رغد"] },
   },
-  mystery: {
-    male:   ["Victor", "Edmund", "Felix", "Caine", "Lucian", "Dorian"],
-    female: ["Vera", "Madeleine", "Petra", "Cleo", "Margot", "Isolde"],
+  Portuguese: {
+    fantasy: { male: ["Afonso", "Bernardo", "Duarte", "Henrique", "Lourenço", "Vasco"], female: ["Beatriz", "Constança", "Inês", "Leonor", "Mafalda", "Margarida"] },
+    scifi:   { male: ["Tomás", "Diogo", "Rodrigo", "Gonçalo", "Tiago", "Bruno"],         female: ["Mariana", "Carolina", "Matilde", "Madalena", "Joana", "Íris"] },
+    reality: { male: ["João", "Pedro", "Miguel", "André", "Rui", "Hugo"],                female: ["Sofia", "Catarina", "Marta", "Sara", "Rita", "Filipa"] },
+    mystery: { male: ["Salvador", "Vicente", "Eduardo", "Frederico", "Sebastião", "Xavier"], female: ["Camila", "Helena", "Cláudia", "Adelaide", "Eulália", "Branca"] },
   },
 };
 
 const DEFAULT_SEEDS = {
-  fantasy: "An ancient kingdom teeters on the edge of ruin as a forgotten evil stirs in the northern mountains.",
-  scifi:   "A malfunctioning space station drifts toward a black hole while its crew uncovers a sinister conspiracy.",
-  reality: "A chance discovery in a city alley pulls an ordinary person into a web of dangerous secrets.",
-  mystery: "A locked-room murder at a remote estate — and every guest has something to hide.",
+  English: {
+    fantasy: "An ancient kingdom teeters on the edge of ruin as a forgotten evil stirs in the northern mountains.",
+    scifi:   "A malfunctioning space station drifts toward a black hole while its crew uncovers a sinister conspiracy.",
+    reality: "A chance discovery in a city alley pulls an ordinary person into a web of dangerous secrets.",
+    mystery: "A locked-room murder at a remote estate — and every guest has something to hide.",
+  },
+  Hebrew: {
+    fantasy: "ממלכה עתיקה ניצבת על סף חורבן בעוד רע נשכח מתעורר בהרי הצפון.",
+    scifi:   "תחנת חלל תקולה נסחפת לעבר חור שחור בעוד צוותה חושף קונספירציה אפלה.",
+    reality: "תגלית מקרית בסמטה עירונית גוררת אדם רגיל לרשת של סודות מסוכנים.",
+    mystery: "רצח בחדר נעול באחוזה מבודדת — ולכל אורח יש משהו להסתיר.",
+  },
+  Arabic: {
+    fantasy: "مملكة قديمة على شفا الانهيار بينما يستيقظ شر منسي في الجبال الشمالية.",
+    scifi:   "محطة فضائية معطلة تنجرف نحو ثقب أسود بينما يكتشف طاقمها مؤامرة شريرة.",
+    reality: "اكتشاف عرضي في زقاق المدينة يجرّ شخصاً عادياً إلى شبكة من الأسرار الخطرة.",
+    mystery: "جريمة قتل في غرفة مغلقة بعزبة نائية — ولكل ضيف ما يخفيه.",
+  },
+  Portuguese: {
+    fantasy: "Um reino antigo balança à beira da ruína enquanto um mal esquecido desperta nas montanhas do norte.",
+    scifi:   "Uma estação espacial avariada deriva em direção a um buraco negro enquanto a sua tripulação descobre uma conspiração sinistra.",
+    reality: "Uma descoberta casual num beco da cidade arrasta uma pessoa comum para uma teia de segredos perigosos.",
+    mystery: "Um homicídio numa sala trancada de uma propriedade isolada — e cada hóspede tem algo a esconder.",
+  },
 };
 
 const APPEARANCE_PARTS = {
-  body:    ["Athletic build", "Slim and wiry", "Stocky and muscular", "Tall and lean", "Average build", "Broad-shouldered", "Petite and nimble", "Short and sturdy"],
-  hairLen: ["shaved head", "close-cropped hair", "short hair", "shoulder-length hair", "long hair", "flowing hair"],
-  hairCol: ["black", "dark brown", "chestnut brown", "auburn", "dirty blonde", "blonde", "red", "silver", "white"],
-  feature: [
-    "a scar running across one cheek", "mismatched eye colors", "a small birthmark on the neck",
-    "calloused and ink-stained hands", "a faded tattoo on the forearm", "unusually sharp cheekbones",
-    "a distinctive hawkish nose", "a warm gap-toothed smile", "unsettlingly pale eyes", "a slight but permanent squint",
-  ],
+  English: {
+    body:    ["Athletic build", "Slim and wiry", "Stocky and muscular", "Tall and lean", "Average build", "Broad-shouldered", "Petite and nimble", "Short and sturdy"],
+    hairLen: ["shaved head", "close-cropped hair", "short hair", "shoulder-length hair", "long hair", "flowing hair"],
+    hairCol: ["black", "dark brown", "chestnut brown", "auburn", "dirty blonde", "blonde", "red", "silver", "white"],
+    feature: [
+      "a scar running across one cheek", "mismatched eye colors", "a small birthmark on the neck",
+      "calloused and ink-stained hands", "a faded tattoo on the forearm", "unusually sharp cheekbones",
+      "a distinctive hawkish nose", "a warm gap-toothed smile", "unsettlingly pale eyes", "a slight but permanent squint",
+    ],
+  },
+  Hebrew: {
+    body:    ["מבנה אתלטי", "רזה וגמיש", "חסון ושרירי", "גבוה ורזה", "מבנה ממוצע", "רחב כתפיים", "קטן וזריז", "נמוך ויציב"],
+    hairLen: ["ראש מגולח", "שיער קצר מאוד", "שיער קצר", "שיער עד הכתפיים", "שיער ארוך", "שיער זורם"],
+    hairCol: ["שחור", "חום כהה", "חום ערמוני", "אדמוני", "בלונדיני כהה", "בלונדיני", "אדום", "כסוף", "לבן"],
+    feature: [
+      "צלקת חוצה את הלחי", "עיניים בצבעים שונים", "כתם לידה קטן בצוואר",
+      "ידיים מיובלות וכתומות דיו", "קעקוע דהוי על הזרוע", "עצמות לחיים חדות במיוחד",
+      "אף נשרי בולט", "חיוך חמים עם רווח בין השיניים", "עיניים בהירות באופן מטריד", "פזילה קלה אך קבועה",
+    ],
+  },
+  Arabic: {
+    body:    ["بنية رياضية", "نحيل ورشيق", "ممتلئ وعضلي", "طويل ونحيل", "بنية متوسطة", "عريض المنكبين", "صغير ورشيق", "قصير ومتين"],
+    hairLen: ["رأس محلوق", "شعر قصير جداً", "شعر قصير", "شعر إلى الكتفين", "شعر طويل", "شعر متموج"],
+    hairCol: ["أسود", "بني داكن", "بني كستنائي", "أحمر مائل", "أشقر داكن", "أشقر", "أحمر", "فضي", "أبيض"],
+    feature: [
+      "ندبة تمتد عبر الخد", "عينان بلونين مختلفين", "وحمة صغيرة على الرقبة",
+      "يدان خشنتان ملطختان بالحبر", "وشم باهت على الساعد", "عظام وجنتين حادة بشكل لافت",
+      "أنف معقوف مميز", "ابتسامة دافئة مع فجوة بين الأسنان", "عينان شاحبتان بشكل مزعج", "ضيق خفيف دائم في العينين",
+    ],
+  },
+  Portuguese: {
+    body:    ["compleição atlética", "magro e ágil", "robusto e musculado", "alto e esguio", "compleição média", "ombros largos", "pequeno e ágil", "baixo e robusto"],
+    hairLen: ["cabeça rapada", "cabelo bem curto", "cabelo curto", "cabelo até aos ombros", "cabelo comprido", "cabelo solto"],
+    hairCol: ["preto", "castanho-escuro", "castanho-acastanhado", "ruivo-acastanhado", "louro-escuro", "louro", "ruivo", "prateado", "branco"],
+    feature: [
+      "uma cicatriz a atravessar uma das faces", "olhos de cores diferentes", "uma pequena marca de nascença no pescoço",
+      "mãos calejadas e manchadas de tinta", "uma tatuagem desbotada no antebraço", "maçãs do rosto invulgarmente pronunciadas",
+      "um nariz aquilino marcante", "um sorriso caloroso com um espaço entre os dentes", "olhos pálidos de forma perturbadora", "um olhar ligeiramente franzido permanente",
+    ],
+  },
 };
 
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
-function randomAppearanceStr() {
-  const { body, hairLen, hairCol, feature } = APPEARANCE_PARTS;
-  return `${pick(body)}, ${pick(hairCol)} ${pick(hairLen)}, ${pick(feature)}`;
+function namesFor(lang, genre) {
+  const byLang = CHARACTER_NAMES[lang] || CHARACTER_NAMES.English;
+  return byLang[genre] || byLang.fantasy;
+}
+function seedFor(lang, genre) {
+  const byLang = DEFAULT_SEEDS[lang] || DEFAULT_SEEDS.English;
+  return byLang[genre] || "";
+}
+function randomAppearanceStr(lang) {
+  const parts = APPEARANCE_PARTS[lang] || APPEARANCE_PARTS.English;
+  return `${pick(parts.body)}, ${pick(parts.hairCol)} ${pick(parts.hairLen)}, ${pick(parts.feature)}`;
 }
 
 // ─── MUSIC ─────────────────────────────────────────────────────
@@ -761,6 +832,109 @@ function DiceRoller({ theme, context, characterSkills, onResult, isRTL, t }) {
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+// ─── LANGUAGE MENU (dropdown) ───────────────────────────────────
+function LangMenu({ value, onChange, theme, options, label, isRTL = false, compact = false }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = e => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    const onEsc = e => { if (e.key === "Escape") setOpen(false); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [open]);
+
+  const current = options.find(o => o.code === value) || options[0];
+  if (!current) return null;
+
+  return (
+    <div ref={ref} style={{ position: "relative", display: "inline-flex", alignItems: "center", gap: 8 }}>
+      {label && (
+        <span style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, letterSpacing: "0.02em" }}>
+          {label}
+        </span>
+      )}
+      <button
+        type="button"
+        onClick={() => setOpen(v => !v)}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        style={{
+          display: "inline-flex", alignItems: "center", gap: 8,
+          padding: compact ? "4px 10px" : "6px 12px",
+          borderRadius: 999,
+          background: open ? `${theme.primary}18` : "transparent",
+          border: `1px solid ${open ? theme.primary : theme.border}`,
+          color: theme.text,
+          fontFamily: theme.body, fontSize: 12, cursor: "pointer",
+          transition: "border-color 0.15s ease, background 0.15s ease",
+          letterSpacing: "0.02em", whiteSpace: "nowrap",
+        }}
+      >
+        <img
+          src={flagSrc(current.flag)}
+          srcSet={`${flagSrc(current.flag)} 1x, ${flagSrc2x(current.flag)} 2x`}
+          alt=""
+          width={18} height={13}
+          style={{ borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", display: "block", objectFit: "cover" }}
+        />
+        <span>{current.label}</span>
+        <Icon name="chevronDown" size={12} style={{ opacity: 0.6 }} />
+      </button>
+      {open && (
+        <ul role="listbox" style={{
+          position: "absolute", top: "calc(100% + 6px)",
+          [isRTL ? "right" : "left"]: 0,
+          minWidth: "100%",
+          zIndex: 100, listStyle: "none", margin: 0, padding: 4,
+          background: theme.bgCard || theme.bg, border: `1px solid ${theme.border}`,
+          borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.25)",
+        }}>
+          {options.map(o => {
+            const active = o.code === value;
+            return (
+              <li key={o.code}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={active}
+                  onClick={() => { onChange(o.code); setOpen(false); }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 10,
+                    width: "100%", padding: "6px 10px",
+                    background: active ? `${theme.primary}22` : "transparent",
+                    color: active ? theme.primary : theme.text,
+                    border: "none", borderRadius: 6,
+                    fontFamily: theme.body, fontSize: 13, cursor: "pointer",
+                    textAlign: isRTL ? "right" : "left",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => { if (!active) e.currentTarget.style.background = theme.border; }}
+                  onMouseLeave={e => { if (!active) e.currentTarget.style.background = "transparent"; }}
+                >
+                  <img
+                    src={flagSrc(o.flag)}
+                    srcSet={`${flagSrc(o.flag)} 1x, ${flagSrc2x(o.flag)} 2x`}
+                    alt=""
+                    width={18} height={13}
+                    style={{ borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", objectFit: "cover" }}
+                  />
+                  <span>{o.label}</span>
+                  {active && <Icon name="check" size={12} style={{ marginInlineStart: "auto" }} />}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
     </div>
   );
 }
@@ -1187,7 +1361,13 @@ export default function AdventureGame() {
   const hasInteracted = useRef(false);
 
   // User preferences (theme, font, size) — persisted to localStorage
-  const [prefs, setPrefs] = useState(() => loadPrefs() || { themeMode: "dark", font: "auto", size: "m", language: "English" });
+  const [prefs, setPrefs] = useState(() => {
+    const loaded = loadPrefs() || { themeMode: "dark", font: "auto", size: "m", language: "English" };
+    if (!loaded.translationLanguage) {
+      loaded.translationLanguage = loaded.language === "English" ? "Hebrew" : "English";
+    }
+    return loaded;
+  });
   useEffect(() => { savePrefs(prefs); }, [prefs]);
   const [showHelp, setShowHelp]         = useState(false);
   const [showSettings, setShowSettings] = useState(false);
@@ -1495,7 +1675,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
   // ─── START ADVENTURE ──────────────────────────────────────────
   const startAdventure = async () => {
     // ── Apply defaults for any unset fields ──
-    const names   = CHARACTER_NAMES[config.genre] || CHARACTER_NAMES.fantasy;
+    const names   = namesFor(lang, config.genre);
     const isMale  = Math.random() < 0.5;
     const allSkillsEN = GENRE_SKILLS[config.genre]?.en || [];
     const shuffled = [...allSkillsEN].sort(() => Math.random() - 0.5);
@@ -1504,7 +1684,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       name:       character.name.trim()    || pick(isMale ? names.male : names.female),
       gender:     character.gender         || (isMale ? "male" : "female"),
       age:        character.age.trim()     || String(Math.floor(Math.random() * 61) + 6),
-      appearance: character.appearance.trim() || randomAppearanceStr(),
+      appearance: character.appearance.trim() || randomAppearanceStr(lang),
       skills:     character.skills.length >= 2 ? character.skills : shuffled.slice(0, 2),
     };
 
@@ -1517,7 +1697,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       deathPossible:  config.deathPossible  ?? false,
       trackStats:     config.trackStats     ?? false,
       perspective:    config.perspective    || "second",
-      storyPrompt:    config.storyPrompt.trim() || DEFAULT_SEEDS[config.genre] || "",
+      storyPrompt:    config.storyPrompt.trim() || seedFor(lang, config.genre),
     };
 
     // Update state so the rest of the session (makeChoice, saves, etc.) uses final values
@@ -1593,8 +1773,8 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     setChoices([]);
 
     // Build LLM history — skip roll/chapter entries, and strip error/retry pairs
-    const ERROR_MARKERS = ["Something went wrong", "משהו השתבש", "حدث خطأ"];
-    const RETRY_TEXTS   = ["Try again", "נסה שוב", "حاول مرة أخرى"];
+    const ERROR_MARKERS = ["Something went wrong", "משהו השתבש", "حدث خطأ", "Algo deu errado"];
+    const RETRY_TEXTS   = ["Try again", "נסה שוב", "حاول مرة أخرى", "Tentar novamente"];
     const rawForHistory = storyLog.filter(e => e.role === "narrator" || e.role === "player");
     const logForHistory = rawForHistory.filter(e => {
       if (e.role === "narrator" && ERROR_MARKERS.some(m => e.text.includes(m))) return false;
@@ -1939,7 +2119,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
         return (
           <SetupCard theme={theme} active isRTL={isRTL} title={t("storySeed")} subtitle={t("storySeedSub")}>
             <textarea value={config.storyPrompt} onChange={e => setConfig(c => ({ ...c, storyPrompt: e.target.value }))}
-              placeholder={DEFAULT_SEEDS[config.genre] || t("storySeedPH")}
+              placeholder={seedFor(lang, config.genre) || t("storySeedPH")}
               style={{ ...inputStyle(theme), minHeight: 120, resize: "vertical", direction: isRTL ? "rtl" : "ltr" }} />
             <NavButtons {...nav} onBack={() => setSetupStep(5)} onNext={() => setSetupStep(7)} canNext />
           </SetupCard>
@@ -1947,7 +2127,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
 
       case "character": {
         const skillsDisplay = getSkillsDisplay(config.genre);
-        const nameChips = CHARACTER_NAMES[config.genre] || CHARACTER_NAMES.fantasy;
+        const nameChips = namesFor(lang, config.genre);
         const chipBtn = (name, gender) => (
           <button key={name}
             onClick={() => setCharacter(c => ({ ...c, name, gender }))}
@@ -2197,7 +2377,10 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
               );
             }
             const tr = translations[i];
-            const otherLangs = LANGUAGES.filter(L => L.code !== lang);
+            const targetLang = prefs.translationLanguage && prefs.translationLanguage !== lang
+              ? prefs.translationLanguage
+              : (LANGUAGES.find(L => L.code !== lang)?.code || "English");
+            const targetLangMeta = LANGUAGES.find(L => L.code === targetLang);
             return (
               <div key={i} style={{
                 marginBottom: 16, padding: entry.role === "player" ? "8px 14px" : 0,
@@ -2218,47 +2401,28 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                   <div style={{ marginTop: 8, position: "relative" }}>
                     {!tr && (
                       <button
-                        onClick={() => setTranslations(prev => ({ ...prev, [i]: { picker: true } }))}
+                        onClick={() => translatePassage(i, entry.text, targetLang)}
                         style={{
                           background: "transparent", border: `1px solid ${theme.border}`, borderRadius: 999,
                           padding: "3px 10px", color: theme.textMuted, fontFamily: theme.body, fontSize: 10.5,
-                          cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 5,
+                          cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6,
                           letterSpacing: 0.3, transition: "all 0.15s",
                         }}
                         onMouseEnter={e => { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.color = theme.primary; }}
                         onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.textMuted; }}
                       >
-                        <Icon name="speech" size={11} /> {t("translate")}
+                        <Icon name="speech" size={11} />
+                        <span>{t("translate")}</span>
+                        {targetLangMeta && (
+                          <img
+                            src={flagSrc(targetLangMeta.flag)}
+                            srcSet={`${flagSrc(targetLangMeta.flag)} 1x, ${flagSrc2x(targetLangMeta.flag)} 2x`}
+                            alt=""
+                            width={14} height={10}
+                            style={{ borderRadius: 1, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", objectFit: "cover" }}
+                          />
+                        )}
                       </button>
-                    )}
-                    {tr?.picker && (
-                      <div style={{
-                        display: "inline-flex", alignItems: "center", gap: 6, flexWrap: "wrap",
-                        padding: "5px 8px", background: theme.bgStory, border: `1px solid ${theme.border}`,
-                        borderRadius: 8,
-                      }}>
-                        <span style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 10.5 }}>{t("translateTo")}</span>
-                        {otherLangs.map(L => (
-                          <button key={L.code}
-                            onClick={() => translatePassage(i, entry.text, L.code)}
-                            style={{
-                              background: "transparent", border: `1px solid ${theme.border}`, borderRadius: 999,
-                              padding: "2px 8px", color: theme.text, fontFamily: theme.body, fontSize: 10.5,
-                              cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4,
-                            }}
-                            onMouseEnter={e => { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.color = theme.primary; }}
-                            onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.text; }}
-                          >
-                            <img src={flagSrc(L.flag)} srcSet={`${flagSrc(L.flag)} 1x, ${flagSrc2x(L.flag)} 2x`} alt="" width={14} height={10} style={{ borderRadius: 1 }} />
-                            {L.label}
-                          </button>
-                        ))}
-                        <button
-                          onClick={() => setTranslations(prev => { const next = { ...prev }; delete next[i]; return next; })}
-                          style={{ background: "transparent", border: "none", color: theme.textMuted, cursor: "pointer", padding: 2, lineHeight: 0 }}
-                          title={t("helpClose")}
-                        ><Icon name="close" size={12} /></button>
-                      </div>
                     )}
                     {tr?.loading && (
                       <span style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 11, fontStyle: "italic" }}>{t("translating")}</span>
@@ -2621,41 +2785,37 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 </p>
               </div>
 
-              {/* Language selector */}
+              {/* Language + translation target selectors */}
               <div style={{
-                display: "flex", justifyContent: "center", alignItems: "center",
-                gap: 8, marginBottom: 22, flexWrap: "wrap",
+                display: "flex", justifyContent: "center", alignItems: "flex-start",
+                gap: 18, marginBottom: 22, flexWrap: "wrap",
               }}>
-                {LANGUAGES.map(l => {
-                  const selected = config.language === l.code;
-                  return (
-                    <button
-                      key={l.code}
-                      onClick={() => { setConfig(c => ({ ...c, language: l.code })); setPrefs(p => ({ ...p, language: l.code })); }}
-                      title={l.label}
-                      style={{
-                        display: "inline-flex", alignItems: "center", gap: 8,
-                        padding: "6px 12px", borderRadius: 999,
-                        background: selected ? `${theme.primary}18` : "transparent",
-                        border: `1px solid ${selected ? theme.primary : theme.border}`,
-                        color: selected ? theme.primary : theme.textDim || theme.textMuted,
-                        fontFamily: theme.body, fontSize: 12, cursor: "pointer",
-                        transition: "all 0.2s ease", letterSpacing: "0.02em",
-                      }}
-                      onMouseEnter={e => { if (!selected) { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.color = theme.primary; } }}
-                      onMouseLeave={e => { if (!selected) { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.textDim || theme.textMuted; } }}
-                    >
-                      <img
-                        src={flagSrc(l.flag)}
-                        srcSet={`${flagSrc(l.flag)} 1x, ${flagSrc2x(l.flag)} 2x`}
-                        alt=""
-                        width={18} height={13}
-                        style={{ borderRadius: 2, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", display: "block", objectFit: "cover" }}
-                      />
-                      <span>{l.label}</span>
-                    </button>
-                  );
-                })}
+                <LangMenu
+                  value={config.language}
+                  onChange={code => {
+                    setConfig(c => ({ ...c, language: code }));
+                    setPrefs(p => {
+                      const next = { ...p, language: code };
+                      if (next.translationLanguage === code) {
+                        const alt = LANGUAGES.find(L => L.code !== code);
+                        if (alt) next.translationLanguage = alt.code;
+                      }
+                      return next;
+                    });
+                  }}
+                  theme={theme}
+                  options={LANGUAGES}
+                  label={t("languageLabel")}
+                  isRTL={isRTL}
+                />
+                <LangMenu
+                  value={prefs.translationLanguage}
+                  onChange={code => setPrefs(p => ({ ...p, translationLanguage: code }))}
+                  theme={theme}
+                  options={LANGUAGES.filter(L => L.code !== config.language)}
+                  label={t("translateToLabel")}
+                  isRTL={isRTL}
+                />
               </div>
 
               {/* Feature bullets */}
