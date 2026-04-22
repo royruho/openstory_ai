@@ -115,7 +115,18 @@ const TR = {
   // ── Home screen ──
   brandName:        { English: "OpenStory AI", Hebrew: "OpenStory AI", Arabic: "OpenStory AI", Portuguese: "OpenStory AI" },
   homeTitle:        { English: "Become the author of your own story", Hebrew: "הפוך למחבר הסיפור שלך", Arabic: "كن مؤلف قصتك الخاصة", Portuguese: "Torne-se o autor da sua própria história" },
-  homeTagline:      { English: "Craft interactive adventures in any world — fantasy, sci-fi, mystery, or the real world. Every choice you make shapes the tale.", Hebrew: "צור הרפתקאות אינטראקטיביות בכל עולם — פנטזיה, מדע בדיוני, מסתורין או עולם אמיתי. כל בחירה שלך מעצבת את הסיפור.", Arabic: "صمّم مغامرات تفاعلية في أي عالم — الفانتازيا والخيال العلمي والغموض أو العالم الواقعي. كل اختيار تصنعه يشكّل الحكاية.", Portuguese: "Crie aventuras interativas em qualquer mundo — fantasia, ficção científica, mistério ou o mundo real. Cada escolha molda a história." },
+  homeTagline: {
+    English:    "Have you ever dreamed of an intriguing idea you've always wanted to read? Or do you simply feel like embarking on a surprising and immersive adventure? This app is the place for you.",
+    Hebrew:     "חלמתם פעם על רעיון מסקרן שתמיד רציתם לקרוא? או שפשוט מתחשק לכם לצאת להרפתקה מפתיעה וסוחפת? האפליקציה הזו היא המקום בשבילכם.",
+    Arabic:     "هل حلمت يوماً بفكرة مثيرة لطالما رغبت في قراءتها؟ أم أنك ببساطة تشعر بالرغبة في خوض مغامرة روائية مدهشة وغامرة؟ هذا التطبيق هو مكانك الأمثل.",
+    Portuguese: "Já sonhou com uma ideia intrigante que sempre quis ler? Ou simplesmente apetece-lhe embarcar numa aventura surpreendente e envolvente? Esta aplicação é o lugar ideal para si.",
+  },
+  pitchExplainer: {
+    English:    "Here, you are the author: create worlds, design heroes, and fine-tune the plot style — or simply jump into a mysterious world generated for you. In this journey, you are the navigator: you hold the pen, and every choice you make becomes a story.",
+    Hebrew:     "כאן אתם הסופרים: בראו עולמות, עצבו גיבורים ודייקו את סגנון העלילה – או פשוט קפצו לעולם מסתורי שהאפליקציה תגריל עבורכם. במסע הזה אתם המנווטים: אתם מחזיקים בעט, וכל בחירה שלכם הופכת לסיפור.",
+    Arabic:     "هنا، أنت الكاتب: ابنِ عوالمك، صمّم أبطالك، ودقّق أسلوب الرواية – أو اقفز ببساطة إلى عالم غامض يختاره التطبيق لك. في هذه الرحلة، أنت القبطان: القلم بين يديك، وكل خيار تتخذه يصبح قصة.",
+    Portuguese: "Aqui, o autor é você: crie mundos, desenhe heróis e ajuste o estilo da narrativa – ou simplesmente salte para um mundo misterioso gerado para si. Nesta viagem, você é o navegador: tem a caneta na mão, e cada escolha sua torna-se uma história.",
+  },
   homeBullet1:      { English: "Pick your genre, set the rules, design your hero.", Hebrew: "בחר ז'אנר, קבע חוקים, עצב את הגיבור שלך.", Arabic: "اختر النوع، اضبط القواعد، صمّم بطلك.", Portuguese: "Escolha o gênero, defina as regras, crie seu herói." },
   homeBullet2:      { English: "AI narrates a living world that reacts to you.", Hebrew: "בינה מלאכותית מספרת עולם חי שמגיב אליך.", Arabic: "الذكاء الاصطناعي يسرد عالماً حياً يتفاعل معك.", Portuguese: "A IA narra um mundo vivo que reage às suas ações." },
   homeBullet3:      { English: "Dice rolls, chapters, and real consequences.", Hebrew: "הטלת קוביות, פרקים והשלכות אמיתיות.", Arabic: "رمي النرد، فصول، وعواقب حقيقية.", Portuguese: "Rolagens de dados, capítulos e consequências reais." },
@@ -3415,6 +3426,16 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                   )}
                 </div>
               </div>
+
+              {/* Pitch explainer — sits below the CTAs, falls below the fold on mobile */}
+              <p style={{
+                fontFamily: theme.body, color: theme.textMuted,
+                fontSize: 13, lineHeight: 1.7, margin: "28px auto 0",
+                maxWidth: 560, textAlign: isRTL ? "right" : "center",
+                opacity: 0.85, direction: isRTL ? "rtl" : "ltr",
+              }}>
+                {t("pitchExplainer")}
+              </p>
             </div>
           )}
 
