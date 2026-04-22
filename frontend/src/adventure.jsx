@@ -62,6 +62,7 @@ const TR = {
   beginAdventure:   { English: "Begin Adventure", Hebrew: "התחל הרפתקה", Arabic: "ابدأ المغامرة", Portuguese: "Começar Aventura" },
   continue_:        { English: "Continue", Hebrew: "המשך", Arabic: "متابعة", Portuguese: "Continuar" },
   back:             { English: "← Back", Hebrew: "חזרה →", Arabic: "رجوع →", Portuguese: "← Voltar" },
+  homeBack:         { English: "← Home", Hebrew: "בית →",  Arabic: "الرئيسية →", Portuguese: "← Início" },
   whatDoYouDo:      { English: "What do you do?", Hebrew: "מה אתה עושה?", Arabic: "ماذا تفعل؟", Portuguese: "O que você faz?" },
   typeAction:       { English: "Write your action...", Hebrew: "כתוב את הפעולה שלך...", Arabic: "اكتب فعلك...", Portuguese: "Escreva sua ação..." },
   orChoose:         { English: "or pick a suggestion", Hebrew: "או בחר הצעה", Arabic: "أو اختر اقتراحاً", Portuguese: "ou escolha uma sugestão" },
@@ -125,7 +126,7 @@ const TR = {
   quitGame:         { English: "Quit Game", Hebrew: "עזוב משחק", Arabic: "إنهاء اللعبة", Portuguese: "Sair do Jogo" },
   addYourKey:       { English: "Add Your Key", Hebrew: "הוסף מפתח", Arabic: "أضف مفتاحك", Portuguese: "Adicionar Chave" },
   unlimitedTurns:   { English: "Unlimited turns", Hebrew: "תורות ללא הגבלה", Arabic: "دورات غير محدودة", Portuguese: "Turnos ilimitados" },
-  freeTurnsInfo:    { English: "{n} free turns included · no sign-up needed", Hebrew: "{n} תורות חינמיים כלולות · ללא הרשמה", Arabic: "يشمل {n} دورات مجانية · لا حاجة للتسجيل", Portuguese: "{n} turnos gratuitos inclusos · sem cadastro" },
+  freeTurnsInfo:    { English: "{n} free turns included · no sign-up needed", Hebrew: "{n} תורות חינמיים כלולים · ללא הרשמה", Arabic: "يشمل {n} دورات مجانية · لا حاجة للتسجيل", Portuguese: "{n} turnos gratuitos inclusos · sem cadastro" },
   keyModalSubHome:  { English: "Play unlimited turns with your own OpenRouter API key. Setup takes 2 minutes — a small top-up (even $5) lasts many thousands of turns.", Hebrew: "שחק תורות ללא הגבלה עם מפתח OpenRouter משלך. ההגדרה לוקחת 2 דקות — טעינה קטנה (אפילו ‎$5) מספיקה לאלפי תורות.", Arabic: "العب دورات غير محدودة بمفتاح OpenRouter الخاص بك. الإعداد يستغرق دقيقتين — شحن صغير (حتى ‎$5) يدوم لآلاف الدورات.", Portuguese: "Jogue turnos ilimitados com sua própria chave OpenRouter. Configuração leva 2 minutos — uma pequena recarga (até ‎$5) dura milhares de turnos." },
   turnsLeft:        { English: "{n} free turns left", Hebrew: "נשארו {n} תורות חינמיים", Arabic: "تبقّى {n} دورات مجانية", Portuguese: "{n} turnos gratuitos restantes" },
   suggestedNames:   { English: "Suggested names", Hebrew: "שמות מוצעים", Arabic: "أسماء مقترحة", Portuguese: "Nomes sugeridos" },
@@ -144,10 +145,10 @@ const TR = {
   helpDiceBody:     { English: "Risky actions trigger a dice roll. A 1 is a critical failure; a 6 is a critical success. If the action matches one of your skills, you roll twice and keep the better result.", Hebrew: "פעולות מסוכנות מפעילות הטלת קובייה. 1 הוא כישלון חרוץ; 6 הוא הצלחה מוחלטת. אם הפעולה תואמת אחד מהכישורים שלך, אתה מטיל פעמיים ושומר על התוצאה הטובה יותר.", Arabic: "الأفعال الخطرة تستدعي رمي النرد. 1 هو فشل ذريع؛ 6 هو نجاح استثنائي. إذا تطابق الفعل مع إحدى مهاراتك، ترمي مرتين وتحتفظ بالنتيجة الأفضل.", Portuguese: "Ações arriscadas acionam uma rolagem de dado. 1 é falha crítica; 6 é sucesso crítico. Se a ação corresponder a uma de suas habilidades, você rola duas vezes e mantém o melhor resultado." },
   helpLearn:        { English: "Learn a language as you play", Hebrew: "למד שפה תוך כדי משחק", Arabic: "تعلّم لغة أثناء اللعب", Portuguese: "Aprenda um idioma enquanto joga" },
   helpLearnBody:    {
-    English:    "An optional educational mode. Pick your interface language on the home screen, then pick a second language under 'Learn' — every narrator passage shows a small Translate button that renders it in the language you're studying. Play in English and peek at Portuguese, or play in Hebrew and peek at Arabic — the original stays visible, the translation appears beneath it, and you control when to look. Set the Learn dropdown to 'Off' to hide the feature entirely.",
-    Hebrew:     "מצב למידה אופציונלי. בחר את שפת הממשק במסך הראשי, ואז בחר שפה שנייה תחת 'למידה' — כל קטע של המספר מציג כפתור תרגום קטן שמציג אותו בשפה שאתה לומד. שחק באנגלית והצץ לפורטוגזית, או שחק בעברית והצץ לערבית — הטקסט המקורי נשאר גלוי, התרגום מופיע מתחתיו, ואתה שולט מתי להסתכל. הגדר את תפריט 'למידה' ל'כבוי' כדי להסתיר את התכונה לחלוטין.",
-    Arabic:     "وضع تعليمي اختياري. اختر لغة الواجهة من الشاشة الرئيسية، ثم اختر لغة ثانية ضمن 'تعلّم' — سيظهر زر ترجمة صغير أسفل كل مقطع من الراوي يعرضه باللغة التي تدرسها. العب بالإنجليزية وألقِ نظرة على البرتغالية، أو العب بالعبرية وألقِ نظرة على العربية — يبقى النص الأصلي ظاهراً، وتظهر الترجمة أسفله، وأنت تتحكم في متى تنظر إليها. اضبط قائمة 'تعلّم' على 'معطّل' لإخفاء الميزة تماماً.",
-    Portuguese: "Um modo educacional opcional. Escolha o idioma da interface no ecrã inicial e depois escolha um segundo idioma em 'Aprender' — cada passagem do narrador mostrará um pequeno botão Traduzir que a apresenta no idioma que está a estudar. Jogue em inglês e espreite em português, ou jogue em hebraico e espreite em árabe — o texto original fica visível, a tradução aparece por baixo e você controla quando olhar. Defina o menu 'Aprender' como 'Desativado' para ocultar totalmente a funcionalidade.",
+    English:    "An optional educational mode. On the home screen pick your interface language and a second language under 'Learn' — then every narrator paragraph becomes a study tool with three modes: (1) Tap any word to see its meaning in a small popover (uses surrounding context for accuracy). (2) Long-press a paragraph (or click 'Gloss all words') to translate every word at once — afterwards each word shows a faint underline so you can tell which are pre-loaded. (3) Click 'Translate' for the full paragraph as one block. Word translations are cached on your device, so the same word never costs an API call twice. Set Learn to 'Off' to hide the feature entirely.",
+    Hebrew:     "מצב למידה אופציונלי. במסך הראשי בחר את שפת הממשק ושפה שנייה תחת 'למידה' — וכל פסקה של המספר הופכת לכלי לימוד עם שלושה מצבים: (1) הקש על כל מילה כדי לראות את משמעותה בחלון קטן (משתמש בהקשר הסביב לדיוק). (2) הקשה ארוכה על פסקה (או לחיצה על 'תרגם כל מילה') תתרגם את כל המילים בבת אחת — לאחר מכן כל מילה תופיע עם קו תחתי קל כדי לדעת אילו מילים נטענו מראש. (3) לחץ על 'תרגם' כדי לקבל את הפסקה כולה כגוש אחד. תרגומי המילים נשמרים במטמון במכשיר שלך, כך שאותה מילה לא תעלה קריאת API פעמיים. הגדר 'למידה' ל'כבוי' כדי להסתיר את התכונה לחלוטין.",
+    Arabic:     "وضع تعليمي اختياري. في الشاشة الرئيسية اختر لغة الواجهة ولغة ثانية ضمن 'تعلّم' — وستصبح كل فقرة من الراوي أداة دراسة بثلاثة أوضاع: (1) اضغط على أي كلمة لرؤية معناها في نافذة صغيرة (يستخدم السياق المحيط للدقة). (2) اضغط مطوّلاً على فقرة (أو انقر 'ترجم كل الكلمات') لترجمة كل الكلمات دفعة واحدة — بعد ذلك ستظهر كل كلمة بخط تحتي خفيف لتعرف أيها تم تحميلها مسبقاً. (3) انقر 'ترجم' للحصول على الفقرة كاملة كجزء واحد. تُخزَّن ترجمات الكلمات في جهازك، فلا تكلّف الكلمة نفسها استدعاء API مرتين. اضبط 'تعلّم' على 'معطّل' لإخفاء الميزة تماماً.",
+    Portuguese: "Um modo educacional opcional. No ecrã inicial escolha o idioma da interface e um segundo idioma em 'Aprender' — e cada parágrafo do narrador torna-se uma ferramenta de estudo com três modos: (1) Toque em qualquer palavra para ver o seu significado num pequeno popover (usa o contexto à volta para precisão). (2) Mantenha pressionado um parágrafo (ou clique em 'Glossar todas') para traduzir todas as palavras de uma vez — depois cada palavra ficará com um sublinhado ténue para sabermos quais foram pré-carregadas. (3) Clique em 'Traduzir' para o parágrafo inteiro como um bloco. As traduções de palavras ficam em cache no seu dispositivo, por isso a mesma palavra nunca custa duas chamadas à API. Defina 'Aprender' como 'Desativado' para ocultar totalmente a funcionalidade.",
   },
   helpChapters:     { English: "Chapters", Hebrew: "פרקים", Arabic: "الفصول", Portuguese: "Capítulos" },
   helpChaptersBody: { English: "Longer adventures split into chapters, each with one overarching goal. Explore freely — a chapter ends only when you conclusively achieve its goal.", Hebrew: "הרפתקאות ארוכות מתחלקות לפרקים, לכל אחד מטרה מרכזית אחת. חקור בחופשיות — פרק מסתיים רק כשאתה משיג את מטרתו באופן חד-משמעי.", Arabic: "المغامرات الأطول تنقسم إلى فصول، لكل فصل هدف رئيسي واحد. استكشف بحرية — ينتهي الفصل فقط عندما تحقق هدفه بشكل قاطع.", Portuguese: "Aventuras mais longas se dividem em capítulos, cada um com um objetivo central. Explore livremente — um capítulo só termina quando você alcança seu objetivo de forma conclusiva." },
@@ -167,6 +168,29 @@ const TR = {
   translateToLabel: { English: "Translate to",   Hebrew: "תרגם ל",       Arabic: "ترجم إلى",       Portuguese: "Traduzir para" },
   learnLangLabel:   { English: "Learn",          Hebrew: "למידה",         Arabic: "تعلّم",           Portuguese: "Aprender" },
   translateOff:     { English: "Off",            Hebrew: "כבוי",          Arabic: "معطّل",           Portuguese: "Desativado" },
+  glossAll:         { English: "Gloss all words", Hebrew: "תרגם כל מילה",  Arabic: "ترجم كل الكلمات", Portuguese: "Glossar todas" },
+  glossing:         { English: "Glossing…",       Hebrew: "מתרגם מילים…", Arabic: "جارٍ ترجمة الكلمات…", Portuguese: "A glossar…" },
+  wordTranslating:  { English: "Translating…",    Hebrew: "מתרגם…",       Arabic: "جارٍ الترجمة…",      Portuguese: "A traduzir…" },
+  wordError:        { English: "Lookup failed",   Hebrew: "החיפוש נכשל",  Arabic: "فشل البحث",          Portuguese: "Falha na pesquisa" },
+  wordHint:         {
+    English:    "Tap any word in the story to see its meaning. Long-press a paragraph to look up every word at once.",
+    Hebrew:     "הקש על כל מילה בסיפור כדי לראות את משמעותה. הקשה ארוכה על פסקה תתרגם את כל המילים בבת אחת.",
+    Arabic:     "اضغط على أي كلمة في القصة لمعرفة معناها. اضغط مطوّلاً على الفقرة لترجمة كل الكلمات دفعة واحدة.",
+    Portuguese: "Toque em qualquer palavra da história para ver o seu significado. Mantenha pressionada uma frase para traduzir todas as palavras de uma vez.",
+  },
+  wordHintDismiss:  { English: "Got it",          Hebrew: "הבנתי",         Arabic: "تمام",               Portuguese: "Entendi" },
+
+  // ── Setup wizard step strip (short labels) ──
+  stepGenre:        { English: "Genre",           Hebrew: "ז'אנר",         Arabic: "النوع",              Portuguese: "Gênero" },
+  stepRating:       { English: "Rating",          Hebrew: "דירוג",         Arabic: "التصنيف",            Portuguese: "Idade" },
+  stepPacing:       { English: "Pacing",          Hebrew: "קצב",           Arabic: "الإيقاع",            Portuguese: "Ritmo" },
+  stepLengthShort:  { English: "Length",          Hebrew: "אורך",          Arabic: "الطول",              Portuguese: "Duração" },
+  stepRules:        { English: "Rules",           Hebrew: "חוקים",         Arabic: "القواعد",            Portuguese: "Regras" },
+  stepPOV:          { English: "POV",             Hebrew: "מבט",           Arabic: "المنظور",            Portuguese: "POV" },
+  stepSeed:         { English: "Seed",            Hebrew: "זרע",           Arabic: "البذرة",             Portuguese: "Ideia" },
+  stepHero:         { English: "Hero",            Hebrew: "גיבור",         Arabic: "البطل",              Portuguese: "Herói" },
+  rulesSet:         { English: "Set",             Hebrew: "הוגדר",         Arabic: "تم",                 Portuguese: "Pronto" },
+  seedSurprise:     { English: "Surprise",        Hebrew: "הפתעה",         Arabic: "مفاجأة",             Portuguese: "Surpresa" },
   learnLangHint:    {
     English:    "Optional educational mode: pick a language you're learning and a small Translate button will appear beneath each passage so you can compare it to your native text.",
     Hebrew:     "מצב למידה אופציונלי: בחר שפה שאתה לומד, וכפתור תרגום קטן יופיע מתחת לכל קטע כדי שתוכל להשוות אותו לטקסט בשפת האם שלך.",
@@ -325,18 +349,89 @@ function loadPrefs() {
     const raw = localStorage.getItem("openstory_prefs");
     if (!raw) return null;
     const p = JSON.parse(raw);
+    const langs = ["English","Hebrew","Arabic","Portuguese"];
     return {
       themeMode: p.themeMode === "light" ? "light" : "dark",
       font:      ["sans","serif","mono","dyslexic"].includes(p.font) ? p.font : "sans",
       size:      ["s","m","l","xl"].includes(p.size) ? p.size : "m",
-      language:  ["English","Hebrew","Arabic","Portuguese"].includes(p.language) ? p.language : "English",
+      language:  langs.includes(p.language) ? p.language : "English",
+      translationLanguage: p.translationLanguage === "off" || langs.includes(p.translationLanguage) ? p.translationLanguage : "off",
+      wordHintDismissed: !!p.wordHintDismissed,
     };
   } catch { return null; }
 }
 function savePrefs(p) {
   try { localStorage.setItem("openstory_prefs", JSON.stringify(p)); } catch {}
 }
+
+const WORD_CACHE_KEY = "openstory_word_cache";
+const WORD_CACHE_MAX = 5000;
+function loadWordCache() {
+  try {
+    const raw = localStorage.getItem(WORD_CACHE_KEY);
+    if (!raw) return {};
+    const obj = JSON.parse(raw);
+    return obj && typeof obj === "object" ? obj : {};
+  } catch { return {}; }
+}
+function saveWordCache(cache) {
+  try {
+    const keys = Object.keys(cache);
+    let toSave = cache;
+    if (keys.length > WORD_CACHE_MAX) {
+      // FIFO trim: drop oldest insertion-ordered keys
+      const trimmed = {};
+      const start = keys.length - WORD_CACHE_MAX;
+      for (let i = start; i < keys.length; i++) trimmed[keys[i]] = cache[keys[i]];
+      toSave = trimmed;
+    }
+    localStorage.setItem(WORD_CACHE_KEY, JSON.stringify(toSave));
+  } catch {}
+}
+// Split text into a sequence of {type, text} tokens. Words are alphabetic runs (Unicode-aware:
+// Latin letters + Hebrew + Arabic + accents). Everything else (whitespace, punctuation) is a "gap".
+// Splitting this way lets us re-render the paragraph with clickable spans without losing layout.
+const WORD_RE = /[\p{L}\p{M}'’׳״]+/gu;
+function splitIntoTokens(text) {
+  if (!text) return [];
+  const out = [];
+  let last = 0;
+  for (const m of text.matchAll(WORD_RE)) {
+    if (m.index > last) out.push({ type: "gap", text: text.slice(last, m.index) });
+    out.push({ type: "word", text: m[0] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push({ type: "gap", text: text.slice(last) });
+  return out;
+}
+// Build a short ~5-word context window around a word index in the token list, for disambiguation.
+function buildWordContext(tokens, idx, windowWords = 5) {
+  const out = [];
+  let before = 0, after = 0;
+  for (let j = idx - 1; j >= 0 && before < windowWords; j--) { if (tokens[j].type === "word") before++; out.unshift(tokens[j].text); }
+  out.push(tokens[idx].text);
+  for (let j = idx + 1; j < tokens.length && after < windowWords; j++) { if (tokens[j].type === "word") after++; out.push(tokens[j].text); }
+  return out.join("").trim().replace(/\s+/g, " ");
+}
+function targetLangLabel(code) {
+  return code === "Portuguese"
+    ? "European Portuguese (pt-PT, as spoken in Portugal — NOT Brazilian; use 'ficheiro' not 'arquivo', 'ecrã' not 'tela')"
+    : code;
+}
+function wordCacheKey(lang, word) { return `${lang}::${word.toLowerCase()}`; }
+
 const SETUP_STEPS   = ["genre", "age", "length", "duration", "rules", "perspective", "prompt", "character"];
+const STEP_DEFS = [
+  { id: 0, icon: "scroll",  labelKey: "stepGenre"       },
+  { id: 1, icon: "shield",  labelKey: "stepRating"      },
+  { id: 2, icon: "bolt",    labelKey: "stepPacing"      },
+  { id: 3, icon: "book",    labelKey: "stepLengthShort" },
+  { id: 4, icon: "skull",   labelKey: "stepRules"       },
+  { id: 5, icon: "speech",  labelKey: "stepPOV"         },
+  { id: 6, icon: "sparkle", labelKey: "stepSeed"        },
+  { id: 7, icon: "person",  labelKey: "stepHero"        },
+];
+const AUTO_ADVANCE_STEPS = new Set([0, 1, 2, 3, 5]);
 const SUMMARY_EVERY = 5;
 const WINDOW_SIZE   = 12;
 const RTL_LANGS     = ["Hebrew", "Arabic"];
@@ -390,6 +485,7 @@ const ICONS = {
   chevronLeft:  (<><path d="M15 6l-6 6 6 6"/></>),
   chevronRight: (<><path d="M9 6l6 6-6 6"/></>),
   chevronDown:  (<><path d="M6 9l6 6 6-6"/></>),
+  scroll:       (<><path d="M6 3h11c1.1 0 2 .9 2 2v3h-2"/><path d="M17 8v10c0 1.7 1.3 3 3 3H8c-1.7 0-3-1.3-3-3V5c0-1.1.9-2 2-2"/><path d="M9 8h5M9 12h5M9 16h3"/></>),
 
   // Genre motifs — fantasy (gold)
   fantasySword:   (<><path d="M14 3h6v6"/><path d="M20 3 9 14"/><path d="M10 13l-4 4 2 2 4-4"/><path d="M6 17l-3 3"/></>),
@@ -966,20 +1062,139 @@ function LangMenu({ value, onChange, theme, options, label, isRTL = false, compa
   );
 }
 
+// ─── WORD POPOVER (per-word translation tooltip) ───────────────
+function WordPopover({ popover, onClose, theme, t, isRTL }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    if (!popover) return;
+    const onDoc = e => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    const onEsc = e => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onEsc);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onEsc);
+    };
+  }, [popover, onClose]);
+  if (!popover) return null;
+  const { word, status, text, error, anchor, lang } = popover;
+  // Position: just below the clicked word, horizontally centered. Clamp to viewport.
+  const POP_W = 220;
+  const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
+  let left = anchor.left + anchor.width / 2 - POP_W / 2;
+  if (left < 8) left = 8;
+  if (left + POP_W > vw - 8) left = vw - 8 - POP_W;
+  const top = anchor.bottom + 6;
+  const targetIsRTL = RTL_LANGS.includes(lang);
+  return (
+    <div ref={ref} role="dialog" style={{
+      position: "fixed", top, left, width: POP_W, zIndex: 1000,
+      background: theme.bgCard || theme.bg, border: `1px solid ${theme.primary}55`,
+      borderRadius: 10, padding: "10px 12px",
+      boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
+      fontFamily: theme.body,
+      direction: isRTL ? "rtl" : "ltr",
+    }}>
+      <div style={{
+        fontSize: 10, color: theme.textMuted, textTransform: "uppercase", letterSpacing: 1.2,
+        marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 6,
+      }}>
+        <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <Icon name="speech" size={10} /> {lang}
+        </span>
+        <button
+          onClick={onClose}
+          aria-label={t("helpClose")}
+          style={{ background: "transparent", border: "none", color: theme.textMuted, cursor: "pointer", padding: 0, lineHeight: 0 }}
+        ><Icon name="close" size={11} /></button>
+      </div>
+      <div style={{ fontSize: 12, color: theme.textMuted, marginBottom: 2, fontStyle: "italic" }}>{word}</div>
+      {status === "loading" && (
+        <div style={{ fontSize: 13, color: theme.textMuted, fontStyle: "italic" }}>{t("wordTranslating")}</div>
+      )}
+      {status === "error" && (
+        <div style={{ fontSize: 12, color: theme.accent || theme.primary }}>{error || t("wordError")}</div>
+      )}
+      {status === "ok" && (
+        <div style={{ fontSize: 16, color: theme.text, fontWeight: 600, lineHeight: 1.3, direction: targetIsRTL ? "rtl" : "ltr", textAlign: targetIsRTL ? "right" : "left" }}>{text}</div>
+      )}
+    </div>
+  );
+}
+
 // ─── SETUP COMPONENTS ───────────────────────────────────────────
-function SetupCard({ theme, active, children, title, subtitle, isRTL }) {
+function SetupCard({ theme, active, children, title, subtitle, isRTL, stepStrip, activePrimary }) {
+  const titleColor = activePrimary || theme.primary;
   return (
     <div style={{
       background: theme.bgCard, backdropFilter: "blur(20px)", border: `1px solid ${theme.border}`,
-      borderRadius: 16, padding: "36px 32px", maxWidth: 560, width: "100%", margin: "0 auto",
+      borderRadius: 16, maxWidth: 560, width: "100%", margin: "0 auto", overflow: "hidden",
       opacity: active ? 1 : 0, transform: active ? "translateY(0) scale(1)" : "translateY(30px) scale(0.95)",
       transition: "all 0.5s cubic-bezier(0.4, 0, 0.2, 1)", position: active ? "relative" : "absolute",
       pointerEvents: active ? "auto" : "none", boxShadow: "0 20px 60px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05)",
       direction: isRTL ? "rtl" : "ltr", textAlign: isRTL ? "right" : "left",
     }}>
-      {title    && <h2 style={{ fontFamily: theme.heading, color: theme.primary, fontSize: 22, margin: "0 0 4px", letterSpacing: 1 }}>{title}</h2>}
-      {subtitle && <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 14, margin: "0 0 24px" }}>{subtitle}</p>}
-      {children}
+      {stepStrip}
+      <div style={{ padding: "26px 32px 32px" }}>
+        {title    && <h2 style={{ fontFamily: theme.heading, color: titleColor, fontSize: 22, margin: "0 0 4px", letterSpacing: 1 }}>{title}</h2>}
+        {subtitle && <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 14, margin: "0 0 24px" }}>{subtitle}</p>}
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function StepStrip({ step, selections, activePrimary, theme, t, onJump, isRTL }) {
+  return (
+    <div style={{
+      background: theme.bgSoft || `${theme.bg}cc`,
+      borderBottom: `1px solid ${theme.border}`,
+      padding: "10px 16px 8px",
+      direction: isRTL ? "rtl" : "ltr",
+    }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 2, marginBottom: 8 }}>
+        {STEP_DEFS.map((s, i) => {
+          const done    = selections[i] !== undefined && selections[i] !== "";
+          const current = i === step;
+          const iconCol = current ? activePrimary : done ? `${activePrimary}99` : theme.textMuted;
+          const labelCol = current ? activePrimary : done ? `${activePrimary}88` : theme.textMuted;
+          return (
+            <button key={i} onClick={() => onJump(i)} title={t(s.labelKey)}
+              style={{
+                background: current ? `${activePrimary}22` : "transparent",
+                border: `1px solid ${current ? activePrimary : done ? `${activePrimary}33` : "transparent"}`,
+                borderRadius: 8, padding: "7px 2px 6px",
+                cursor: "pointer", textAlign: "center", transition: "all 0.2s",
+              }}>
+              <div style={{
+                display: "flex", justifyContent: "center", marginBottom: 2,
+                color: iconCol, opacity: !done && !current ? 0.35 : 1,
+                transition: "opacity 0.2s",
+              }}>
+                <Icon name={s.icon} size={15} strokeWidth={1.5} />
+              </div>
+              <div style={{
+                fontFamily: theme.body, fontSize: 9, letterSpacing: 0.3,
+                textTransform: "uppercase", lineHeight: 1.2, color: labelCol,
+              }}>{t(s.labelKey)}</div>
+              {done && (
+                <div style={{
+                  fontSize: 8, color: activePrimary, marginTop: 2,
+                  whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis",
+                  maxWidth: "100%", padding: "0 2px",
+                }}>{String(selections[i]).slice(0, 7)}</div>
+              )}
+            </button>
+          );
+        })}
+      </div>
+      <div style={{ height: 2, background: theme.border, borderRadius: 999, overflow: "hidden" }}>
+        <div style={{
+          height: "100%", background: activePrimary, borderRadius: 999,
+          width: `${(step / (STEP_DEFS.length - 1)) * 100}%`,
+          transition: "width 0.35s ease",
+        }} />
+      </div>
     </div>
   );
 }
@@ -1352,6 +1567,7 @@ function loadAndValidateSave(json) {
 export default function AdventureGame() {
   const [phase, setPhase]           = useState("home");
   const [setupStep, setSetupStep]   = useState(0);
+  const [stepSelections, setStepSelections] = useState({});
   const [config, setConfig]         = useState(() => ({ genre: "", language: loadPrefs()?.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" }));
   const [character, setCharacter]   = useState({ name: "", gender: "", age: "", appearance: "", skills: [] });
   const [storyLog, setStoryLog]     = useState([]);
@@ -1375,6 +1591,11 @@ export default function AdventureGame() {
   // Inline translations of narrator passages — keyed by storyLog index.
   // Shape: { [logIdx]: { lang, text, loading, error, picker } } — ephemeral, not saved.
   const [translations, setTranslations]     = useState({});
+  // Per-word translation cache — keyed by `${targetLang}::${lowercasedWord}`. Persisted across sessions.
+  const [wordCache, setWordCache]           = useState(() => loadWordCache());
+  const [wordPopover, setWordPopover]       = useState(null); // { word, lang, anchor:DOMRect, status:"loading"|"ok"|"error", text? } | null
+  // Per-passage gloss-all loading state, keyed by storyLog index.
+  const [glossLoading, setGlossLoading]     = useState({});
 
   const [showKeyModal, setShowKeyModal]   = useState(false);
   const [keyModalContext, setKeyModalContext] = useState("game"); // "home" | "game"
@@ -1390,11 +1611,13 @@ export default function AdventureGame() {
 
   // User preferences (theme, font, size) — persisted to localStorage
   const [prefs, setPrefs] = useState(() => {
-    const loaded = loadPrefs() || { themeMode: "dark", font: "auto", size: "m", language: "English" };
+    const loaded = loadPrefs() || { themeMode: "dark", font: "auto", size: "m", language: "English", translationLanguage: "off", wordHintDismissed: false };
     if (loaded.translationLanguage === undefined) loaded.translationLanguage = "off";
+    if (loaded.wordHintDismissed === undefined) loaded.wordHintDismissed = false;
     return loaded;
   });
   useEffect(() => { savePrefs(prefs); }, [prefs]);
+  useEffect(() => { saveWordCache(wordCache); }, [wordCache]);
   const [showHelp, setShowHelp]         = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isMobile, setIsMobile]         = useState(() => typeof window !== "undefined" && window.innerWidth < MOBILE_BREAKPOINT);
@@ -1409,6 +1632,9 @@ export default function AdventureGame() {
   const storyEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const bannerTimerRef = useRef(null);
+  // Long-press detection for batched-gloss-all on a narrator paragraph.
+  const longPressTimer = useRef(null);
+  const longPressed = useRef(false);
 
   const lang    = config.language;
   const isRTL   = RTL_LANGS.includes(lang);
@@ -1592,6 +1818,96 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     }
   }, [buildSystemPrompt, lang, turnCount]);
 
+  // ─── PER-WORD TRANSLATION (educational mode) ──────────────────
+  // Lazy single-word lookup. Cache hit → return immediately. Cache miss → small LLM call, cache result.
+  const translateWord = useCallback(async (word, targetLang, context) => {
+    const key = wordCacheKey(targetLang, word);
+    if (wordCache[key]) return wordCache[key];
+    const SYSTEM =
+      `You are a precise translator. Translate the SINGLE word the user provides into ${targetLangLabel(targetLang)}, ` +
+      `using the short context to pick the correct sense. Lowercase output unless it is a proper noun. ` +
+      `RESPOND WITH VALID JSON ONLY: {"t":"the translation"}`;
+    const payload = JSON.stringify({ w: word, c: context || "" });
+    const result = await api.chat(SYSTEM, [{ role: "user", content: payload }], { max_tokens_override: 30, turnCount });
+    const t = (result?.t || "").trim();
+    if (!t) throw new Error("empty");
+    setWordCache(prev => ({ ...prev, [key]: t }));
+    return t;
+  }, [wordCache, turnCount]);
+
+  // Batched gloss for an entire passage. Sends only words not already cached. One LLM call per passage.
+  const translateAllWords = useCallback(async (logIdx, passageText, targetLang) => {
+    setGlossLoading(g => ({ ...g, [logIdx]: true }));
+    try {
+      const tokens = splitIntoTokens(passageText);
+      const seen = new Set();
+      const wordsToFetch = [];
+      for (const tok of tokens) {
+        if (tok.type !== "word") continue;
+        const lower = tok.text.toLowerCase();
+        if (seen.has(lower)) continue;
+        seen.add(lower);
+        if (!wordCache[wordCacheKey(targetLang, lower)]) wordsToFetch.push(lower);
+      }
+      if (wordsToFetch.length) {
+        const SYSTEM =
+          `You are a precise translator. Translate each word in the user's list into ${targetLangLabel(targetLang)}, ` +
+          `using the surrounding passage to pick the correct sense for each. Lowercase output unless a word is a proper noun. ` +
+          `RESPOND WITH VALID JSON ONLY: {"t":{"word1":"…","word2":"…"}}`;
+        const payload = JSON.stringify({ words: wordsToFetch, context: passageText });
+        const result = await api.chat(SYSTEM, [{ role: "user", content: payload }], { max_tokens_override: 1500, turnCount });
+        const dict = result?.t || {};
+        if (dict && typeof dict === "object") {
+          setWordCache(prev => {
+            const next = { ...prev };
+            for (const w of wordsToFetch) {
+              const v = dict[w];
+              if (typeof v === "string" && v.trim()) next[wordCacheKey(targetLang, w)] = v.trim();
+            }
+            return next;
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("Gloss-all failed:", e);
+    } finally {
+      setGlossLoading(g => { const next = { ...g }; delete next[logIdx]; return next; });
+    }
+  }, [wordCache, turnCount]);
+
+  // Handle clicking a single word — opens the popover, fills it from cache or via translateWord.
+  const handleWordClick = useCallback((e, wordText, contextStr, targetLang) => {
+    if (longPressed.current) { longPressed.current = false; return; }
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const lower = wordText.toLowerCase();
+    const cached = wordCache[wordCacheKey(targetLang, lower)];
+    if (cached) {
+      setWordPopover({ word: wordText, anchor: rect, status: "ok", text: cached, lang: targetLang });
+      return;
+    }
+    setWordPopover({ word: wordText, anchor: rect, status: "loading", lang: targetLang });
+    translateWord(lower, targetLang, contextStr).then(text => {
+      setWordPopover(prev => prev && prev.word === wordText && prev.anchor.top === rect.top ? { ...prev, status: "ok", text } : prev);
+    }).catch(() => {
+      setWordPopover(prev => prev && prev.word === wordText && prev.anchor.top === rect.top ? { ...prev, status: "error" } : prev);
+    });
+  }, [wordCache, translateWord]);
+
+  // Long-press handlers: fire translateAllWords after 500ms hold, suppress the next click.
+  const startLongPress = useCallback((logIdx, text, targetLang) => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressed.current = false;
+    longPressTimer.current = setTimeout(() => {
+      longPressed.current = true;
+      longPressTimer.current = null;
+      translateAllWords(logIdx, text, targetLang);
+    }, 500);
+  }, [translateAllWords]);
+  const cancelLongPress = useCallback(() => {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; }
+  }, []);
+
   // ─── INLINE TRANSLATION ───────────────────────────────────────
   const translatePassage = useCallback(async (logIdx, sourceText, targetLang) => {
     setTranslations(t => ({ ...t, [logIdx]: { ...(t[logIdx] || {}), lang: targetLang, loading: true, error: null, picker: false } }));
@@ -1615,10 +1931,16 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
 
   // ─── BACKGROUND SUMMARIZER ─────────────────────────────────────
   const triggerSummarize = useCallback(async (fullLog, currentSummary) => {
+    const eLang = config.language || "English";
+    const ePortuguese = eLang === "Portuguese";
+    const langDirective = ePortuguese
+      ? "European Portuguese (pt-PT, NOT Brazilian Portuguese)"
+      : eLang;
     const SYSTEM =
       `You track story continuity for an interactive adventure game. Produce a compact JSON summary. ` +
+      `LANGUAGE: Write every string value (narrative text, npc names, locations, decisions, threads) ENTIRELY in ${langDirective}. JSON keys stay in English; every value in ${eLang}.\n` +
       `RESPOND WITH VALID JSON ONLY:\n` +
-      `{"narrative":"2-3 sentences covering key events and current situation","world":{"npcs":{"Name":"relationship/status"},"locations":["place — notes"],"decisions":["decision made"],"threads":["active plot thread"]}}`;
+      `{"narrative":"2-3 sentences in ${eLang} covering key events and current situation","world":{"npcs":{"Name":"relationship/status"},"locations":["place — notes"],"decisions":["decision made"],"threads":["active plot thread"]}}`;
 
     const parts = [];
     if (currentSummary.narrative) {
@@ -1642,21 +1964,27 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     } catch (e) {
       console.warn("Summarization failed (non-critical):", e);
     }
-  }, [turnCount]);
+  }, [turnCount, config.language]);
 
   // ─── CHAPTER BRIEF GENERATOR ──────────────────────────────────
   const generateChapterBrief = useCallback(async (chNum, total, summaryContext) => {
     const genreLabel = THEMES[config.genre]?.nameKey || "fantasy";
+    const eLang = config.language || "English";
+    const ePortuguese = eLang === "Portuguese";
+    const langDirective = ePortuguese
+      ? "European Portuguese (pt-PT, as spoken in Portugal — NOT Brazilian Portuguese; use words like 'ficheiro' not 'arquivo', 'ecrã' not 'tela', 'autocarro' not 'ônibus', 'telemóvel' not 'celular')"
+      : eLang;
     const SYSTEM =
       `You are a story architect for an interactive ${genreLabel} adventure. ` +
       `Design a chapter brief with ONE concrete goal. The player explores freely and may hit dead ends.\n\n` +
+      `LANGUAGE: Write the title, goal, and obstacle ENTIRELY in ${langDirective}. The JSON keys ("title","goal","obstacle") stay in English, but every value must be in ${eLang}.\n\n` +
       `RESPOND WITH VALID JSON ONLY — a single object (NOT an array), three fields, nothing else:\n` +
       `{\n` +
-      `  "title": "evocative chapter title (3-6 words)",\n` +
-      `  "goal": "ONE concrete, falsifiable objective. Must be one of: (a) a specific answer/truth to discover, (b) a specific artifact/object to obtain, or (c) a specific problem/situation to fix. Name WHAT is learned, obtained, or fixed — do not use vague verbs like 'investigate' or 'uncover' on their own. GOOD: 'Learn the true name of the cursed blacksmith.' / 'Recover the stolen signet ring from the thieves' guild.' / 'Restore power to the station's life-support core.' BAD: 'Investigate the village.' / 'Uncover the mystery.'",\n` +
-      `  "obstacle": "2-3 sentences. Sentence 1: the specific challenge, threat, or complication blocking the goal — who/what opposes the player, and any key detail that makes the situation tricky. Sentence 2-3: the general approach the player will need to take to overcome it — broad strokes only, no specific steps or items. Keep it open-ended enough that the player has real choices."\n` +
+      `  "title": "evocative chapter title (3-6 words) in ${eLang}",\n` +
+      `  "goal": "ONE concrete, falsifiable objective in ${eLang}. Must be one of: (a) a specific answer/truth to discover, (b) a specific artifact/object to obtain, or (c) a specific problem/situation to fix. Name WHAT is learned, obtained, or fixed — do not use vague verbs like 'investigate' or 'uncover' on their own.",\n` +
+      `  "obstacle": "2-3 sentences in ${eLang}. Sentence 1: the specific challenge, threat, or complication blocking the goal — who/what opposes the player, and any key detail that makes the situation tricky. Sentence 2-3: the general approach the player will need to take to overcome it — broad strokes only, no specific steps or items. Keep it open-ended enough that the player has real choices."\n` +
       `}\n` +
-      `Return ONLY the JSON object — no wrapping array, no markdown fences, no commentary.`;
+      `Return ONLY the JSON object — no wrapping array, no markdown fences, no commentary. Every value MUST be in ${eLang}.`;
 
     const parts = [
       `Chapter ${chNum} of ${total} in a ${genreLabel} adventure.`,
@@ -1935,7 +2263,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
   };
 
   const resetGame = () => {
-    setPhase("home"); setSetupStep(0); setStoryLog([]); setChoices([]);
+    setPhase("home"); setSetupStep(0); setStepSelections({}); setStoryLog([]); setChoices([]);
     setStats({ health: 100, inventory: [], relationships: {} });
     setGameOver(false); setTurnCount(0); setCustomAction("");
     setCharacter({ name: "", gender: "", age: "", appearance: "", skills: [] });
@@ -1993,18 +2321,54 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
   // ─── SETUP STEPS ──────────────────────────────────────────────
   const renderSetupStep = () => {
     const nav = { theme, isRTL, backLabel: t("back"), nextLabel: t("continue_") };
+    const activePrimary = (THEMES[config.genre] || theme).primary || theme.primary;
+    const stepStrip = (
+      <StepStrip
+        step={setupStep}
+        selections={stepSelections}
+        activePrimary={activePrimary}
+        theme={theme}
+        t={t}
+        isRTL={isRTL}
+        onJump={(i) => setSetupStep(i)}
+      />
+    );
+    const cardProps = { stepStrip, activePrimary };
+
+    // Pick a value, record its display label, and auto-advance after a short flash.
+    const pickAndAdvance = (idx, label, applyConfig) => {
+      if (applyConfig) applyConfig();
+      setStepSelections(p => ({ ...p, [idx]: label }));
+      if (idx < SETUP_STEPS.length - 1) {
+        setTimeout(() => setSetupStep(idx + 1), 120);
+      }
+    };
+
+    // Back link (text style) used on auto-advance steps.
+    const BackLink = ({ to, label }) => (
+      <div style={{ marginTop: 18 }}>
+        <button onClick={to === "home" ? () => setPhase("home") : () => setSetupStep(to)} style={{
+          background: "transparent", border: "none", padding: "4px 0",
+          color: theme.textMuted, fontFamily: theme.body, fontSize: 12,
+          cursor: "pointer", opacity: 0.75,
+        }}>{label || t("back")}</button>
+      </div>
+    );
 
     switch (currentStep) {
       case "genre":
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("chooseWorld")} subtitle={t("chooseWorldSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("chooseWorld")} subtitle={t("chooseWorldSub")}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {Object.entries(THEMES).map(([key, th]) => {
                 const selected = config.genre === key;
                 const motifs = GENRE_ICONS[key] || [];
                 return (
                   <OptionButton key={key} theme={theme} selected={selected}
-                    onClick={() => { setConfig(c => ({ ...c, genre: key })); setCharacter(c => ({ ...c, skills: [] })); }}>
+                    onClick={() => pickAndAdvance(0, t(th.nameKey), () => {
+                      setConfig(c => ({ ...c, genre: key }));
+                      setCharacter(c => ({ ...c, skills: [] }));
+                    })}>
                     {selected ? (
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 14, marginBottom: 8, color: th.primary }}>
                         {motifs.map((n, i) => (
@@ -2025,45 +2389,45 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 );
               })}
             </div>
-            <NavButtons {...nav} theme={THEMES[config.genre] || theme} onBack={() => setPhase("home")} onNext={() => setSetupStep(1)} canNext={!!config.genre} />
+            <BackLink to="home" label={t("homeBack")} />
           </SetupCard>
         );
 
       case "age":
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("contentRating")} subtitle={t("contentRatingSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("contentRating")} subtitle={t("contentRatingSub")}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[["kids","kids","kidsSub"],["teen","teen","teenSub"],["adult","adult","adultSub"]].map(([key,lbl,sub]) => (
                 <OptionButton key={key} theme={theme} selected={config.ageTier === key}
-                  onClick={() => setConfig(c => ({ ...c, ageTier: key }))}>
+                  onClick={() => pickAndAdvance(1, t(lbl), () => setConfig(c => ({ ...c, ageTier: key })))}>
                   <strong style={{ fontFamily: theme.heading }}>{t(lbl)}</strong>
                   <span style={{ display: "block", fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{t(sub)}</span>
                 </OptionButton>
               ))}
             </div>
-            <NavButtons {...nav} onBack={() => setSetupStep(0)} onNext={() => setSetupStep(2)} canNext />
+            <BackLink to={0} />
           </SetupCard>
         );
 
       case "length":
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("storyPacing")} subtitle={t("storyPacingSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("storyPacing")} subtitle={t("storyPacingSub")}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[["short","short","shortSub"],["medium","medium","mediumSub"],["long","long","longSub"]].map(([key,lbl,sub]) => (
                 <OptionButton key={key} theme={theme} selected={config.responseLength === key}
-                  onClick={() => setConfig(c => ({ ...c, responseLength: key }))}>
+                  onClick={() => pickAndAdvance(2, t(lbl), () => setConfig(c => ({ ...c, responseLength: key })))}>
                   <strong style={{ fontFamily: theme.heading }}>{t(lbl)}</strong>
                   <span style={{ display: "block", fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{t(sub)}</span>
                 </OptionButton>
               ))}
             </div>
-            <NavButtons {...nav} onBack={() => setSetupStep(1)} onNext={() => setSetupStep(3)} canNext />
+            <BackLink to={1} />
           </SetupCard>
         );
 
       case "duration":
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("storyDuration")} subtitle={t("storyDurationSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("storyDuration")} subtitle={t("storyDurationSub")}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {[
                 { turns: 5,  icon: "bolt",     labelKey: "sprint",   descKey: "sprintDesc" },
@@ -2072,9 +2436,9 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 { turns: 40, icon: "mountain", labelKey: "epic",     descKey: "epicDesc" },
               ].map(({ turns, icon, labelKey, descKey }) => (
                 <OptionButton key={turns} theme={theme} selected={config.storyLength === turns}
-                  onClick={() => setConfig(c => ({ ...c, storyLength: turns }))}
+                  onClick={() => pickAndAdvance(3, t(labelKey), () => setConfig(c => ({ ...c, storyLength: turns })))}
                   style={{ textAlign: "center", padding: "16px 12px" }}>
-                  <div style={{ marginBottom: 8, color: theme.primary, display: "flex", justifyContent: "center" }}>
+                  <div style={{ marginBottom: 8, color: activePrimary, display: "flex", justifyContent: "center" }}>
                     <Icon name={icon} size={24} strokeWidth={1.5} />
                   </div>
                   <strong style={{ fontFamily: theme.heading, fontSize: 15 }}>{t(labelKey)}</strong>
@@ -2082,22 +2446,22 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 </OptionButton>
               ))}
             </div>
-            <NavButtons {...nav} onBack={() => setSetupStep(2)} onNext={() => setSetupStep(4)} canNext />
+            <BackLink to={2} />
           </SetupCard>
         );
 
       case "rules":
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("gameRules")} subtitle={t("gameRulesSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("gameRules")} subtitle={t("gameRulesSub")}>
             <div style={{ marginBottom: 20 }}>
               <p style={{ fontFamily: theme.body, color: theme.text, fontSize: 14, marginBottom: 10 }}>{t("canDie")}</p>
               <div style={{ display: "flex", gap: 10 }}>
                 <OptionButton theme={theme} selected={config.deathPossible === true} onClick={() => setConfig(c => ({ ...c, deathPossible: true }))} style={{ flex: 1, textAlign: "center" }}>
-                  <div style={{ marginBottom: 4, color: theme.primary, display: "flex", justifyContent: "center" }}><Icon name="skull" size={20} /></div>
+                  <div style={{ marginBottom: 4, color: activePrimary, display: "flex", justifyContent: "center" }}><Icon name="skull" size={20} /></div>
                   {t("yesDeath")}
                 </OptionButton>
                 <OptionButton theme={theme} selected={config.deathPossible === false} onClick={() => setConfig(c => ({ ...c, deathPossible: false }))} style={{ flex: 1, textAlign: "center" }}>
-                  <div style={{ marginBottom: 4, color: theme.primary, display: "flex", justifyContent: "center" }}><Icon name="shield" size={20} /></div>
+                  <div style={{ marginBottom: 4, color: activePrimary, display: "flex", justifyContent: "center" }}><Icon name="shield" size={20} /></div>
                   {t("noDeath")}
                 </OptionButton>
               </div>
@@ -2106,48 +2470,58 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
               <p style={{ fontFamily: theme.body, color: theme.text, fontSize: 14, marginBottom: 10 }}>{t("trackStatsQ")}</p>
               <div style={{ display: "flex", gap: 10 }}>
                 <OptionButton theme={theme} selected={config.trackStats === true} onClick={() => setConfig(c => ({ ...c, trackStats: true }))} style={{ flex: 1, textAlign: "center" }}>
-                  <div style={{ marginBottom: 4, color: theme.primary, display: "flex", justifyContent: "center" }}><Icon name="chart" size={20} /></div>
+                  <div style={{ marginBottom: 4, color: activePrimary, display: "flex", justifyContent: "center" }}><Icon name="chart" size={20} /></div>
                   {t("yesStats")}
                 </OptionButton>
                 <OptionButton theme={theme} selected={config.trackStats === false} onClick={() => setConfig(c => ({ ...c, trackStats: false }))} style={{ flex: 1, textAlign: "center" }}>
-                  <div style={{ marginBottom: 4, color: theme.primary, display: "flex", justifyContent: "center" }}><Icon name="book" size={20} /></div>
+                  <div style={{ marginBottom: 4, color: activePrimary, display: "flex", justifyContent: "center" }}><Icon name="book" size={20} /></div>
                   {t("noStats")}
                 </OptionButton>
               </div>
             </div>
-            <NavButtons {...nav} onBack={() => setSetupStep(3)} onNext={() => setSetupStep(5)} canNext />
+            <NavButtons {...nav}
+              onBack={() => setSetupStep(3)}
+              onNext={() => { setStepSelections(p => ({ ...p, 4: t("rulesSet") })); setSetupStep(5); }}
+              canNext />
           </SetupCard>
         );
 
       case "perspective":
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("perspective")} subtitle={t("perspectiveSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("perspective")} subtitle={t("perspectiveSub")}>
             <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               {[
                 { value: "second", labelKey: "secondPerson", exKey: "secondPersonEx", icon: "person" },
                 { value: "first",  labelKey: "firstPerson",  exKey: "firstPersonEx",  icon: "speech" },
               ].map(({ value, labelKey, exKey, icon }) => (
                 <OptionButton key={value} theme={theme} selected={config.perspective === value}
-                  onClick={() => setConfig(c => ({ ...c, perspective: value }))}
+                  onClick={() => pickAndAdvance(5, t(labelKey), () => setConfig(c => ({ ...c, perspective: value })))}
                   style={{ textAlign: isRTL ? "right" : "left", padding: "14px 18px" }}>
                   <div style={{ fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>
-                    <Icon name={icon} size={18} color={theme.primary} /> <span>{t(labelKey)}</span>
+                    <Icon name={icon} size={18} color={activePrimary} /> <span>{t(labelKey)}</span>
                   </div>
                   <div style={{ fontSize: 13, opacity: 0.7, fontStyle: "italic" }}>{t(exKey)}</div>
                 </OptionButton>
               ))}
             </div>
-            <NavButtons {...nav} onBack={() => setSetupStep(4)} onNext={() => setSetupStep(6)} canNext />
+            <BackLink to={4} />
           </SetupCard>
         );
 
       case "prompt":
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("storySeed")} subtitle={t("storySeedSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("storySeed")} subtitle={t("storySeedSub")}>
             <textarea value={config.storyPrompt} onChange={e => setConfig(c => ({ ...c, storyPrompt: e.target.value }))}
               placeholder={seedFor(lang, config.genre) || t("storySeedPH")}
               style={{ ...inputStyle(theme), minHeight: 120, resize: "vertical", direction: isRTL ? "rtl" : "ltr" }} />
-            <NavButtons {...nav} onBack={() => setSetupStep(5)} onNext={() => setSetupStep(7)} canNext />
+            <NavButtons {...nav}
+              onBack={() => setSetupStep(5)}
+              onNext={() => {
+                const seedLabel = config.storyPrompt.trim() ? config.storyPrompt.trim().slice(0, 7) : t("seedSurprise");
+                setStepSelections(p => ({ ...p, 6: seedLabel }));
+                setSetupStep(7);
+              }}
+              canNext />
           </SetupCard>
         );
 
@@ -2166,7 +2540,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
             }}>{name}</button>
         );
         return (
-          <SetupCard theme={theme} active isRTL={isRTL} title={t("createChar")} subtitle={t("createCharSub")}>
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("createChar")} subtitle={t("createCharSub")}>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 8 }}>
@@ -2366,6 +2740,31 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
             <GenreIconStrip theme={theme} genre={config.genre} />
           </div>
 
+          {/* First-turn educational-mode hint */}
+          {prefs.translationLanguage && prefs.translationLanguage !== "off" && prefs.translationLanguage !== lang && !prefs.wordHintDismissed && storyLog.some(e => e.role === "narrator") && (
+            <div style={{
+              display: "flex", alignItems: "flex-start", gap: 10,
+              padding: "10px 14px", margin: "0 0 14px",
+              background: `${theme.primary}10`, border: `1px solid ${theme.primary}40`, borderRadius: 10,
+            }}>
+              <Icon name="speech" size={16} color={theme.primary} />
+              <p style={{
+                flex: 1, margin: 0, fontFamily: theme.body, fontSize: 12,
+                color: theme.text, lineHeight: 1.5,
+              }}>
+                {t("wordHint")}
+              </p>
+              <button
+                onClick={() => setPrefs(p => ({ ...p, wordHintDismissed: true }))}
+                style={{
+                  background: "transparent", border: `1px solid ${theme.primary}55`, borderRadius: 999,
+                  padding: "3px 10px", color: theme.primary, fontFamily: theme.body, fontSize: 11,
+                  cursor: "pointer", whiteSpace: "nowrap",
+                }}
+              >{t("wordHintDismiss")}</button>
+            </div>
+          )}
+
           {/* Story log */}
           {storyLog.map((entry, i) => {
             if (entry.role === "chapter") {
@@ -2415,39 +2814,95 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 {entry.role === "player" && (
                   <span style={{ fontFamily: theme.heading, color: theme.primary, fontSize: 11, textTransform: "uppercase", letterSpacing: 1.5 }}>{character.name}</span>
                 )}
-                <p style={{
-                  fontFamily: theme.body, color: entry.role === "player" ? theme.primary : theme.text,
-                  fontSize: entry.role === "player" ? Math.max(13, storyFontSizePx - 1) : storyFontSizePx,
-                  lineHeight: 1.75,
-                  margin: entry.role === "player" ? "4px 0 0" : 0,
-                  fontStyle: entry.role === "player" ? "italic" : "normal", whiteSpace: "pre-wrap",
-                }}>{entry.text}</p>
+                {(entry.role !== "narrator" || !translateEnabled) && (
+                  <p style={{
+                    fontFamily: theme.body, color: entry.role === "player" ? theme.primary : theme.text,
+                    fontSize: entry.role === "player" ? Math.max(13, storyFontSizePx - 1) : storyFontSizePx,
+                    lineHeight: 1.75,
+                    margin: entry.role === "player" ? "4px 0 0" : 0,
+                    fontStyle: entry.role === "player" ? "italic" : "normal", whiteSpace: "pre-wrap",
+                  }}>{entry.text}</p>
+                )}
+                {entry.role === "narrator" && translateEnabled && (() => {
+                  const tokens = splitIntoTokens(entry.text);
+                  return (
+                    <p
+                      onPointerDown={() => startLongPress(i, entry.text, targetLang)}
+                      onPointerUp={cancelLongPress}
+                      onPointerLeave={cancelLongPress}
+                      onPointerCancel={cancelLongPress}
+                      style={{
+                        fontFamily: theme.body, color: theme.text,
+                        fontSize: storyFontSizePx, lineHeight: 1.75, margin: 0,
+                        whiteSpace: "pre-wrap", userSelect: "text",
+                      }}>
+                      {tokens.map((tok, ti) => {
+                        if (tok.type !== "word") return <span key={ti}>{tok.text}</span>;
+                        const cached = wordCache[wordCacheKey(targetLang, tok.text.toLowerCase())];
+                        return (
+                          <span
+                            key={ti}
+                            role="button"
+                            tabIndex={0}
+                            onMouseDown={e => e.stopPropagation()}
+                            onClick={e => handleWordClick(e, tok.text, buildWordContext(tokens, ti), targetLang)}
+                            style={{
+                              cursor: "pointer",
+                              borderBottom: cached ? `1px solid ${theme.primary}55` : "1px dotted transparent",
+                              transition: "border-color 0.15s, background 0.15s",
+                              borderRadius: 2,
+                            }}
+                            onMouseEnter={e => { if (!cached) e.currentTarget.style.borderBottom = `1px dotted ${theme.primary}80`; e.currentTarget.style.background = `${theme.primary}10`; }}
+                            onMouseLeave={e => { if (!cached) e.currentTarget.style.borderBottom = "1px dotted transparent"; e.currentTarget.style.background = "transparent"; }}
+                          >{tok.text}</span>
+                        );
+                      })}
+                    </p>
+                  );
+                })()}
                 {entry.role === "narrator" && entry.text && (
                   <div style={{ marginTop: 8, position: "relative" }}>
                     {!tr && translateEnabled && (
-                      <button
-                        onClick={() => translatePassage(i, entry.text, targetLang)}
-                        style={{
-                          background: "transparent", border: `1px solid ${theme.border}`, borderRadius: 999,
-                          padding: "3px 10px", color: theme.textMuted, fontFamily: theme.body, fontSize: 10.5,
-                          cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6,
-                          letterSpacing: 0.3, transition: "all 0.15s",
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.color = theme.primary; }}
-                        onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.textMuted; }}
-                      >
-                        <Icon name="speech" size={11} />
-                        <span>{t("translate")}</span>
-                        {targetLangMeta && (
-                          <img
-                            src={flagSrc(targetLangMeta.flag)}
-                            srcSet={`${flagSrc(targetLangMeta.flag)} 1x, ${flagSrc2x(targetLangMeta.flag)} 2x`}
-                            alt=""
-                            width={14} height={10}
-                            style={{ borderRadius: 1, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", objectFit: "cover" }}
-                          />
-                        )}
-                      </button>
+                      <span style={{ display: "inline-flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                        <button
+                          onClick={() => translatePassage(i, entry.text, targetLang)}
+                          style={{
+                            background: "transparent", border: `1px solid ${theme.border}`, borderRadius: 999,
+                            padding: "3px 10px", color: theme.textMuted, fontFamily: theme.body, fontSize: 10.5,
+                            cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6,
+                            letterSpacing: 0.3, transition: "all 0.15s",
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.color = theme.primary; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.textMuted; }}
+                        >
+                          <Icon name="speech" size={11} />
+                          <span>{t("translate")}</span>
+                          {targetLangMeta && (
+                            <img
+                              src={flagSrc(targetLangMeta.flag)}
+                              srcSet={`${flagSrc(targetLangMeta.flag)} 1x, ${flagSrc2x(targetLangMeta.flag)} 2x`}
+                              alt=""
+                              width={14} height={10}
+                              style={{ borderRadius: 1, boxShadow: "0 0 0 1px rgba(0,0,0,0.2)", objectFit: "cover" }}
+                            />
+                          )}
+                        </button>
+                        <button
+                          onClick={() => translateAllWords(i, entry.text, targetLang)}
+                          disabled={!!glossLoading[i]}
+                          style={{
+                            background: "transparent", border: `1px solid ${theme.border}`, borderRadius: 999,
+                            padding: "3px 10px", color: theme.textMuted, fontFamily: theme.body, fontSize: 10.5,
+                            cursor: glossLoading[i] ? "wait" : "pointer", display: "inline-flex", alignItems: "center", gap: 6,
+                            letterSpacing: 0.3, transition: "all 0.15s", opacity: glossLoading[i] ? 0.6 : 1,
+                          }}
+                          onMouseEnter={e => { if (!glossLoading[i]) { e.currentTarget.style.borderColor = theme.primary; e.currentTarget.style.color = theme.primary; } }}
+                          onMouseLeave={e => { if (!glossLoading[i]) { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.color = theme.textMuted; } }}
+                        >
+                          <Icon name="book" size={11} />
+                          <span>{glossLoading[i] ? t("glossing") : t("glossAll")}</span>
+                        </button>
+                      </span>
                     )}
                     {tr?.loading && (
                       <span style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 11, fontStyle: "italic" }}>{t("translating")}</span>
@@ -2679,8 +3134,6 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       )}
     </div>
   );
-
-  const progress = ((setupStep + 1) / SETUP_STEPS.length) * 100;
 
   return (
     <>
@@ -2982,12 +3435,6 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                   {t("adventureAwaits")}
                 </h1>
                 {config.genre && <GenreIconStrip theme={theme} genre={config.genre} />}
-                <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 14, margin: 0 }}>
-                  {t("stepOf", { c: String(setupStep + 1), t: String(SETUP_STEPS.length) })}
-                </p>
-                <div style={{ width: "100%", height: 3, background: `${theme.border}55`, borderRadius: 2, marginTop: 16, overflow: "hidden" }}>
-                  <div style={{ width: `${progress}%`, height: "100%", background: theme.primary, borderRadius: 2, transition: "width 0.4s ease", boxShadow: `0 0 10px ${theme.primary}60` }} />
-                </div>
               </div>
               {renderSetupStep()}
             </div>
@@ -3121,6 +3568,9 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
 
       {/* Help modal */}
       {showHelp && <HelpModal theme={theme} t={t} isRTL={isRTL} onClose={() => setShowHelp(false)} />}
+
+      {/* Per-word translation popover (educational mode) */}
+      <WordPopover popover={wordPopover} onClose={() => setWordPopover(null)} theme={theme} t={t} isRTL={isRTL} />
 
       {/* Settings modal */}
       {showSettings && (

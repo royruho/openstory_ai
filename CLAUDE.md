@@ -154,11 +154,15 @@ POST `/api/proxy` — the only server-side route. Accepts the same body that Ope
 
 Everything lives in `frontend/src/adventure.jsx` — a single React component.
 
-### Setup wizard (9 steps)
+### Setup wizard (8 steps)
 
-language → genre → age tier → story pacing → adventure length → game rules → narrative perspective → story seed → character
+genre → age tier → story pacing → adventure length → game rules → narrative perspective → story seed → character
 
-Supported languages: **English, Hebrew, Arabic** (RTL handled automatically for Hebrew and Arabic).
+Language is set on the home screen (not a wizard step). Supported languages: **English, Hebrew, Arabic, Portuguese** (RTL handled automatically for Hebrew and Arabic).
+
+**Navigation:** A persistent `StepStrip` icon row sits at the top of every wizard card. Each icon shows the step's icon + short label, plus a 7-char preview of the chosen value once a step is completed. The strip color tracks the selected genre's primary color (`activePrimary`). Clicking any strip icon jumps directly to that step.
+
+**Auto-advance:** Steps in `AUTO_ADVANCE_STEPS` (`{0, 1, 2, 3, 5}` — genre, age, pacing, duration, perspective) auto-advance 120 ms after a single-choice click via the `pickAndAdvance(idx, label, applyConfig)` helper. They render only a text-link `← Back` (no Continue button). Steps 4 (rules), 6 (seed), 7 (character) keep their Continue / Begin Adventure buttons because they require multiple inputs or free text.
 
 ### Game state
 
@@ -336,12 +340,14 @@ Phase is calculated from `Math.min(turnCount, storyLength)` so it never overflow
 
 ## Adding a new setup step
 
-1. Add translation keys to the `TR` object (English + Hebrew + Arabic)
-2. Add the step name to `SETUP_STEPS` array
-3. Add the new field to the `config` state initializer
-4. Add a `case "stepname":` in `renderSetupStep()` with `NavButtons` pointing to correct step indexes
-5. Update all subsequent step `onBack`/`onNext` numbers (+1 each)
-6. Use the new config field in `buildSystemPrompt()` and add it to the `useCallback` deps
+1. Add translation keys to the `TR` object — the step's title/subtitle plus a short label for the strip (`stepXxx`). All four languages: English, Hebrew, Arabic, Portuguese.
+2. Add the step name to the `SETUP_STEPS` array (string id).
+3. Add a matching entry to `STEP_DEFS` (`{ id, icon, labelKey }`). Pick an existing icon from the `ICONS` map or add one. The strip is sized for 8 steps via `grid-template-columns: repeat(8, 1fr)` — bump that grid count if you exceed 8.
+4. Add the new field to the `config` state initializer (and to the `resetGame` re-initializer).
+5. Add a `case "stepname":` in `renderSetupStep()`. For single-choice steps, call `pickAndAdvance(idx, displayLabel, () => setConfig(...))` from each option's `onClick` and add the index to `AUTO_ADVANCE_STEPS`. For multi-input steps, render `<NavButtons>` and have the `onNext` set `stepSelections[idx]` before calling `setSetupStep(idx + 1)`.
+6. Pass `{...cardProps}` to the `<SetupCard>` so the strip renders inside the card.
+7. Update `onBack` / `BackLink to={n}` and any explicit `setSetupStep(n)` numbers in adjacent steps (+1 each).
+8. Use the new config field in `buildSystemPrompt()` and add it to the `useCallback` deps.
 
 ---
 
@@ -350,6 +356,7 @@ Phase is calculated from `Math.min(turnCount, storyLength)` so it never overflow
 1. Add `{ code: "LangName", label: "Native Label" }` to the `LANGUAGES` array
 2. Add translation keys to `TR` for all existing keys in the new language
 3. If RTL, add the language code to `RTL_LANGS`
+4. Background LLM calls (`generateChapterBrief`, `triggerSummarize`) build a `langDirective` from `config.language` and inject a `LANGUAGE:` line into the system prompt — they fall through to the language label automatically. Add a special case there only if the language needs disambiguation (e.g., European Portuguese vs Brazilian Portuguese).
 
 ---
 
