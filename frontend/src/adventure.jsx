@@ -252,9 +252,9 @@ const TR = {
 const THEMES = {
   fantasy: {
     nameKey: "fantasy",
-    primary:     "#c9a24a",   // gold
+    primary:     "#a584c4",   // purple — arcane, mystical
     secondary:   "#8ba0b2",
-    accent:      "#e3c983",
+    accent:      "#d4bce4",
     heading:     "'Cormorant Garamond', 'Fraunces', serif",
     body:        "'Fraunces', 'Cormorant Garamond', serif",
     displayFont: "'Cormorant Garamond', serif",
@@ -282,7 +282,7 @@ const THEMES = {
   },
   mystery: {
     nameKey: "mystery",
-    primary:     "#c9a24a",   // gold — same family as fantasy, different voice
+    primary:     "#c9a24a",   // gold — warm, classic noir
     secondary:   "#8ba0b2",
     accent:      "#e3c983",
     heading:     "'Playfair Display', 'Fraunces', serif",
