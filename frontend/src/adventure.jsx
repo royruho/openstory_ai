@@ -245,6 +245,32 @@ const TR = {
   standardDesc:     { English: "~20 turns — 4 chapters", Hebrew: "~20 תורות — 4 פרקים",  Arabic: "~20 جولات — 4 فصول",   Portuguese: "~20 turnos — 4 capítulos" },
   epic:             { English: "Epic",     Hebrew: "אפי",     Arabic: "ملحمي",  Portuguese: "Épica" },
   epicDesc:         { English: "~40 turns — 8 chapters", Hebrew: "~40 תורות — 8 פרקים",  Arabic: "~40 جولات — 8 فصول",   Portuguese: "~40 turnos — 8 capítulos" },
+  // ── Mode picker ──
+  modePickerTitle:    { English: "How do you want to play?", Hebrew: "איך תרצו לשחק?", Arabic: "كيف تريد أن تلعب؟", Portuguese: "Como queres jogar?" },
+  modeAdventure:      { English: "Choose Your Own Adventure", Hebrew: "בחר את ההרפתקה שלך", Arabic: "اختر مغامرتك بنفسك", Portuguese: "Escolhe a Tua Aventura" },
+  modeAdventureSub:   { English: "Shape the story with your choices. Every decision matters.", Hebrew: "עצב את הסיפור עם הבחירות שלך. כל החלטה חשובה.", Arabic: "شكّل القصة باختياراتك. كل قرار يهمّ.", Portuguese: "Molda a história com as tuas escolhas. Cada decisão importa." },
+  modeDnd:            { English: "D&D Mode", Hebrew: "מצב D&D", Arabic: "وضع D&D", Portuguese: "Modo D&D" },
+  modeDndSub:         { English: "Dice rolls, ability scores, and a Dungeon Master in a high-fantasy world.", Hebrew: "הטלות קוביות, ציוני יכולות ו-Dungeon Master בעולם פנטזיה.", Arabic: "رميات النرد، نقاط القدرات، وسيد الزنزانة في عالم فانتازيا.", Portuguese: "Rolagens de dados, pontuações de habilidade e um Dungeon Master num mundo de fantasia." },
+  modeEducational:    { English: "Educational Mode", Hebrew: "מצב לימודי", Arabic: "الوضع التعليمي", Portuguese: "Modo Educacional" },
+  modeEducationalSub: { English: "Read and play in a language you're learning.", Hebrew: "קרא ושחק בשפה שאתה לומד.", Arabic: "اقرأ والعب بلغة تتعلمها.", Portuguese: "Lê e joga numa língua que estás a aprender." },
+  // ── Educational wizard step ──
+  stepLearnLang:        { English: "Language", Hebrew: "שפה", Arabic: "اللغة", Portuguese: "Idioma" },
+  learnLangRequired:    { English: "Choose a language to learn", Hebrew: "בחר שפה ללמוד", Arabic: "اختر لغة لتتعلمها", Portuguese: "Escolhe uma língua para aprender" },
+  learnLangRequiredSub: { English: "Words in the story will be translatable as you read.", Hebrew: "מילות הסיפור יהיו ניתנות לתרגום.", Arabic: "ستكون كلمات القصة قابلة للترجمة.", Portuguese: "As palavras da história serão traduzíveis à medida que lês." },
+  // ── D&D labels ──
+  dndRace:          { English: "Race",           Hebrew: "גזע",         Arabic: "العرق",       Portuguese: "Raça" },
+  dndClass:         { English: "Class",          Hebrew: "מחלקה",       Arabic: "الفئة",       Portuguese: "Classe" },
+  dndAbilityScores: { English: "Ability Scores", Hebrew: "ציוני יכולת", Arabic: "نقاط القدرات", Portuguese: "Pontuações de Habilidade" },
+  dndStandardArray: { English: "Standard Array", Hebrew: "מערך סטנדרטי", Arabic: "المصفوفة القياسية", Portuguese: "Matriz Padrão" },
+  dndRollStats:     { English: "Roll Stats",     Hebrew: "הטל יכולות",  Arabic: "ارمِ القدرات", Portuguese: "Lançar Atributos" },
+  stepDndHero:      { English: "Hero",           Hebrew: "גיבור",       Arabic: "البطل",       Portuguese: "Herói" },
+  dndContinue:      { English: "Enter the Dungeon", Hebrew: "כנס למבוך", Arabic: "ادخل الزنزانة", Portuguese: "Entrar na Masmorra" },
+  statSTR: { English: "STR", Hebrew: "כוח",    Arabic: "قوة",    Portuguese: "FOR" },
+  statDEX: { English: "DEX", Hebrew: "זריזות", Arabic: "رشاقة",  Portuguese: "DES" },
+  statCON: { English: "CON", Hebrew: "חוסן",   Arabic: "بنية",   Portuguese: "CON" },
+  statINT: { English: "INT", Hebrew: "אינטל",  Arabic: "ذكاء",   Portuguese: "INT" },
+  statWIS: { English: "WIS", Hebrew: "חוכמה",  Arabic: "حكمة",   Portuguese: "SAB" },
+  statCHA: { English: "CHA", Hebrew: "כריזמה", Arabic: "جاذبية", Portuguese: "CAR" },
 };
 
 // ─── GENRE THEMES ──────────────────────────────────────────────
@@ -433,18 +459,80 @@ function targetLangLabel(code) {
 }
 function wordCacheKey(lang, word) { return `${lang}::${word.toLowerCase()}`; }
 
-const SETUP_STEPS   = ["genre", "age", "length", "duration", "rules", "perspective", "prompt", "character"];
-const STEP_DEFS = [
+const SETUP_STEPS   = ["genre", "age", "length", "duration", "rules", "prompt", "character"];
+const STEP_DEFS_ADVENTURE = [
   { id: 0, icon: "scroll",  labelKey: "stepGenre"       },
   { id: 1, icon: "shield",  labelKey: "stepRating"      },
   { id: 2, icon: "bolt",    labelKey: "stepPacing"      },
   { id: 3, icon: "book",    labelKey: "stepLengthShort" },
   { id: 4, icon: "skull",   labelKey: "stepRules"       },
-  { id: 5, icon: "speech",  labelKey: "stepPOV"         },
-  { id: 6, icon: "sparkle", labelKey: "stepSeed"        },
-  { id: 7, icon: "person",  labelKey: "stepHero"        },
+  { id: 5, icon: "sparkle", labelKey: "stepSeed"        },
+  { id: 6, icon: "person",  labelKey: "stepHero"        },
 ];
-const AUTO_ADVANCE_STEPS = new Set([0, 1, 2, 3, 5]);
+const AUTO_ADVANCE_STEPS = new Set([0, 1, 2, 3]);
+
+// ─── D&D CONSTANTS ─────────────────────────────────────────────
+const DND_RACES   = ["Human","Elf","Dwarf","Halfling","Half-Orc","Gnome","Tiefling","Dragonborn"];
+const DND_CLASSES = ["Fighter","Wizard","Rogue","Cleric","Ranger","Bard","Paladin","Druid","Barbarian","Monk","Warlock","Sorcerer"];
+const DND_STATS   = ["STR","DEX","CON","INT","WIS","CHA"];
+const DND_STANDARD_ARRAY = [15, 14, 13, 12, 10, 8];
+
+const DND_STAT_KEYWORDS = {
+  STR: ["attack","melee","push","lift","break","athletics","climb","swim","jump","force"],
+  DEX: ["stealth","sneak","hide","dodge","acrobatics","sleight","lockpick","ranged","bow","agility","reflex"],
+  CON: ["endure","resist","concentration","fatigue","poison","survival","tough"],
+  INT: ["arcana","history","lore","investigation","recall","decipher","magic","spell","knowledge"],
+  WIS: ["perception","insight","medicine","nature","religion","sense","notice","detect","wisdom"],
+  CHA: ["persuade","persuasion","deception","intimidation","performance","charm","bluff","negotiate"],
+};
+
+function getDndStatBonus(context, abilityScores) {
+  if (!context || !abilityScores) return 0;
+  const ctx = context.toLowerCase();
+  for (const [stat, kws] of Object.entries(DND_STAT_KEYWORDS)) {
+    if (kws.some(k => ctx.includes(k)))
+      return Math.floor((abilityScores[stat] - 10) / 2);
+  }
+  return 0;
+}
+
+function getDiceOutcome(value, isDnd) {
+  if (isDnd) {
+    if (value === 1)   return { labelKey: "critFail",    color: "#FF2040", bg: "rgba(255,32,64,0.12)",    narrative: "critical failure — something goes catastrophically wrong" };
+    if (value <= 9)    return { labelKey: "minorFail",   color: "#FF8C00", bg: "rgba(255,140,0,0.12)",   narrative: "clear failure with complications" };
+    if (value <= 14)   return { labelKey: "partSuccess", color: "#4DB6AC", bg: "rgba(77,182,172,0.12)",  narrative: "partial success — it works but with a cost or catch" };
+    if (value <= 19)   return { labelKey: "partSuccess", color: "#4DB6AC", bg: "rgba(77,182,172,0.12)",  narrative: "solid success" };
+    return               { labelKey: "critSuccess", color: "#66BB6A", bg: "rgba(102,187,106,0.12)", narrative: "critical success — natural 20, exceptional outcome" };
+  }
+  return DICE_OUTCOMES[value];
+}
+
+// ─── MODE-AWARE STEP DEFINITIONS ───────────────────────────────
+function getStepDefs(mode) {
+  if (mode === "dnd") return [
+    { id: 0, key: "age",           icon: "shield",  labelKey: "stepRating"      },
+    { id: 1, key: "duration",      icon: "book",    labelKey: "stepLengthShort" },
+    { id: 2, key: "prompt",        icon: "sparkle", labelKey: "stepSeed"        },
+    { id: 3, key: "dnd-character", icon: "person",  labelKey: "stepDndHero"     },
+  ];
+  if (mode === "educational") return [
+    { id: 0, key: "learnlang",    icon: "speech",  labelKey: "stepLearnLang"   },
+    { id: 1, key: "genre",        icon: "scroll",  labelKey: "stepGenre"       },
+    { id: 2, key: "age",          icon: "shield",  labelKey: "stepRating"      },
+    { id: 3, key: "length",       icon: "bolt",    labelKey: "stepPacing"      },
+    { id: 4, key: "duration",     icon: "book",    labelKey: "stepLengthShort" },
+    { id: 5, key: "rules",        icon: "skull",   labelKey: "stepRules"       },
+    { id: 6, key: "prompt",       icon: "sparkle", labelKey: "stepSeed"        },
+    { id: 7, key: "character",    icon: "person",  labelKey: "stepHero"        },
+  ];
+  // adventure or unset
+  return STEP_DEFS_ADVENTURE.map(s => ({ ...s, key: SETUP_STEPS[s.id] }));
+}
+function getSetupSteps(mode) { return getStepDefs(mode).map(s => s.key); }
+function getAutoAdvanceSteps(mode) {
+  const auto = new Set(["genre","age","length","duration","learnlang"]);
+  return new Set(getStepDefs(mode).filter(s => auto.has(s.key)).map(s => s.id));
+}
 const SUMMARY_EVERY = 5;
 const WINDOW_SIZE   = 12;
 const RTL_LANGS     = ["Hebrew", "Arabic"];
@@ -839,12 +927,14 @@ function GenreIconStrip({ theme, genre }) {
 }
 
 // ─── DICE ROLLER OVERLAY ────────────────────────────────────────
-function DiceRoller({ theme, context, characterSkills, onResult, isRTL, t }) {
+function DiceRoller({ theme, context, characterSkills, onResult, isRTL, t, mode, abilityScores }) {
   const DICE_FACES = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+  const isDnd = mode === "dnd";
   const [rolling, setRolling]       = useState(false);
   const [displayVal, setDisplayVal] = useState(null);
   const [finalVal, setFinalVal]     = useState(null);
   const [skillBonus, setSkillBonus] = useState(false);
+  const [statBonus, setStatBonus]   = useState(0);
 
   const checkSkillRelevance = () => {
     if (!characterSkills?.length || !context) return false;
@@ -859,25 +949,45 @@ function DiceRoller({ theme, context, characterSkills, onResult, isRTL, t }) {
   const handleRoll = () => {
     setRolling(true);
     setFinalVal(null);
-    const hasBonus = checkSkillRelevance();
-    setSkillBonus(hasBonus);
-    let count = 0;
-    const iv = setInterval(() => {
-      setDisplayVal(Math.ceil(Math.random() * 6));
-      count++;
-      if (count >= 20) {
-        clearInterval(iv);
-        const r1 = Math.ceil(Math.random() * 6);
-        const r2 = hasBonus ? Math.ceil(Math.random() * 6) : r1;
-        const final = Math.max(r1, r2);
-        setDisplayVal(final);
-        setFinalVal(final);
-        setRolling(false);
-      }
-    }, 75);
+    if (isDnd) {
+      const bonus = getDndStatBonus(context, abilityScores);
+      setStatBonus(bonus);
+      setSkillBonus(false);
+      let count = 0;
+      const iv = setInterval(() => {
+        setDisplayVal(Math.ceil(Math.random() * 20));
+        count++;
+        if (count >= 20) {
+          clearInterval(iv);
+          const raw = Math.ceil(Math.random() * 20);
+          const final = Math.min(20, Math.max(1, raw + bonus));
+          setDisplayVal(final);
+          setFinalVal(final);
+          setRolling(false);
+        }
+      }, 75);
+    } else {
+      const hasBonus = checkSkillRelevance();
+      setSkillBonus(hasBonus);
+      setStatBonus(0);
+      let count = 0;
+      const iv = setInterval(() => {
+        setDisplayVal(Math.ceil(Math.random() * 6));
+        count++;
+        if (count >= 20) {
+          clearInterval(iv);
+          const r1 = Math.ceil(Math.random() * 6);
+          const r2 = hasBonus ? Math.ceil(Math.random() * 6) : r1;
+          const final = Math.max(r1, r2);
+          setDisplayVal(final);
+          setFinalVal(final);
+          setRolling(false);
+        }
+      }, 75);
+    }
   };
 
-  const outcome = finalVal ? DICE_OUTCOMES[finalVal] : null;
+  const outcome = finalVal ? getDiceOutcome(finalVal, isDnd) : null;
 
   return (
     <div style={{
@@ -898,16 +1008,33 @@ function DiceRoller({ theme, context, characterSkills, onResult, isRTL, t }) {
           "{context}"
         </div>
 
-        {/* Dice face */}
-        <div style={{
-          fontSize: 100, lineHeight: 1, margin: "0 0 20px",
-          color: outcome ? outcome.color : theme.primary,
-          transition: "color 0.5s ease",
-          animation: rolling ? "diceRoll 0.12s ease-in-out infinite" : "none",
-          filter: rolling ? "blur(2px)" : "none",
-        }}>
-          {displayVal ? DICE_FACES[displayVal] : <Icon name="dice" size={84} strokeWidth={1.2} />}
-        </div>
+        {/* Dice display */}
+        {isDnd ? (
+          <div style={{
+            margin: "0 0 20px",
+            color: outcome ? outcome.color : theme.primary,
+            transition: "color 0.5s ease",
+            animation: rolling ? "diceRoll 0.12s ease-in-out infinite" : "none",
+            filter: rolling ? "blur(2px)" : "none",
+          }}>
+            {displayVal != null
+              ? <div style={{ fontFamily: theme.heading, fontSize: 80, lineHeight: 1 }}>{displayVal}</div>
+              : <Icon name="dice" size={84} strokeWidth={1.2} />}
+            {displayVal != null && (
+              <div style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 13, marginTop: 4 }}>{displayVal} / 20</div>
+            )}
+          </div>
+        ) : (
+          <div style={{
+            fontSize: 100, lineHeight: 1, margin: "0 0 20px",
+            color: outcome ? outcome.color : theme.primary,
+            transition: "color 0.5s ease",
+            animation: rolling ? "diceRoll 0.12s ease-in-out infinite" : "none",
+            filter: rolling ? "blur(2px)" : "none",
+          }}>
+            {displayVal ? DICE_FACES[displayVal] : <Icon name="dice" size={84} strokeWidth={1.2} />}
+          </div>
+        )}
 
         {/* Outcome label */}
         {outcome && (
@@ -919,13 +1046,20 @@ function DiceRoller({ theme, context, characterSkills, onResult, isRTL, t }) {
             <div style={{ fontFamily: theme.heading, color: outcome.color, fontSize: 18, letterSpacing: 1.5, fontWeight: 700 }}>
               {t(outcome.labelKey)}
             </div>
-            <div style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, marginTop: 4 }}>
-              {displayVal} / 6
-            </div>
+            {!isDnd && (
+              <div style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, marginTop: 4 }}>
+                {displayVal} / 6
+              </div>
+            )}
           </div>
         )}
 
-        {skillBonus && finalVal && (
+        {isDnd && finalVal && statBonus !== 0 && (
+          <div style={{ fontFamily: theme.body, color: theme.secondary || "#4DB6AC", fontSize: 12, marginBottom: 14, opacity: 0.9, display: "inline-flex", alignItems: "center", gap: 6 }}>
+            <Icon name="sparkle" size={13} /> {statBonus > 0 ? "+" : ""}{statBonus} ability modifier applied
+          </div>
+        )}
+        {!isDnd && skillBonus && finalVal && (
           <div style={{ fontFamily: theme.body, color: theme.secondary || "#4DB6AC", fontSize: 12, marginBottom: 14, opacity: 0.9, display: "inline-flex", alignItems: "center", gap: 6 }}>
             <Icon name="sparkle" size={13} /> {t("skillBonusApplied")}
           </div>
@@ -944,7 +1078,7 @@ function DiceRoller({ theme, context, characterSkills, onResult, isRTL, t }) {
             </button>
           ) : (
             <button
-              onClick={() => onResult({ value: finalVal, outcome: t(outcome.labelKey), narrative: outcome.narrative, skillBonus })}
+              onClick={() => onResult({ value: finalVal, outcome: t(outcome.labelKey), narrative: outcome.narrative, skillBonus, statBonus })}
               style={{
                 background: outcome.color, border: "none", borderRadius: 10, padding: "13px 36px",
                 color: "#000", fontFamily: theme.heading, fontSize: 15, fontWeight: 700,
@@ -1157,7 +1291,8 @@ function SetupCard({ theme, active, children, title, subtitle, isRTL, stepStrip,
   );
 }
 
-function StepStrip({ step, selections, activePrimary, theme, t, onJump, isRTL }) {
+function StepStrip({ step, selections, activePrimary, theme, t, onJump, isRTL, stepDefs }) {
+  const defs = stepDefs || STEP_DEFS_ADVENTURE.map((s, i) => ({ ...s, key: SETUP_STEPS[i] }));
   return (
     <div style={{
       background: theme.bgSoft || `${theme.bg}cc`,
@@ -1165,8 +1300,8 @@ function StepStrip({ step, selections, activePrimary, theme, t, onJump, isRTL })
       padding: "10px 16px 8px",
       direction: isRTL ? "rtl" : "ltr",
     }}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(8, 1fr)", gap: 2, marginBottom: 8 }}>
-        {STEP_DEFS.map((s, i) => {
+      <div style={{ display: "grid", gridTemplateColumns: `repeat(${defs.length}, 1fr)`, gap: 2, marginBottom: 8 }}>
+        {defs.map((s, i) => {
           const done    = selections[i] !== undefined && selections[i] !== "";
           const current = i === step;
           const iconCol = current ? activePrimary : done ? `${activePrimary}99` : theme.textMuted;
@@ -1204,7 +1339,7 @@ function StepStrip({ step, selections, activePrimary, theme, t, onJump, isRTL })
       <div style={{ height: 2, background: theme.border, borderRadius: 999, overflow: "hidden" }}>
         <div style={{
           height: "100%", background: activePrimary, borderRadius: 999,
-          width: `${(step / (STEP_DEFS.length - 1)) * 100}%`,
+          width: `${(step / (defs.length - 1)) * 100}%`,
           transition: "width 0.35s ease",
         }} />
       </div>
@@ -1525,7 +1660,7 @@ function exportStoryAsText({ storyLog, config, character, stats, turnCount, game
     if (entry.role === "chapter") {
       lines.push("", `${"─".repeat(42)}`, `  ${entry.text}`, `${"─".repeat(42)}`, "");
     } else if (entry.role === "roll") {
-      lines.push(`[Fate Check: ${entry.context} — ${entry.value}/6 (${entry.outcome})${entry.skillBonus ? " ★ Skill Bonus" : ""}]`);
+      lines.push(`[Fate Check: ${entry.context} — ${entry.value}/${config.mode === "dnd" ? 20 : 6} (${entry.outcome})${entry.skillBonus ? " ★ Skill Bonus" : ""}]`);
     } else if (entry.role === "narrator") {
       turn++;
       lines.push(`[Turn ${turn} — Narrator]`);
@@ -1573,6 +1708,12 @@ function loadAndValidateSave(json) {
   // Version 2 and 3 are supported; anything else (or missing) is rejected
   if (data.version !== undefined && data.version < 2)
     throw new Error("version");
+  // Backfill fields added after v3 (modes)
+  if (!data.config.mode) data.config.mode = "adventure";
+  if (!data.character.abilityScores)
+    data.character.abilityScores = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 };
+  if (data.character.dndRace === undefined) data.character.dndRace = "";
+  if (data.character.dndClass === undefined) data.character.dndClass = "";
   return data;
 }
 
@@ -1581,8 +1722,8 @@ export default function AdventureGame() {
   const [phase, setPhase]           = useState("home");
   const [setupStep, setSetupStep]   = useState(0);
   const [stepSelections, setStepSelections] = useState({});
-  const [config, setConfig]         = useState(() => ({ genre: "", language: loadPrefs()?.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" }));
-  const [character, setCharacter]   = useState({ name: "", gender: "", age: "", appearance: "", skills: [] });
+  const [config, setConfig]         = useState(() => ({ mode: "", genre: "", language: loadPrefs()?.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" }));
+  const [character, setCharacter]   = useState({ name: "", gender: "", age: "", appearance: "", skills: [], dndRace: "", dndClass: "", abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 } });
   const [storyLog, setStoryLog]     = useState([]);
   const [stats, setStats]           = useState({ health: 100, inventory: [], relationships: {} });
   const [choices, setChoices]       = useState([]);
@@ -1695,7 +1836,10 @@ export default function AdventureGame() {
         body:      bodyFontOverride || genreTheme.body,
       };
   const storyFontSizePx = FONT_SIZES[prefs.size] || FONT_SIZES.m;
-  const currentStep  = SETUP_STEPS[setupStep];
+  const modeStepDefs    = getStepDefs(config.mode);
+  const modeSetupSteps  = getSetupSteps(config.mode);
+  const modeAutoAdvance = getAutoAdvanceSteps(config.mode);
+  const currentStep     = modeSetupSteps[setupStep];
   const totalChapters = CHAPTER_MAP[config.storyLength] || Math.max(1, Math.round((config.storyLength || 10) / 5));
 
   const getSkillsDisplay = (genre) => isHebrew ? (GENRE_SKILLS[genre]?.he || []) : (GENRE_SKILLS[genre]?.en || []);
@@ -1766,19 +1910,35 @@ Active threads: ${storySummary.world.threads.join("; ")}` : ""}` : "";
     else if (pct < 0.65)                              phaseInstr = "PHASE — MIDDLE: Escalate tension, raise stakes, introduce a twist.";
     else                                              phaseInstr = `PHASE — LATE: Push toward the climax. Consequences mount, ${Math.max(1, total - turnCount)} turn(s) remaining.`;
 
-    return `You are the narrator of an interactive ${THEMES[cfg.genre]?.nameKey || "fantasy"} adventure game.
+    const isDnd = cfg.mode === "dnd";
+    const isEducational = cfg.mode === "educational";
+
+    const narratorPersona = isDnd
+      ? `You are the Dungeon Master of a D&D 5e-inspired fantasy adventure.`
+      : `You are the narrator of an interactive ${THEMES[cfg.genre]?.nameKey || "fantasy"} adventure game.`;
+
+    const dndCharBlock = isDnd ? `
+RACE: ${char.dndRace || "Human"}
+CLASS: ${char.dndClass || "Fighter"}
+ABILITY SCORES: ${DND_STATS.map(s => {
+  const v = char.abilityScores?.[s] ?? 10;
+  const m = Math.floor((v - 10) / 2);
+  return `${s} ${v} (${m >= 0 ? "+" : ""}${m})`;
+}).join(", ")}` : "";
+
+    const rollInstruction = isDnd
+      ? "rollRequired should be true for most meaningful actions — combat, ability checks, skill challenges, saving throws. Err on the side of requiring rolls."
+      : "rollRequired: true when next action has meaningful risk (combat, stealth, locks, persuasion). False for safe/narrative choices.";
+
+    const eduNote = isEducational
+      ? "\nEDUCATIONAL: Use clear vocabulary suitable for language learners. Prefer common words over idioms or rare vocabulary. Keep sentences reasonably short."
+      : "";
+
+    return `${narratorPersona}
 
 LANGUAGE: Respond ENTIRELY in ${ePortuguese ? "European Portuguese (pt-PT, as spoken in Portugal — NOT Brazilian Portuguese; use words like 'ficheiro' not 'arquivo', 'ecrã' not 'tela', 'registar' not 'cadastrar', 'autocarro' not 'ônibus', 'telemóvel' not 'celular'; use 'tu' or 'você' forms consistent with Portugal usage; avoid gerund-continuous 'está fazendo' — prefer 'está a fazer')" : eLang}. ALL story text and choices must be in ${eLang}.
 
-PERSPECTIVE: ${cfg.perspective === "first"
-  ? eHebrew
-    ? 'כתוב בגוף ראשון. השתמש ב"אני", "שלי". דוגמה: "שללתי את חרבי וצעדתי אל החשיכה."'
-    : eRTL
-      ? 'اكتب بضمير المتكلم. استخدم "أنا"، "لي". مثال: "سللت سيفي وخطوت إلى الظلام."'
-      : ePortuguese
-        ? 'Escreva em PRIMEIRA PESSOA. Use "eu", "meu/minha", com formas do português europeu. Exemplo: "Desembainhei a minha espada e avancei para a escuridão."'
-        : 'Write in FIRST PERSON. Use "I", "my", "me". Example: "I drew my sword and stepped into the dark."'
-  : eHebrew
+PERSPECTIVE: ${eHebrew
     ? 'כתוב בגוף שני. השתמש ב"אתה", "שלך". דוגמה: "אתה שולף את חרבך וצועד אל החשיכה."'
     : eRTL
       ? 'اكتب بضمير المخاطب. استخدم "أنت"، "لك". مثال: "تسلّ سيفك وتخطو نحو الظلام."'
@@ -1786,10 +1946,10 @@ PERSPECTIVE: ${cfg.perspective === "first"
         ? 'Escreva em SEGUNDA PESSOA, português europeu. Use "tu" (formas do "tu" do Portugal) ou "você" conforme soar mais natural em Portugal, nunca formas brasileiras. Exemplo: "Desembainhas a tua espada e avanças para a escuridão."'
         : 'Write in SECOND PERSON. Use "you", "your". Example: "You draw your sword and step into the dark."'}
 
-CHARACTER: Name: ${char.name || "The Adventurer"}, Gender: ${char.gender || "unspecified"}, Age: ${char.age || "unknown"}, Appearance: ${(char.appearance || "unspecified").replace(/\n+/g, ", ")}, Skills: ${skillsEN.join(", ") || "none"}
+CHARACTER: Name: ${char.name || "The Adventurer"}, Gender: ${char.gender || "unspecified"}, Age: ${char.age || "unknown"}, Appearance: ${(char.appearance || "unspecified").replace(/\n+/g, ", ")}, Skills: ${skillsEN.join(", ") || "none"}${dndCharBlock}
 
 CONTENT: ${ageRules[cfg.ageTier] || ageRules.teen}
-LENGTH: ${lengthRules[cfg.responseLength] || lengthRules.medium}
+LENGTH: ${lengthRules[cfg.responseLength] || lengthRules.medium}${eduNote}
 ${cfg.deathPossible ? "DEATH IS POSSIBLE if very poor choices are made." : "DEATH IS NOT POSSIBLE. Failures redirect the story."}
 ${cfg.trackStats
   ? `TRACK STATS: Always return a "stats" object with the updated values. Current authoritative state — health: ${stats.health}/100, inventory: [${(stats.inventory || []).join(", ") || "empty"}], relationships: {${Object.entries(stats.relationships || {}).map(([k,v]) => `${k}: ${v}`).join(", ") || "none"}}. Carry these forward and modify based on events. Reduce health on dangerous failures.`
@@ -1804,7 +1964,7 @@ STORY ARC: ${phaseInstr}
 RESPOND WITH VALID JSON ONLY (no markdown fences):
 {"story":"...","choices":["...","...","..."],${cfg.trackStats ? '"stats":{"health":100,"inventory":[],"relationships":{}},' : ''}"gameOver":false,"gameOverReason":"","rollRequired":false,"rollContext":"","chapterComplete":false,"chapterProgress":{"achieved":[],"clues":[]},"mood":"neutral"}
 
-rollRequired: true when next action has meaningful risk (combat, stealth, locks, persuasion). False for safe/narrative choices.
+${rollInstruction}
 rollContext: Short phrase shown to player before rolling (e.g. "pick the ancient lock").
 chapterComplete: true ONLY when the single chapter goal is conclusively achieved.
 chapterProgress: Update every turn — achieved: specific milestones completed toward the one chapter goal (cumulative, carry forward); clues: hints/info the player has discovered that help reach the goal (cumulative).
@@ -2063,16 +2223,20 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       age:        character.age.trim()     || String(Math.floor(Math.random() * 61) + 6),
       appearance: character.appearance.trim() || randomAppearanceStr(lang),
       skills:     character.skills.length >= 2 ? character.skills : shuffled.slice(0, 2),
+      dndRace:       character.dndRace   || "Human",
+      dndClass:      character.dndClass  || "Fighter",
+      abilityScores: character.abilityScores,
     };
 
+    const isDndMode = config.mode === "dnd";
     const validLengths = [5, 10, 20, 40];
     const finalCfg = {
       ...config,
       ageTier:        config.ageTier        || "teen",
-      responseLength: config.responseLength  || "short",
+      responseLength: isDndMode ? "medium" : (config.responseLength  || "short"),
       storyLength:    validLengths.includes(config.storyLength) ? config.storyLength : 5,
-      deathPossible:  config.deathPossible  ?? false,
-      trackStats:     config.trackStats     ?? false,
+      deathPossible:  isDndMode ? true  : (config.deathPossible  ?? false),
+      trackStats:     isDndMode ? true  : (config.trackStats     ?? false),
       perspective:    config.perspective    || "second",
       storyPrompt:    config.storyPrompt.trim() || seedFor(lang, config.genre),
     };
@@ -2211,14 +2375,32 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       }
 
       if (rollInfo) {
-        const dangerNote = rollInfo.value === 1
-          ? " Narrate a serious consequence. If this was physically dangerous, reduce health in stats."
-          : rollInfo.value <= 3
-          ? " Narrate a complication or setback."
-          : rollInfo.value <= 5
-          ? " Narrate partial success with a catch."
-          : " Narrate exceptional success, perhaps with an unexpected bonus.";
-        lastMsg += `\n\n[FATE CHECK: ${rollInfo.context || "the attempt"}]\nRoll: ${rollInfo.value}/6 — ${rollInfo.outcome}${rollInfo.skillBonus ? " (skill bonus applied)" : ""}.\nOutcome: ${rollInfo.narrative || ""}${dangerNote}`;
+        const isDndRoll = config.mode === "dnd";
+        const rollMax = isDndRoll ? 20 : 6;
+        let dangerNote;
+        if (isDndRoll) {
+          dangerNote = rollInfo.value === 1
+            ? " Narrate a catastrophic failure — something goes dramatically wrong."
+            : rollInfo.value <= 9
+            ? " Narrate a clear failure with complications."
+            : rollInfo.value <= 14
+            ? " Narrate partial success with a cost or catch."
+            : rollInfo.value <= 19
+            ? " Narrate solid success."
+            : " Narrate a critical success — natural 20, exceptional outcome.";
+        } else {
+          dangerNote = rollInfo.value === 1
+            ? " Narrate a serious consequence. If this was physically dangerous, reduce health in stats."
+            : rollInfo.value <= 3
+            ? " Narrate a complication or setback."
+            : rollInfo.value <= 5
+            ? " Narrate partial success with a catch."
+            : " Narrate exceptional success, perhaps with an unexpected bonus.";
+        }
+        const bonusNote = isDndRoll
+          ? (rollInfo.statBonus != null && rollInfo.statBonus !== 0 ? ` (ability modifier ${rollInfo.statBonus >= 0 ? "+" : ""}${rollInfo.statBonus} applied)` : "")
+          : (rollInfo.skillBonus ? " (skill bonus applied)" : "");
+        lastMsg += `\n\n[FATE CHECK: ${rollInfo.context || "the attempt"}]\nRoll: ${rollInfo.value}/${rollMax} — ${rollInfo.outcome}${bonusNote}.\nOutcome: ${rollInfo.narrative || ""}${dangerNote}`;
       }
       history.push({ role: "user", content: lastMsg });
     }
@@ -2289,8 +2471,8 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     setPhase("home"); setSetupStep(0); setStepSelections({}); setStoryLog([]); setChoices([]);
     setStats({ health: 100, inventory: [], relationships: {} });
     setGameOver(false); setTurnCount(0); setCustomAction("");
-    setCharacter({ name: "", gender: "", age: "", appearance: "", skills: [] });
-    setConfig({ genre: "", language: prefs.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" });
+    setCharacter({ name: "", gender: "", age: "", appearance: "", skills: [], dndRace: "", dndClass: "", abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 } });
+    setConfig({ mode: "", genre: "", language: prefs.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" });
     setStorySummary({ narrative: "", world: null });
     setChapterNumber(1); setChapterBrief(null); setChapterBanner(null);
     setPendingRoll(null); setNextRollRequired({ required: false, context: "" });
@@ -2354,15 +2536,19 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
         t={t}
         isRTL={isRTL}
         onJump={(i) => setSetupStep(i)}
+        stepDefs={modeStepDefs}
       />
     );
     const cardProps = { stepStrip, activePrimary };
+
+    // Resolves the step index for a given step key within the current mode's step list.
+    const stepIdx = (key) => modeSetupSteps.indexOf(key);
 
     // Pick a value, record its display label, and auto-advance after a short flash.
     const pickAndAdvance = (idx, label, applyConfig) => {
       if (applyConfig) applyConfig();
       setStepSelections(p => ({ ...p, [idx]: label }));
-      if (idx < SETUP_STEPS.length - 1) {
+      if (idx < modeSetupSteps.length - 1) {
         setTimeout(() => setSetupStep(idx + 1), 120);
       }
     };
@@ -2379,6 +2565,26 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     );
 
     switch (currentStep) {
+      case "learnlang": {
+        const learnOptions = LANGUAGES.filter(L => L.code !== config.language);
+        return (
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("learnLangRequired")} subtitle={t("learnLangRequiredSub")}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+              {learnOptions.map(L => (
+                <OptionButton key={L.code} theme={theme} selected={prefs.translationLanguage === L.code}
+                  onClick={() => {
+                    setPrefs(p => ({ ...p, translationLanguage: L.code }));
+                    pickAndAdvance(stepIdx("learnlang"), L.label, null);
+                  }}>
+                  {L.label}
+                </OptionButton>
+              ))}
+            </div>
+            <BackLink to="home" label={t("homeBack")} />
+          </SetupCard>
+        );
+      }
+
       case "genre":
         return (
           <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("chooseWorld")} subtitle={t("chooseWorldSub")}>
@@ -2412,7 +2618,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 );
               })}
             </div>
-            <BackLink to="home" label={t("homeBack")} />
+            <BackLink to={config.mode === "educational" ? stepIdx("learnlang") : "home"} label={config.mode === "educational" ? undefined : t("homeBack")} />
           </SetupCard>
         );
 
@@ -2422,13 +2628,13 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[["kids","kids","kidsSub"],["teen","teen","teenSub"],["adult","adult","adultSub"]].map(([key,lbl,sub]) => (
                 <OptionButton key={key} theme={theme} selected={config.ageTier === key}
-                  onClick={() => pickAndAdvance(1, t(lbl), () => setConfig(c => ({ ...c, ageTier: key })))}>
+                  onClick={() => pickAndAdvance(stepIdx("age"), t(lbl), () => setConfig(c => ({ ...c, ageTier: key })))}>
                   <strong style={{ fontFamily: theme.heading }}>{t(lbl)}</strong>
                   <span style={{ display: "block", fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{t(sub)}</span>
                 </OptionButton>
               ))}
             </div>
-            <BackLink to={0} />
+            <BackLink to={config.mode === "dnd" ? "home" : stepIdx("genre")} />
           </SetupCard>
         );
 
@@ -2438,13 +2644,13 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[["short","short","shortSub"],["medium","medium","mediumSub"],["long","long","longSub"]].map(([key,lbl,sub]) => (
                 <OptionButton key={key} theme={theme} selected={config.responseLength === key}
-                  onClick={() => pickAndAdvance(2, t(lbl), () => setConfig(c => ({ ...c, responseLength: key })))}>
+                  onClick={() => pickAndAdvance(stepIdx("length"), t(lbl), () => setConfig(c => ({ ...c, responseLength: key })))}>
                   <strong style={{ fontFamily: theme.heading }}>{t(lbl)}</strong>
                   <span style={{ display: "block", fontSize: 12, color: theme.textMuted, marginTop: 4 }}>{t(sub)}</span>
                 </OptionButton>
               ))}
             </div>
-            <BackLink to={1} />
+            <BackLink to={stepIdx("age")} />
           </SetupCard>
         );
 
@@ -2459,7 +2665,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 { turns: 40, icon: "mountain", labelKey: "epic",     descKey: "epicDesc" },
               ].map(({ turns, icon, labelKey, descKey }) => (
                 <OptionButton key={turns} theme={theme} selected={config.storyLength === turns}
-                  onClick={() => pickAndAdvance(3, t(labelKey), () => setConfig(c => ({ ...c, storyLength: turns })))}
+                  onClick={() => pickAndAdvance(stepIdx("duration"), t(labelKey), () => setConfig(c => ({ ...c, storyLength: turns })))}
                   style={{ textAlign: "center", padding: "16px 12px" }}>
                   <div style={{ marginBottom: 8, color: activePrimary, display: "flex", justifyContent: "center" }}>
                     <Icon name={icon} size={24} strokeWidth={1.5} />
@@ -2469,7 +2675,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 </OptionButton>
               ))}
             </div>
-            <BackLink to={2} />
+            <BackLink to={stepIdx("length") >= 0 ? stepIdx("length") : stepIdx("age")} />
           </SetupCard>
         );
 
@@ -2503,31 +2709,9 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
               </div>
             </div>
             <NavButtons {...nav}
-              onBack={() => setSetupStep(3)}
-              onNext={() => { setStepSelections(p => ({ ...p, 4: t("rulesSet") })); setSetupStep(5); }}
+              onBack={() => setSetupStep(stepIdx("duration"))}
+              onNext={() => { setStepSelections(p => ({ ...p, [stepIdx("rules")]: t("rulesSet") })); setSetupStep(stepIdx("prompt")); }}
               canNext />
-          </SetupCard>
-        );
-
-      case "perspective":
-        return (
-          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("perspective")} subtitle={t("perspectiveSub")}>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {[
-                { value: "second", labelKey: "secondPerson", exKey: "secondPersonEx", icon: "person" },
-                { value: "first",  labelKey: "firstPerson",  exKey: "firstPersonEx",  icon: "speech" },
-              ].map(({ value, labelKey, exKey, icon }) => (
-                <OptionButton key={value} theme={theme} selected={config.perspective === value}
-                  onClick={() => pickAndAdvance(5, t(labelKey), () => setConfig(c => ({ ...c, perspective: value })))}
-                  style={{ textAlign: isRTL ? "right" : "left", padding: "14px 18px" }}>
-                  <div style={{ fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 10 }}>
-                    <Icon name={icon} size={18} color={activePrimary} /> <span>{t(labelKey)}</span>
-                  </div>
-                  <div style={{ fontSize: 13, opacity: 0.7, fontStyle: "italic" }}>{t(exKey)}</div>
-                </OptionButton>
-              ))}
-            </div>
-            <BackLink to={4} />
           </SetupCard>
         );
 
@@ -2538,11 +2722,11 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
               placeholder={seedFor(lang, config.genre) || t("storySeedPH")}
               style={{ ...inputStyle(theme), minHeight: 120, resize: "vertical", direction: isRTL ? "rtl" : "ltr" }} />
             <NavButtons {...nav}
-              onBack={() => setSetupStep(5)}
+              onBack={() => setSetupStep(stepIdx("rules") >= 0 ? stepIdx("rules") : stepIdx("duration"))}
               onNext={() => {
                 const seedLabel = config.storyPrompt.trim() ? config.storyPrompt.trim().slice(0, 7) : t("seedSurprise");
-                setStepSelections(p => ({ ...p, 6: seedLabel }));
-                setSetupStep(7);
+                setStepSelections(p => ({ ...p, [stepIdx("prompt")]: seedLabel }));
+                setSetupStep(stepIdx(config.mode === "dnd" ? "dnd-character" : "character"));
               }}
               canNext />
           </SetupCard>
@@ -2632,11 +2816,92 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 </div>
               </div>
             </div>
-            <NavButtons {...nav} onBack={() => setSetupStep(6)} onNext={startAdventure}
+            <NavButtons {...nav} onBack={() => setSetupStep(stepIdx("prompt"))} onNext={startAdventure}
               canNext nextLabel={t("beginAdventure")} />
           </SetupCard>
         );
       }
+      case "dnd-character": {
+        const roll4d6dl = () => {
+          const d = Array.from({ length: 4 }, () => Math.ceil(Math.random() * 6)).sort((a, b) => a - b);
+          return d.slice(1).reduce((s, v) => s + v, 0);
+        };
+        const mod = s => Math.floor((s - 10) / 2);
+        const modStr = s => { const m = mod(s); return m >= 0 ? `+${m}` : `${m}`; };
+        const statKeys = ["statSTR","statDEX","statCON","statINT","statWIS","statCHA"];
+        return (
+          <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("stepDndHero")} subtitle={t("modeDndSub")}>
+            <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+              {/* Race */}
+              <div>
+                <label style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>{t("dndRace")}</label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {DND_RACES.map(race => (
+                    <OptionButton key={race} theme={theme} selected={character.dndRace === race}
+                      onClick={() => setCharacter(c => ({ ...c, dndRace: race }))}
+                      style={{ padding: "7px 14px", fontSize: 13 }}>{race}</OptionButton>
+                  ))}
+                </div>
+              </div>
+              {/* Class */}
+              <div>
+                <label style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, display: "block", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.06em" }}>{t("dndClass")}</label>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {DND_CLASSES.map(cls => (
+                    <OptionButton key={cls} theme={theme} selected={character.dndClass === cls}
+                      onClick={() => setCharacter(c => ({ ...c, dndClass: cls }))}
+                      style={{ padding: "7px 14px", fontSize: 13 }}>{cls}</OptionButton>
+                  ))}
+                </div>
+              </div>
+              {/* Ability Scores */}
+              <div>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, flexWrap: "wrap", gap: 8 }}>
+                  <label style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, textTransform: "uppercase", letterSpacing: "0.06em" }}>{t("dndAbilityScores")}</label>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    <button onClick={() => {
+                      const scores = {};
+                      DND_STATS.forEach((s, i) => { scores[s] = DND_STANDARD_ARRAY[i]; });
+                      setCharacter(c => ({ ...c, abilityScores: scores }));
+                    }} style={{ background: `${activePrimary}22`, border: `1px solid ${activePrimary}`, borderRadius: 8, padding: "5px 12px", color: activePrimary, fontFamily: theme.body, fontSize: 12, cursor: "pointer" }}>{t("dndStandardArray")}</button>
+                    <button onClick={() => {
+                      const scores = {};
+                      DND_STATS.forEach(s => { scores[s] = roll4d6dl(); });
+                      setCharacter(c => ({ ...c, abilityScores: scores }));
+                    }} style={{ background: `${activePrimary}22`, border: `1px solid ${activePrimary}`, borderRadius: 8, padding: "5px 12px", color: activePrimary, fontFamily: theme.body, fontSize: 12, cursor: "pointer" }}>{t("dndRollStats")}</button>
+                  </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+                  {DND_STATS.map((stat, i) => {
+                    const val = character.abilityScores?.[stat] ?? 10;
+                    return (
+                      <div key={stat} style={{ background: theme.bgStory || theme.bg, border: `1px solid ${theme.border}`, borderRadius: 10, padding: "10px 8px", textAlign: "center" }}>
+                        <div style={{ fontFamily: theme.body, fontSize: 10, color: theme.textMuted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{t(statKeys[i])}</div>
+                        <div style={{ fontFamily: theme.heading, fontSize: 24, color: theme.text, lineHeight: 1 }}>{val}</div>
+                        <div style={{ fontFamily: theme.body, fontSize: 12, color: activePrimary, marginTop: 4 }}>{modStr(val)}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              {/* Name (optional) */}
+              <div>
+                <label style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, display: "block", marginBottom: 4 }}>
+                  {t("name")} <span style={{ opacity: 0.5 }}>({t("optional_")})</span>
+                </label>
+                <input value={character.name} onChange={e => setCharacter(c => ({ ...c, name: e.target.value }))}
+                  placeholder={t("namePH")} style={{ ...inputStyle(theme), direction: isRTL ? "rtl" : "ltr" }} />
+              </div>
+            </div>
+            <NavButtons {...nav}
+              onBack={() => setSetupStep(stepIdx("prompt"))}
+              onNext={startAdventure}
+              canNext={!!character.dndRace && !!character.dndClass}
+              nextLabel={t("dndContinue")} />
+          </SetupCard>
+        );
+      }
+
       default: return null;
     }
   };
@@ -2764,7 +3029,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
           </div>
 
           {/* First-turn educational-mode hint */}
-          {prefs.translationLanguage && prefs.translationLanguage !== "off" && prefs.translationLanguage !== lang && !prefs.wordHintDismissed && storyLog.some(e => e.role === "narrator") && (
+          {(config.mode === "educational" || (prefs.translationLanguage && prefs.translationLanguage !== "off" && prefs.translationLanguage !== lang)) && !prefs.wordHintDismissed && storyLog.some(e => e.role === "narrator") && (
             <div style={{
               display: "flex", alignItems: "flex-start", gap: 10,
               padding: "10px 14px", margin: "0 0 14px",
@@ -2807,7 +3072,9 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
               );
             }
             if (entry.role === "roll") {
-              const oc = DICE_OUTCOMES[entry.value];
+              const isDndEntry = config.mode === "dnd";
+              const oc = getDiceOutcome(entry.value, isDndEntry);
+              const rollMax = isDndEntry ? 20 : 6;
               return (
                 <div key={i} style={{
                   display: "flex", alignItems: "center", gap: 10, margin: "8px 0",
@@ -2819,14 +3086,20 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                   <span style={{ fontFamily: theme.body, fontSize: 12, color: theme.textMuted }}>
                     <span style={{ color: oc?.color, fontWeight: 700 }}>{entry.outcome}</span>
                     {entry.context ? ` — ${entry.context}` : ""}
-                    <span style={{ opacity: 0.6, marginLeft: 6 }}>{entry.value}/6{entry.skillBonus ? " ★" : ""}</span>
+                    <span style={{ opacity: 0.6, marginLeft: 6 }}>{entry.value}/{rollMax}{entry.skillBonus ? " ★" : ""}</span>
                   </span>
                 </div>
               );
             }
             const tr = translations[i];
-            const translateEnabled = prefs.translationLanguage && prefs.translationLanguage !== "off" && prefs.translationLanguage !== lang;
-            const targetLang = translateEnabled ? prefs.translationLanguage : null;
+            const translateEnabled =
+              config.mode === "educational" ||
+              (prefs.translationLanguage && prefs.translationLanguage !== "off" && prefs.translationLanguage !== lang);
+            const targetLang = translateEnabled
+              ? (prefs.translationLanguage && prefs.translationLanguage !== "off"
+                  ? prefs.translationLanguage
+                  : LANGUAGES.find(L => L.code !== lang)?.code)
+              : null;
             const targetLangMeta = targetLang ? LANGUAGES.find(L => L.code === targetLang) : null;
             return (
               <div key={i} style={{
@@ -3368,21 +3641,40 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                 boxShadow: prefs.themeMode === "light" ? "0 4px 24px rgba(0,0,0,0.06)" : "0 10px 40px rgba(0,0,0,0.3)",
                 display: "flex", flexDirection: "column", gap: 12,
               }}>
-                <button
-                  onClick={() => setPhase("setup")}
-                  className="os-btn-primary"
-                  style={{
-                    padding: "16px 0", borderRadius: 10, border: "none",
-                    background: theme.text, color: theme.bg,
-                    fontFamily: theme.body, fontSize: 15, fontWeight: 500,
-                    cursor: "pointer", letterSpacing: 0.3,
-                    transition: "transform 0.15s, box-shadow 0.15s, background 0.15s",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 8px 24px rgba(0,0,0,0.25)`; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-                >
-                  {t("startNew")} →
-                </button>
+                <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, textAlign: "center", margin: "0 0 2px", letterSpacing: "0.04em" }}>
+                  {t("modePickerTitle")}
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {[
+                    { mode: "adventure", icon: "masks",  titleKey: "modeAdventure",   subKey: "modeAdventureSub"   },
+                    { mode: "dnd",       icon: "skull",  titleKey: "modeDnd",          subKey: "modeDndSub"         },
+                    { mode: "educational", icon: "speech", titleKey: "modeEducational", subKey: "modeEducationalSub" },
+                  ].map(({ mode, icon, titleKey, subKey }) => (
+                    <button key={mode}
+                      onClick={() => {
+                        setConfig(c => ({ ...c, mode, genre: mode === "dnd" ? "fantasy" : c.genre }));
+                        setSetupStep(0);
+                        setStepSelections({});
+                        setPhase("setup");
+                      }}
+                      style={{
+                        background: theme.bgStory || theme.bgCard, border: `1px solid ${theme.border}`,
+                        borderRadius: 12, padding: "14px 18px", cursor: "pointer",
+                        textAlign: isRTL ? "right" : "left", transition: "border-color 0.2s",
+                        display: "flex", alignItems: "flex-start", gap: 14,
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = theme.primary}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = theme.border}
+                    >
+                      <Icon name={icon} size={22} strokeWidth={1.5}
+                        style={{ color: theme.primary, flexShrink: 0, marginTop: 2 }} />
+                      <div>
+                        <div style={{ fontFamily: theme.heading, color: theme.text, fontSize: 15, fontWeight: 600, marginBottom: 3 }}>{t(titleKey)}</div>
+                        <div style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, lineHeight: 1.5 }}>{t(subKey)}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
                 <div style={{ display: "flex", gap: 10, flexDirection: isMobile ? "column" : "row" }}>
                   <button
                     onClick={handleLoadGame}
@@ -3605,6 +3897,8 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
           onResult={handleRollResult}
           isRTL={isRTL}
           t={t}
+          mode={config.mode}
+          abilityScores={character.abilityScores}
         />
       )}
 
