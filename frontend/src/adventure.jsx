@@ -74,6 +74,8 @@ const TR = {
   adventureOver:    { English: "Adventure Over", Hebrew: "ההרפתקה הסתיימה", Arabic: "انتهت المغامرة", Portuguese: "Aventura Encerrada" },
   newAdventure:     { English: "New Adventure", Hebrew: "הרפתקה חדשה", Arabic: "مغامرة جديدة", Portuguese: "Nova Aventura" },
   storyUnfolds:     { English: "The story unfolds...", Hebrew: "הסיפור מתגלה...", Arabic: "القصة تتكشف...", Portuguese: "A história se desenrola..." },
+  retryHighDemand:  { English: "The model is under heavy load — retrying…", Hebrew: "המודל בעומס גבוה — מנסה שוב…", Arabic: "النموذج تحت ضغط عالٍ — جاري المحاولة مرة أخرى…", Portuguese: "O modelo está com alta demanda — a tentar novamente…" },
+  retryFallback:    { English: "Switching to a backup model…", Hebrew: "מעבר למודל גיבוי…", Arabic: "التبديل إلى نموذج احتياطي…", Portuguese: "A mudar para um modelo alternativo…" },
   turn:             { English: "Turn", Hebrew: "תור", Arabic: "الدورة", Portuguese: "Turno" },
   sAdventure:       { English: "'s Adventure", Hebrew: " - הרפתקה", Arabic: " - مغامرة", Portuguese: " - Aventura" },
   exportStory:      { English: "Export Story", Hebrew: "ייצא סיפור", Arabic: "تصدير القصة", Portuguese: "Exportar História" },
@@ -1585,6 +1587,9 @@ export default function AdventureGame() {
   const [stats, setStats]           = useState({ health: 100, inventory: [], relationships: {} });
   const [choices, setChoices]       = useState([]);
   const [loading, setLoading]       = useState(false);
+  // Surfaced under the loading spinner during retries / fallback so the player
+  // sees that the system is working, not stuck. { kind: "retry"|"fallback" } | null
+  const [retryNotice, setRetryNotice] = useState(null);
   const [customAction, setCustomAction] = useState("");
   const [turnCount, setTurnCount]   = useState(0);
   const [gameOver, setGameOver]     = useState(false);
@@ -1811,8 +1816,15 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
   const callAPI = useCallback(async (messages, opts = {}) => {
     try {
       const sysPrompt = opts.systemPrompt ?? buildSystemPrompt();
-      return await api.chat(sysPrompt, messages, { ...opts, turnCount });
+      // Only foreground turns surface the retry banner. Background calls
+      // (summary, chapter brief, translation) bypass callAPI and call api.chat
+      // directly without an onRetry — same retry logic, no UI.
+      const onRetry = ({ willFallback }) => setRetryNotice({ kind: willFallback ? "fallback" : "retry" });
+      const result = await api.chat(sysPrompt, messages, { ...opts, turnCount, onRetry });
+      setRetryNotice(null);
+      return result;
     } catch (err) {
+      setRetryNotice(null);
       if (err.message === "__need_key__") {
         setKeyModalContext("game");
         setShowKeyModal(true);
@@ -2961,6 +2973,15 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
             <div style={{ textAlign: "center", padding: 30 }}>
               <div style={{ fontSize: 28, animation: "pulse 1.5s ease-in-out infinite" }}>{theme.icon}</div>
               <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 13, marginTop: 8 }}>{t("storyUnfolds")}</p>
+              {retryNotice && (
+                <p style={{
+                  fontFamily: theme.body,
+                  color: retryNotice.kind === "fallback" ? theme.accent : theme.textMuted,
+                  fontSize: 12, marginTop: 10, opacity: 0.85,
+                }}>
+                  {t(retryNotice.kind === "fallback" ? "retryFallback" : "retryHighDemand")}
+                </p>
+              )}
             </div>
           )}
 

@@ -1,5 +1,14 @@
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODEL    = "google/gemini-2.0-flash-001";
+// Fallback chain used only when the caller sets `useFallback: true` (after a
+// 20-second window of 429/503 retries on the primary). Order = priority.
+// First fallback is a sister Gemini model (covers per-model rate limits on the
+// primary); second is on a different provider (covers Google-wide outages).
+// Both verified against the full game JSON contract in test/fallback-models.mjs.
+const FALLBACK_MODELS     = [
+  "google/gemini-2.5-flash",
+  "meta-llama/llama-3.3-70b-instruct",
+];
 const MAX_TOKENS_CAP      = 2000;
 
 function isAllowedOrigin(origin) {
@@ -50,7 +59,19 @@ module.exports = async function handler(req, res) {
     body.max_completion_tokens || MAX_TOKENS_CAP,
     MAX_TOKENS_CAP
   );
-  body.model = OPENROUTER_MODEL;
+
+  // Caller cannot pick the model — the proxy locks both the primary and the
+  // fallback chain server-side. The only choice the caller has is whether to
+  // use the fallback chain (after exhausting retries on the primary).
+  const useFallback = body.useFallback === true;
+  delete body.useFallback;
+  delete body.models;
+  if (useFallback) {
+    delete body.model;
+    body.models = [OPENROUTER_MODEL, ...FALLBACK_MODELS];
+  } else {
+    body.model = OPENROUTER_MODEL;
+  }
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 25000);

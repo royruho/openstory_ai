@@ -1,5 +1,14 @@
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 const OPENROUTER_MODEL    = "google/gemini-2.0-flash-001";
+// Mirrored on the server in api/proxy.js — keep in sync. Used by the
+// user-key path (turn 20+) where the call goes direct to OpenRouter.
+const FALLBACK_MODELS     = [
+  "google/gemini-2.5-flash",
+  "meta-llama/llama-3.3-70b-instruct",
+];
+// Retry the primary for this long before flipping to the fallback chain.
+const RETRY_WINDOW_MS = 20000;
+const RETRY_STATUSES  = new Set([429, 503, 504]);
 export const FREE_TURN_LIMIT = 20;
 
 // ─── User key (stored in localStorage after turn 20) ────────────
@@ -27,29 +36,44 @@ function extractJSON(raw) {
   const clean = raw
     .replace(/<think>[\s\S]*?<\/think>/gi, "")
     .replace(/```json/g, "").replace(/```/g, "").trim();
-  try { return JSON.parse(clean); } catch { /* fall through */ }
+  // Some models (e.g. gemini-2.0-flash-lite) wrap the object in a single-element
+  // array — unwrap so the caller still gets the expected shape.
+  const unwrap = (v) => (Array.isArray(v) && v.length === 1 && typeof v[0] === "object") ? v[0] : v;
+  try { return unwrap(JSON.parse(clean)); } catch { /* fall through */ }
   // Slice from first { to last } and try again
   const start = clean.indexOf("{");
   const end   = clean.lastIndexOf("}");
   if (start !== -1 && end > start) {
-    try { return JSON.parse(clean.slice(start, end + 1)); } catch { /* fall through */ }
+    try { return unwrap(JSON.parse(clean.slice(start, end + 1))); } catch { /* fall through */ }
   }
   return null;
 }
 
 // ─── Core call ──────────────────────────────────────────────────
 
-async function callWithKey(key, system, messages, opts) {
-  const maxTokens = Math.min(opts.max_tokens_override || 2000, 2000);
+// Build the request body for the user-key (direct OpenRouter) path.
+// `useFallback` swaps `model` for the `models` array so OpenRouter picks
+// the first one that responds.
+function buildUserKeyBody(system, messages, maxTokens, useFallback) {
   const body = {
-    model:                 OPENROUTER_MODEL,
     max_completion_tokens: maxTokens,
     messages:              [{ role: "system", content: system }, ...messages],
     response_format:       { type: "json_object" },
   };
+  if (useFallback) body.models = [OPENROUTER_MODEL, ...FALLBACK_MODELS];
+  else             body.model  = OPENROUTER_MODEL;
+  return body;
+}
 
-  const MAX_RETRIES = 2;
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+async function callWithKey(key, system, messages, opts) {
+  const maxTokens = Math.min(opts.max_tokens_override || 2000, 2000);
+  const onRetry   = typeof opts.onRetry === "function" ? opts.onRetry : null;
+  const startMs   = Date.now();
+  let attempt = 0;
+  let useFallback = false;
+
+  while (true) {
+    attempt++;
     const resp = await fetch(OPENROUTER_ENDPOINT, {
       method:  "POST",
       headers: {
@@ -58,70 +82,94 @@ async function callWithKey(key, system, messages, opts) {
         "HTTP-Referer":  window.location.origin,
         "X-Title":       "Choose Your Adventure",
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify(buildUserKeyBody(system, messages, maxTokens, useFallback)),
     });
 
-    if (resp.status === 429 || resp.status === 503) {
-      if (attempt < MAX_RETRIES) {
-        let waitBody = null;
-        try { waitBody = await resp.json(); } catch { /* ignore */ }
-        const wait = resp.status === 429 ? parseRetryAfter(waitBody) * 1000 : 4000 * (attempt + 1);
-        await new Promise(r => setTimeout(r, wait));
-        continue;
-      }
-      throw new Error(resp.status === 429
-        ? "Rate limit reached — please wait a moment and try again."
-        : "Service temporarily overloaded — please try again.");
+    if (resp.ok) {
+      const data   = await resp.json();
+      const raw    = data?.choices?.[0]?.message?.content || "";
+      const result = extractJSON(raw);
+      return result || { story: raw, choices: [], gameOver: false, gameOverReason: "" };
     }
 
-    if (!resp.ok) {
+    if (!RETRY_STATUSES.has(resp.status)) {
       const txt = await resp.text().catch(() => resp.statusText);
       throw new Error(`API error ${resp.status}: ${txt}`);
     }
 
-    const data   = await resp.json();
-    const raw    = data?.choices?.[0]?.message?.content || "";
-    const result = extractJSON(raw);
-    return result || { story: raw, choices: [], gameOver: false, gameOverReason: "" };
+    // Retryable. If we already tried the fallback chain, give up.
+    if (useFallback) {
+      throw new Error(resp.status === 429
+        ? "Rate limit reached on all backup models — please wait a moment and try again."
+        : "All models are overloaded right now — please try again.");
+    }
+
+    const elapsed = Date.now() - startMs;
+    if (elapsed >= RETRY_WINDOW_MS) {
+      useFallback = true;
+      onRetry?.({ secsElapsed: Math.round(elapsed / 1000), willFallback: true, attempt });
+      continue;
+    }
+
+    let waitBody = null;
+    try { waitBody = await resp.json(); } catch { /* ignore */ }
+    const hint = resp.status === 429 ? parseRetryAfter(waitBody) * 1000 : 3000 + attempt * 1500;
+    const wait = Math.min(Math.max(hint, 2000), RETRY_WINDOW_MS - elapsed);
+    onRetry?.({ secsElapsed: Math.round(elapsed / 1000), willFallback: false, attempt });
+    await new Promise(r => setTimeout(r, wait));
   }
 }
 
 async function callViaProxy(system, messages, opts) {
   const maxTokens = Math.min(opts.max_tokens_override || 2000, 2000);
-  const body = {
-    max_completion_tokens: maxTokens,
-    messages:              [{ role: "system", content: system }, ...messages],
-    response_format:       { type: "json_object" },
-  };
+  const onRetry   = typeof opts.onRetry === "function" ? opts.onRetry : null;
+  const startMs   = Date.now();
+  let attempt = 0;
+  let useFallback = false;
 
-  const MAX_RETRIES = 2;
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+  while (true) {
+    attempt++;
+    const body = {
+      max_completion_tokens: maxTokens,
+      messages:              [{ role: "system", content: system }, ...messages],
+      response_format:       { type: "json_object" },
+      useFallback,                              // proxy swaps in the fallback chain
+    };
     const resp = await fetch("/api/proxy", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(body),
     });
 
-    if (resp.status === 429 || resp.status === 503 || resp.status === 504) {
-      if (attempt < MAX_RETRIES) {
-        const wait = resp.status === 429 ? 6000 : 4000 * (attempt + 1);
-        await new Promise(r => setTimeout(r, wait));
-        continue;
-      }
-      throw new Error(resp.status === 429
-        ? "Rate limit reached — please try again in a moment."
-        : "Model is slow right now — please try again.");
+    if (resp.ok) {
+      const data   = await resp.json();
+      const raw    = data?.choices?.[0]?.message?.content || "";
+      const result = extractJSON(raw);
+      return result || { story: raw, choices: [], gameOver: false, gameOverReason: "" };
     }
 
-    if (!resp.ok) {
+    if (!RETRY_STATUSES.has(resp.status)) {
       const txt = await resp.text().catch(() => resp.statusText);
       throw new Error(`Proxy error ${resp.status}: ${txt}`);
     }
 
-    const data   = await resp.json();
-    const raw    = data?.choices?.[0]?.message?.content || "";
-    const result = extractJSON(raw);
-    return result || { story: raw, choices: [], gameOver: false, gameOverReason: "" };
+    if (useFallback) {
+      throw new Error(resp.status === 429
+        ? "Rate limit reached on all backup models — please try again in a moment."
+        : "All models are slow right now — please try again.");
+    }
+
+    const elapsed = Date.now() - startMs;
+    if (elapsed >= RETRY_WINDOW_MS) {
+      useFallback = true;
+      onRetry?.({ secsElapsed: Math.round(elapsed / 1000), willFallback: true, attempt });
+      continue;
+    }
+
+    const hint = resp.status === 429 ? 5000 : 3000 + attempt * 1500;
+    const wait = Math.min(Math.max(hint, 2000), RETRY_WINDOW_MS - elapsed);
+    onRetry?.({ secsElapsed: Math.round(elapsed / 1000), willFallback: false, attempt });
+    await new Promise(r => setTimeout(r, wait));
   }
 }
 
