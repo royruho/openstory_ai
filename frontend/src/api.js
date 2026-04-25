@@ -30,6 +30,41 @@ function parseRetryAfter(body) {
   }
 }
 
+// Escape unescaped " characters inside JSON string values.
+// Strategy: scan character by character tracking string context. When inside a
+// string, a `"` is the closing delimiter only if the next non-whitespace char is
+// a JSON structural character (} ] , :). Otherwise it's an unescaped quote that
+// the LLM embedded in the value (common with Hebrew/Arabic dialogue) — escape it.
+function repairUnescapedQuotes(str) {
+  let out = "";
+  let inStr = false;
+  let i = 0;
+  while (i < str.length) {
+    const ch = str[i];
+    if (!inStr) {
+      out += ch;
+      if (ch === '"') inStr = true;
+      i++;
+    } else if (ch === '\\') {
+      out += ch + (str[i + 1] ?? "");
+      i += 2;
+    } else if (ch === '"') {
+      // Peek past whitespace to see if the next token is structural.
+      let j = i + 1;
+      while (j < str.length && " \t\n\r".includes(str[j])) j++;
+      const next = str[j];
+      if (j >= str.length || "}],:".includes(next)) {
+        out += '"'; inStr = false; i++;   // valid end of string
+      } else {
+        out += '\\"'; i++;                 // unescaped inner quote — escape it
+      }
+    } else {
+      out += ch; i++;
+    }
+  }
+  return out;
+}
+
 function extractJSON(raw) {
   if (!raw) return null;
   // Strip reasoning blocks and code fences
@@ -44,8 +79,12 @@ function extractJSON(raw) {
   const start = clean.indexOf("{");
   const end   = clean.lastIndexOf("}");
   if (start !== -1 && end > start) {
-    try { return unwrap(JSON.parse(clean.slice(start, end + 1))); } catch { /* fall through */ }
+    const sliced = clean.slice(start, end + 1);
+    try { return unwrap(JSON.parse(sliced)); } catch { /* fall through */ }
+    // Last resort: repair unescaped quotes inside string values, then retry both forms.
+    try { return unwrap(JSON.parse(repairUnescapedQuotes(sliced))); } catch { /* fall through */ }
   }
+  try { return unwrap(JSON.parse(repairUnescapedQuotes(clean))); } catch { /* fall through */ }
   return null;
 }
 
