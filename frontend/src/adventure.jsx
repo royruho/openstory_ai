@@ -534,7 +534,7 @@ function getAutoAdvanceSteps(mode) {
   return new Set(getStepDefs(mode).filter(s => auto.has(s.key)).map(s => s.id));
 }
 const SUMMARY_EVERY = 5;
-const WINDOW_SIZE   = 12;
+const WINDOW_SIZE   = 16;
 const RTL_LANGS     = ["Hebrew", "Arabic"];
 // Chapter count per adventure length (goal-based, not turn-based)
 const CHAPTER_MAP   = { 5: 1, 10: 2, 20: 4, 40: 8 };
@@ -1693,11 +1693,11 @@ function triggerDownload(filename, content, mime) {
   URL.revokeObjectURL(url);
 }
 
-function buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, chapterNumber, chapterBrief, chapterProgress }) {
+function buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress }) {
   return {
     version: 3, savedAt: new Date().toISOString(),
     config, character, stats, storyLog, choices, turnCount, gameOver,
-    storySummary, chapterNumber, chapterBrief, chapterProgress,
+    storySummary, worldState, chapterNumber, chapterBrief, chapterProgress,
   };
 }
 
@@ -1714,6 +1714,7 @@ function loadAndValidateSave(json) {
     data.character.abilityScores = { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 };
   if (data.character.dndRace === undefined) data.character.dndRace = "";
   if (data.character.dndClass === undefined) data.character.dndClass = "";
+  if (!data.worldState) data.worldState = { npcs: {}, locations: [], facts: [] };
   return data;
 }
 
@@ -1735,6 +1736,7 @@ export default function AdventureGame() {
   const [turnCount, setTurnCount]   = useState(0);
   const [gameOver, setGameOver]     = useState(false);
   const [storySummary, setStorySummary] = useState({ narrative: "", world: null });
+  const [worldState, setWorldState]     = useState({ npcs: {}, locations: [], facts: [] });
   // Chapter system
   const [chapterNumber, setChapterNumber] = useState(1);
   const [chapterBrief, setChapterBrief]   = useState(null);
@@ -1890,6 +1892,13 @@ Obstacle: ${chapterBrief.obstacle}
 → Set chapterComplete:true only when the goal above is concretely achieved (the specific answer learned, artifact obtained, or problem fixed). Player may explore freely and hit dead ends.`
       : "";
 
+    const hasWorldState = Object.keys(worldState.npcs).length || worldState.locations.length || worldState.facts.length;
+    const worldStateSection = hasWorldState ? `
+WORLD STATE (persistent facts — always true, never contradict):${Object.keys(worldState.npcs).length ? `
+NPCs: ${Object.entries(worldState.npcs).map(([k, v]) => `${k} (${v})`).join(" | ")}` : ""}${worldState.locations.length ? `
+Locations: ${worldState.locations.join(" | ")}` : ""}${worldState.facts.length ? `
+Facts: ${worldState.facts.join(" | ")}` : ""}` : "";
+
     const storyContextSection = storySummary.narrative ? `
 STORY CONTEXT (events before recent turns — stay consistent, never contradict):
 ${storySummary.narrative}${storySummary.world?.npcs && Object.keys(storySummary.world.npcs).length ? `
@@ -1935,7 +1944,7 @@ ABILITY SCORES: ${DND_STATS.map(s => {
       : "";
 
     return `${narratorPersona}
-
+${worldStateSection}
 LANGUAGE: Respond ENTIRELY in ${ePortuguese ? "European Portuguese (pt-PT, as spoken in Portugal — NOT Brazilian Portuguese; use words like 'ficheiro' not 'arquivo', 'ecrã' not 'tela', 'registar' not 'cadastrar', 'autocarro' not 'ônibus', 'telemóvel' not 'celular'; use 'tu' or 'você' forms consistent with Portugal usage; avoid gerund-continuous 'está fazendo' — prefer 'está a fazer')" : eLang}. ALL story text and choices must be in ${eLang}.
 
 PERSPECTIVE: ${eHebrew
@@ -1962,15 +1971,19 @@ ${chapterSection}
 STORY ARC: ${phaseInstr}
 
 RESPOND WITH VALID JSON ONLY (no markdown fences):
-{"story":"...","choices":["...","...","..."],${cfg.trackStats ? '"stats":{"health":100,"inventory":[],"relationships":{}},' : ''}"gameOver":false,"gameOverReason":"","rollRequired":false,"rollContext":"","chapterComplete":false,"chapterProgress":{"achieved":[],"clues":[]},"mood":"neutral"}
+{"story":"...","choices":["...","...","..."],${cfg.trackStats ? '"stats":{"health":100,"inventory":[],"relationships":{}},' : ''}"gameOver":false,"gameOverReason":"","rollRequired":false,"rollContext":"","chapterComplete":false,"chapterProgress":{"achieved":[],"clues":[]},"mood":"neutral","worldState":{"npcs":{},"locations":[],"facts":[]}}
 
 ${rollInstruction}
 rollContext: Short phrase shown to player before rolling (e.g. "pick the ancient lock").
 chapterComplete: true ONLY when the single chapter goal is conclusively achieved.
 chapterProgress: Update every turn — achieved: specific milestones completed toward the one chapter goal (cumulative, carry forward); clues: hints/info the player has discovered that help reach the goal (cumulative).
 mood: Emotional tone of the story text just returned. One of: peaceful, tense, action, dramatic, sad, triumphant, mysterious, neutral.
+worldState: Update every turn — carry ALL existing entries forward and add new ones.
+  npcs: {"Name": "role/relationship — one-sentence current status"} — every character the player has met.
+  locations: ["Place — brief note"] — every location visited or mentioned.
+  facts: ["Established fact"] — key truths that affect the story. Keep to the 8 most important; drop least relevant when full.
 Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unless gameOver is true.`;
-  }, [config, character, turnCount, storySummary, chapterBrief, chapterNumber, totalChapters, stats]);
+  }, [config, character, turnCount, storySummary, worldState, chapterBrief, chapterNumber, totalChapters, stats]);
 
   // ─── API CALL ─────────────────────────────────────────────────
   const callAPI = useCallback(async (messages, opts = {}) => {
@@ -2123,7 +2136,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       `You track story continuity for an interactive adventure game. Produce a compact JSON summary. ` +
       `LANGUAGE: Write every string value (narrative text, npc names, locations, decisions, threads) ENTIRELY in ${langDirective}. JSON keys stay in English; every value in ${eLang}.\n` +
       `RESPOND WITH VALID JSON ONLY:\n` +
-      `{"narrative":"2-3 sentences in ${eLang} covering key events and current situation","world":{"npcs":{"Name":"relationship/status"},"locations":["place — notes"],"decisions":["decision made"],"threads":["active plot thread"]}}`;
+      `{"narrative":"4-6 sentences in ${eLang} covering key events, character development, and current situation — enough for the narrator to stay fully consistent","world":{"npcs":{"Name":"relationship/status"},"locations":["place — notes"],"decisions":["decision made"],"threads":["active plot thread"]}}`;
 
     const parts = [];
     if (currentSummary.narrative) {
@@ -2142,7 +2155,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     }
 
     try {
-      const result = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n\n") }], { max_tokens_override: 350, turnCount });
+      const result = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n\n") }], { max_tokens_override: 700, turnCount });
       if (result?.narrative) setStorySummary(result);
     } catch (e) {
       console.warn("Summarization failed (non-critical):", e);
@@ -2438,6 +2451,16 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       }));
     }
 
+    // Merge worldState — npcs by key, locations/facts deduplicated
+    if (result.worldState) {
+      const ws = result.worldState;
+      setWorldState(prev => ({
+        npcs:      { ...prev.npcs,      ...(ws.npcs      || {}) },
+        locations: [...new Set([...prev.locations, ...(ws.locations || [])])],
+        facts:     [...new Set([...prev.facts,     ...(ws.facts     || [])])].slice(0, 8),
+      }));
+    }
+
     // Chapter completion
     if (result.chapterComplete && !result.gameOver) {
       const nextChap = chapterNumber + 1;
@@ -2448,6 +2471,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
         setHintLevel(0); // collapse hints — new chapter is a fresh mystery
         // Delay so it doesn't compete with the just-completed main call
         setTimeout(() => generateChapterBrief(nextChap, totalChapters, summaryCtx), 10000);
+        setTimeout(() => triggerSummarize(fullLog, storySummary), 2000); // re-ground context for new chapter
       }
     }
 
@@ -2455,11 +2479,10 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     setTurnCount(newTurnCount);
     setLoading(false);
 
-    // Skip summarization for short adventures (Sprint/Short have ≤10 turns — not worth the extra call)
-    if (newTurnCount % SUMMARY_EVERY === 0 && config.storyLength > 10) {
+    // Periodic summarization — fires every 5 turns, short delay so it doesn't race the main call
+    if (newTurnCount % SUMMARY_EVERY === 0) {
       const fullNewLog = [...storyLog, { role: "player", text: choiceText }, { role: "narrator", text: result.story }];
-      // Delay 20s so background summary doesn't compete with the just-completed main call
-      setTimeout(() => triggerSummarize(fullNewLog, storySummary), 20000);
+      setTimeout(() => triggerSummarize(fullNewLog, storySummary), 3000);
     }
   };
 
@@ -2474,6 +2497,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     setCharacter({ name: "", gender: "", age: "", appearance: "", skills: [], dndRace: "", dndClass: "", abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 } });
     setConfig({ mode: "", genre: "", language: prefs.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" });
     setStorySummary({ narrative: "", world: null });
+    setWorldState({ npcs: {}, locations: [], facts: [] });
     setChapterNumber(1); setChapterBrief(null); setChapterBanner(null);
     setPendingRoll(null); setNextRollRequired({ required: false, context: "" });
     setChapterProgress({ achieved: [], clues: [] });
@@ -2486,7 +2510,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
   };
 
   const handleSaveGame = () => {
-    const payload = buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, chapterNumber, chapterBrief, chapterProgress });
+    const payload = buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress });
     triggerDownload(`${character.name}-save-${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json");
   };
 
@@ -2507,6 +2531,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
         setTurnCount(save.turnCount || 0);
         setGameOver(save.gameOver || false);
         setStorySummary(save.storySummary || { narrative: "", world: null });
+        setWorldState(save.worldState || { npcs: {}, locations: [], facts: [] });
         setChapterNumber(save.chapterNumber || 1);
         setChapterBrief(save.chapterBrief || null);
         setChapterBanner(null);
