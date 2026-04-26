@@ -1,9 +1,9 @@
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_MODEL    = "deepseek/deepseek-v4-flash";
+const OPENROUTER_MODEL    = "google/gemini-2.0-flash-001";
 // Fallback chain used only when the caller sets `useFallback: true` (after a
 // 20-second window of 429/503 retries on the primary). Order = priority.
 const FALLBACK_MODELS     = [
-  "google/gemini-2.0-flash-001",
+  "deepseek/deepseek-chat",
   "google/gemini-2.5-flash",
 ];
 const MAX_TOKENS_CAP      = 2000;

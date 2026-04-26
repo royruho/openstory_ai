@@ -1,9 +1,9 @@
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_MODEL    = "deepseek/deepseek-v4-flash";
+const OPENROUTER_MODEL    = "google/gemini-2.0-flash-001";
 // Mirrored on the server in api/proxy.js — keep in sync. Used by the
 // user-key path (turn 20+) where the call goes direct to OpenRouter.
 const FALLBACK_MODELS     = [
-  "google/gemini-2.0-flash-001",
+  "deepseek/deepseek-chat",
   "google/gemini-2.5-flash",
 ];
 // Retry the primary for this long before flipping to the fallback chain.
