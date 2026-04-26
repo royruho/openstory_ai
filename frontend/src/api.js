@@ -7,7 +7,7 @@ const FALLBACK_MODELS     = [
   "google/gemini-2.5-flash",
 ];
 // Retry the primary for this long before flipping to the fallback chain.
-const RETRY_WINDOW_MS = 20000;
+const RETRY_WINDOW_MS = 5000;
 const RETRY_STATUSES  = new Set([429, 503, 504]);
 export const FREE_TURN_LIMIT = 20;
 
