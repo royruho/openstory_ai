@@ -1,13 +1,10 @@
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_MODEL    = "google/gemini-2.0-flash-001";
+const OPENROUTER_MODEL    = "deepseek/deepseek-v4-flash";
 // Fallback chain used only when the caller sets `useFallback: true` (after a
 // 20-second window of 429/503 retries on the primary). Order = priority.
-// First fallback is a sister Gemini model (covers per-model rate limits on the
-// primary); second is on a different provider (covers Google-wide outages).
-// Both verified against the full game JSON contract in test/fallback-models.mjs.
 const FALLBACK_MODELS     = [
+  "google/gemini-2.0-flash-001",
   "google/gemini-2.5-flash",
-  "meta-llama/llama-3.3-70b-instruct",
 ];
 const MAX_TOKENS_CAP      = 2000;
 
