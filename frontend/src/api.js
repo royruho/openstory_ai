@@ -7,8 +7,11 @@ const FALLBACK_MODELS     = [
   "google/gemini-2.5-flash",
 ];
 // Retry the primary for this long before flipping to the fallback chain.
-const RETRY_WINDOW_MS = 5000;
-const RETRY_STATUSES  = new Set([429, 503, 504]);
+const RETRY_WINDOW_MS   = 5000;
+const RETRY_STATUSES    = new Set([429, 503, 504]);
+// Hard per-attempt timeout — if a model responds slowly but doesn't error,
+// abort and fall back rather than waiting indefinitely.
+const ATTEMPT_TIMEOUT_MS = 25000;
 export const FREE_TURN_LIMIT = 20;
 
 // ─── User key (stored in localStorage after turn 20) ────────────
@@ -113,16 +116,32 @@ async function callWithKey(key, system, messages, opts) {
 
   while (true) {
     attempt++;
-    const resp = await fetch(OPENROUTER_ENDPOINT, {
-      method:  "POST",
-      headers: {
-        "Content-Type":  "application/json",
-        "Authorization": `Bearer ${key}`,
-        "HTTP-Referer":  window.location.origin,
-        "X-Title":       "Choose Your Adventure",
-      },
-      body: JSON.stringify(buildUserKeyBody(system, messages, maxTokens, useFallback)),
-    });
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
+    let resp;
+    try {
+      resp = await fetch(OPENROUTER_ENDPOINT, {
+        method:  "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": `Bearer ${key}`,
+          "HTTP-Referer":  window.location.origin,
+          "X-Title":       "Choose Your Adventure",
+        },
+        body:   JSON.stringify(buildUserKeyBody(system, messages, maxTokens, useFallback)),
+        signal: controller.signal,
+      });
+    } catch (e) {
+      clearTimeout(timeoutId);
+      // AbortError = our timeout fired; treat as a slow-model retryable error
+      if (e.name !== "AbortError") throw e;
+      const elapsed = Date.now() - startMs;
+      if (useFallback) throw new Error("All models timed out — please try again.");
+      useFallback = true;
+      onRetry?.({ secsElapsed: Math.round(elapsed / 1000), willFallback: true, attempt });
+      continue;
+    }
+    clearTimeout(timeoutId);
 
     if (resp.ok) {
       const data   = await resp.json();
@@ -168,17 +187,31 @@ async function callViaProxy(system, messages, opts) {
 
   while (true) {
     attempt++;
-    const body = {
-      max_completion_tokens: maxTokens,
-      messages:              [{ role: "system", content: system }, ...messages],
-      response_format:       { type: "json_object" },
-      useFallback,                              // proxy swaps in the fallback chain
-    };
-    const resp = await fetch("/api/proxy", {
-      method:  "POST",
-      headers: { "Content-Type": "application/json" },
-      body:    JSON.stringify(body),
-    });
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), ATTEMPT_TIMEOUT_MS);
+    let resp;
+    try {
+      resp = await fetch("/api/proxy", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({
+          max_completion_tokens: maxTokens,
+          messages:              [{ role: "system", content: system }, ...messages],
+          response_format:       { type: "json_object" },
+          useFallback,
+        }),
+        signal: controller.signal,
+      });
+    } catch (e) {
+      clearTimeout(timeoutId);
+      if (e.name !== "AbortError") throw e;
+      const elapsed = Date.now() - startMs;
+      if (useFallback) throw new Error("All models timed out — please try again.");
+      useFallback = true;
+      onRetry?.({ secsElapsed: Math.round(elapsed / 1000), willFallback: true, attempt });
+      continue;
+    }
+    clearTimeout(timeoutId);
 
     if (resp.ok) {
       const data   = await resp.json();
