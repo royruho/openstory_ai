@@ -88,6 +88,39 @@ function repairUnescapedQuotes(str) {
   return out;
 }
 
+// Fix closers that don't match the bracket they close. Models intermittently end
+// an array with `}` — e.g. `"facts":[ ... "רועי יצא מהמערה."}}}` instead of
+// `..."]}}` — which is unparseable even under response_format:json_object.
+//
+// Deliberately only SWAPS a wrong closer for the right one. It never appends
+// missing closers and never closes an open string: doing so would make genuinely
+// TRUNCATED output parse, and a truncated story must fail the turn rather than be
+// stored (it would then compound through the history round-trip).
+function repairMismatchedBrackets(str) {
+  let out = "";
+  const stack = [];
+  let inStr = false;
+  for (let i = 0; i < str.length; i++) {
+    const ch = str[i];
+    if (inStr) {
+      if (ch === "\\") { out += ch + (str[i + 1] ?? ""); i++; continue; }
+      if (ch === '"') inStr = false;
+      out += ch;
+      continue;
+    }
+    if (ch === '"') { inStr = true; out += ch; continue; }
+    if (ch === "{" || ch === "[") { stack.push(ch); out += ch; continue; }
+    if (ch === "}" || ch === "]") {
+      const open = stack.pop();
+      if (open === undefined) { out += ch; continue; }  // stray closer — leave it, parse will fail
+      out += open === "{" ? "}" : "]";                  // emit the closer the opener demands
+      continue;
+    }
+    out += ch;
+  }
+  return out;  // unbalanced leftovers stay unbalanced on purpose
+}
+
 function extractJSON(raw) {
   if (!raw) return null;
   // Strip reasoning blocks and code fences
@@ -104,11 +137,38 @@ function extractJSON(raw) {
   if (start !== -1 && end > start) {
     const sliced = clean.slice(start, end + 1);
     try { return unwrap(JSON.parse(sliced)); } catch { /* fall through */ }
-    // Last resort: repair unescaped quotes inside string values, then retry both forms.
+    // Repair the two damage patterns models actually produce, independently and
+    // then together: unescaped quotes inside values, and mismatched closers.
     try { return unwrap(JSON.parse(repairUnescapedQuotes(sliced))); } catch { /* fall through */ }
+    try { return unwrap(JSON.parse(repairMismatchedBrackets(sliced))); } catch { /* fall through */ }
+    try { return unwrap(JSON.parse(repairMismatchedBrackets(repairUnescapedQuotes(sliced)))); } catch { /* fall through */ }
   }
   try { return unwrap(JSON.parse(repairUnescapedQuotes(clean))); } catch { /* fall through */ }
+  try { return unwrap(JSON.parse(repairMismatchedBrackets(repairUnescapedQuotes(clean)))); } catch { /* fall through */ }
   return null;
+}
+
+// Force a parsed turn into the shape the UI actually renders.
+//
+// Parsing is not enough: models intermittently invent a richer schema — most
+// often `choices: [{choice, outcome:{...}}]` instead of plain strings. React then
+// throws "Objects are not valid as a React child" and the app white-screens.
+// Anything the UI renders as text must be guaranteed to BE text here.
+function normalizeTurn(r) {
+  if (!r || typeof r !== "object") return r;
+  if (typeof r.story !== "string") r.story = r.story == null ? "" : String(r.story);
+  if (Array.isArray(r.choices)) {
+    r.choices = r.choices
+      .map(c => {
+        if (typeof c === "string") return c;
+        if (c && typeof c === "object") return c.choice || c.text || c.label || c.action || c.title || "";
+        return c == null ? "" : String(c);
+      })
+      .filter(c => typeof c === "string" && c.trim());
+  } else {
+    r.choices = [];
+  }
+  return r;
 }
 
 // ─── Core call ──────────────────────────────────────────────────
@@ -168,7 +228,7 @@ async function callWithKey(key, system, messages, opts) {
       const data   = await resp.json();
       const raw    = data?.choices?.[0]?.message?.content || "";
       const result = extractJSON(raw);
-      if (result) return result;
+      if (result) return normalizeTurn(result);
       // Unparseable. Never hand back the raw blob as story text — it would be
       // written into storyLog, re-serialized into history every turn, and
       // progressively corrupt the run. Retry instead: the usual cause is a
@@ -250,7 +310,7 @@ async function callViaProxy(system, messages, opts) {
       const data   = await resp.json();
       const raw    = data?.choices?.[0]?.message?.content || "";
       const result = extractJSON(raw);
-      if (result) return result;
+      if (result) return normalizeTurn(result);
       // See callWithKey — a malformed response must never reach storyLog, and
       // an HTTP 200 carrying finish_reason:"error" is retryable, not terminal.
       parseFailures++;

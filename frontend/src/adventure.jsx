@@ -2054,7 +2054,9 @@ worldState: Update every turn — carry ALL existing entries forward and add new
   npcs: {"Name": "role/relationship — one-sentence current status"} — every character the player has met.
   locations: ["Place — brief note"] — every location visited or mentioned.
   facts: ["Established fact"] — key truths that affect the story. Keep to the 8 most important; drop least relevant when full.
-Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unless gameOver is true.`;
+Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unless gameOver is true.
+choices: an array of PLAIN STRINGS — the exact text of each option, nothing else. Never objects, never nested, never the outcome of a choice. Correct: ["open the door","wait"]. Wrong: [{"choice":"open the door","outcome":{...}}].
+Return the JSON object above and nothing else — do not add fields, do not nest extra structure inside any field.`;
   }, [config, character, turnCount, storySummary, worldState, chapterBrief, chapterNumber, totalChapters, stats]);
 
   // ─── API CALL ─────────────────────────────────────────────────
@@ -2078,8 +2080,24 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       console.error("API error:", err);
       const errorMsg = lang === "Hebrew" ? "משהו השתבש... נסה שוב." : lang === "Arabic" ? "حدث خطأ... حاول مرة أخرى." : lang === "Portuguese" ? "Algo deu errado... tente novamente." : "Something went wrong... try again.";
       const retryMsg = lang === "Hebrew" ? "נסה שוב" : lang === "Arabic" ? "حاول مرة أخرى" : lang === "Portuguese" ? "Tentar novamente" : "Try again";
+
+      // A rate-limited key, an unfunded key and a malformed response all used to
+      // collapse into the same generic string, which made every failure report
+      // unactionable. Show what actually happened.
+      const detail = err?.message ? `\n\n(${err.message})` : "";
+
+      // 401/402/403 on the user-key path means the stored key itself is the
+      // problem — a generic "try again" would loop forever, since every retry
+      // reuses the same bad key. Send them to the key modal instead.
+      if (hasUserKey() && /API error (401|402|403)\b/.test(err?.message || "")) {
+        setKeyError(err.message);
+        setKeyModalContext("game");
+        setShowKeyModal(true);
+        return null; // caller must handle null
+      }
+
       return {
-        story: errorMsg,
+        story: errorMsg + detail,
         choices: [retryMsg],
         gameOver: false, rollRequired: false, rollContext: "", chapterSolved: false,
       };
