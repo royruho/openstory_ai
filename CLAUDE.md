@@ -344,6 +344,10 @@ The system prompt also shows authoritative current stats and `WORLD STATE`. This
 
 ## Long-context management
 
+**Near-duplicate merging.** The LLM re-emits the cumulative lists every turn and rewords them slightly each time, so exact-match `new Set()` never deduped them and they grew forever (`"…של מפה."` / `"…של מפה"` / `"הקלף המפותל…"` as three entries; `"מערה חסרת מוצא"` alongside `"מערה חסרת מוצא — מלאה בעשן…"`). `mergeDedup()` merges on meaning — equal after normalisation, one containing the other, or ≥90% Levenshtein similarity — and keeps the longest variant. `saysSame()` refuses to merge strings whose **digits** differ, so "room 1" and "room 2" stay distinct facts. `mergeNpcs()` does the same for NPC keys. Used for `chapterProgress.achieved/clues` and `worldState.locations/facts`.
+
+This is load-bearing for `stuckTurns`: only a genuinely new item counts as movement, otherwise a reworded restatement would reset the counter every turn and a stuck player would never be offered the costly way out.
+
 | Mechanism | Detail |
 |---|---|
 | Sliding window | Only the last `WINDOW_SIZE` (16) `storyLog` entries are sent as raw history once a summary exists |
@@ -442,6 +446,7 @@ There is no separate FINALE phase. The last chapter's solve **is** the ending: t
 - Do not set `chapterSolved: true` on intent, planning, a near-miss, or because the player is struggling — only when the `winCondition` is objectively met
 - Do not render `chapterBrief.approaches` — they are the puzzle. They go to the LLM only. (They *are* visible in the save JSON; unavoidable with no backend, and self-inflicted.)
 - Do not gate the `chapterProgress` merge on `result.chapterProgress` being present — an absent value is exactly the no-movement signal `stuckTurns` depends on
+- Do not dedupe cumulative lists with plain `new Set()` — the LLM rewords entries every turn, so exact matching lets them grow forever. Use `mergeDedup()`, and count movement by whether it actually added an item
 - Do not add `setting` or `resolutionCondition` back to the chapter brief — both were intentionally removed. `winCondition` is the goal made falsifiable, not a revival of `resolutionCondition` (which described how the narration should wrap up)
 - Do not put `chapterProgress` — or the stuck directive derived from it — in the system prompt; both belong only in the `[CURRENT STATE]` user message block
 - Do not bump `chapterNumber` inside the brief's success handler — a failed brief then silently strands the player in the previous chapter forever. `startChapter` bumps it up front

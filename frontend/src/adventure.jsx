@@ -543,7 +543,78 @@ function getAutoAdvanceSteps(mode) {
 const SUMMARY_EVERY = 5;
 const WINDOW_SIZE   = 16;
 const RTL_LANGS     = ["Hebrew", "Arabic"];
-// Chapter count per adventure length (goal-based, not turn-based)
+
+// ─── NEAR-DUPLICATE MERGING ────────────────────────────────────
+// Cumulative lists (chapterProgress.achieved/clues, worldState.locations/facts)
+// are re-emitted by the LLM every turn, and it rewords them slightly each time.
+// Exact-match `new Set()` never catches that, so the lists grew forever:
+//   "הקלף מפותל מכיל שרטוטים לא ברורים של מפה."   <- trailing period
+//   "הקלף מפותל מכיל שרטוטים לא ברורים של מפה"
+//   "הקלף המפותל מכיל שרטוטים לא ברורים של מפה."  <- one extra letter
+//   "מערה חסרת מוצא"  vs  "מערה חסרת מוצא — מלאה בעשן..."   <- bare vs annotated
+// which bloats every prompt and, worse, looks like fresh progress to stuckTurns.
+const normKey = (s) => String(s ?? "").trim().toLowerCase().replace(/\s+/g, " ").replace(/[.,;:!?…׃]+$/u, "").trim();
+
+function levenshtein(a, b) {
+  if (a === b) return 0;
+  if (!a.length) return b.length;
+  if (!b.length) return a.length;
+  let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    prev = cur;
+  }
+  return prev[b.length];
+}
+
+// Same digits required: "רועי בחדר 1" and "רועי בחדר 2" are 95% identical as text
+// but are different facts, and merging them would silently lose one.
+const digitsOf = (s) => (s.match(/\d+/g) || []).join(",");
+
+// True when `b` says the same thing as `a`: identical after normalisation, one
+// contains the other (bare name vs annotated), or near-identical text.
+function saysSame(a, b) {
+  if (a === b) return true;
+  if (a.includes(b) || b.includes(a)) return true;
+  if (digitsOf(a) !== digitsOf(b)) return false;
+  const max = Math.max(a.length, b.length);
+  return max > 0 && 1 - levenshtein(a, b) / max >= 0.9;
+}
+
+// Merge `incoming` into `existing`, keeping the longest (most informative)
+// variant of each distinct item. Returns a new array.
+function mergeDedup(existing = [], incoming = []) {
+  const out = [];
+  for (const raw of [...existing, ...incoming]) {
+    const item = typeof raw === "string" ? raw.trim() : String(raw ?? "").trim();
+    if (!item) continue;
+    const key = normKey(item);
+    const at = out.findIndex(o => saysSame(normKey(o), key));
+    if (at === -1) out.push(item);
+    else if (item.length > out[at].length) out[at] = item;  // prefer the annotated variant
+  }
+  return out;
+}
+
+// NPCs are keyed by name, but the LLM varies the key too ("רועי" / "רועי "),
+// which would otherwise create a second entry for the same character. Match on
+// the normalised name, keep the incoming status (it is the more recent one).
+function mergeNpcs(prev = {}, incoming = {}) {
+  const out = { ...prev };
+  for (const [name, status] of Object.entries(incoming || {})) {
+    const clean = String(name ?? "").trim();
+    if (!clean) continue;
+    const key = normKey(clean);
+    const existing = Object.keys(out).find(k => normKey(k) === key);
+    if (existing) out[existing] = status;
+    else out[clean] = status;
+  }
+  return out;
+}
+
 // Chapter counts the duration step offers. Chapters end when their situation is
 // solved, never on a turn count — so this is the only measure of adventure size.
 const CHAPTER_COUNTS = [1, 2, 4, 8];
@@ -2622,26 +2693,26 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     // against the render snapshot rather than inside the updater because we need
     // to know whether the merge actually moved; safe because makeChoice is
     // guarded by `loading` and never runs concurrently with itself.
-    const cp     = result.chapterProgress || {};
-    const newAch = (cp.achieved || []).filter(a => a && !chapterProgress.achieved.includes(a));
-    const newClu = (cp.clues    || []).filter(c => c && !chapterProgress.clues.includes(c));
-    if (newAch.length || newClu.length) {
-      setChapterProgress(prev => ({
-        achieved: [...new Set([...prev.achieved, ...newAch])],
-        clues:    [...new Set([...prev.clues,    ...newClu])],
-      }));
-      setStuckTurns(0);
-    } else if (!solved) {
-      setStuckTurns(n => n + 1);
-    }
+    const cp        = result.chapterProgress || {};
+    const mergedAch = mergeDedup(chapterProgress.achieved, cp.achieved || []);
+    const mergedClu = mergeDedup(chapterProgress.clues,    cp.clues    || []);
+    // Only a genuinely NEW item counts as movement. A reworded restatement of an
+    // existing clue must not reset the counter, or a stuck player would never be
+    // offered the costly way out.
+    const moved = mergedAch.length > chapterProgress.achieved.length
+               || mergedClu.length > chapterProgress.clues.length;
+    setChapterProgress({ achieved: mergedAch, clues: mergedClu });
+    if (moved) setStuckTurns(0);
+    else if (!solved) setStuckTurns(n => n + 1);
 
-    // Merge worldState — npcs by key, locations/facts deduplicated
+    // Merge worldState — npcs by name, locations/facts merged on meaning rather
+    // than exact text (the LLM rewords them every turn; see mergeDedup).
     if (result.worldState) {
       const ws = result.worldState;
       setWorldState(prev => ({
-        npcs:      { ...prev.npcs,      ...(ws.npcs      || {}) },
-        locations: [...new Set([...prev.locations, ...(ws.locations || [])])],
-        facts:     [...new Set([...prev.facts,     ...(ws.facts     || [])])].slice(0, 8),
+        npcs:      mergeNpcs(prev.npcs, ws.npcs),
+        locations: mergeDedup(prev.locations, ws.locations || []),
+        facts:     mergeDedup(prev.facts,     ws.facts     || []).slice(0, 8),
       }));
     }
 
