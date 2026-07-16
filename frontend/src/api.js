@@ -1,10 +1,9 @@
 const OPENROUTER_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
-const OPENROUTER_MODEL    = "google/gemini-2.0-flash-001";
+const OPENROUTER_MODEL    = "google/gemini-2.5-flash";
 // Mirrored on the server in api/proxy.js — keep in sync. Used by the
 // user-key path (turn 20+) where the call goes direct to OpenRouter.
 const FALLBACK_MODELS     = [
   "deepseek/deepseek-chat",
-  "google/gemini-2.5-flash",
 ];
 // Retry the primary for this long before flipping to the fallback chain.
 const RETRY_WINDOW_MS   = 5000;
@@ -35,9 +34,16 @@ function parseRetryAfter(body) {
 
 // Escape unescaped " characters inside JSON string values.
 // Strategy: scan character by character tracking string context. When inside a
-// string, a `"` is the closing delimiter only if the next non-whitespace char is
-// a JSON structural character (} ] , :). Otherwise it's an unescaped quote that
-// the LLM embedded in the value (common with Hebrew/Arabic dialogue) — escape it.
+// string, a `"` is the closing delimiter only if what follows is *structurally*
+// valid JSON. Otherwise it's an unescaped quote the LLM embedded in the value
+// (common with Hebrew/Arabic dialogue) — escape it.
+//
+// Treating a bare `,` as structural is NOT safe: dialogue that closes a quote
+// before a comma — `אמר: "עצור שם", ואז שלף` — looks identical to end-of-value.
+// Misreading it derails the parse, extractJSON returns null, and the caller
+// used to store the raw JSON blob as story text (which then compounds through
+// the history round-trip). So after a comma we require a real `"key":` pair or
+// a following string element; prose after the comma means it was an inner quote.
 function repairUnescapedQuotes(str) {
   let out = "";
   let inStr = false;
@@ -52,11 +58,21 @@ function repairUnescapedQuotes(str) {
       out += ch + (str[i + 1] ?? "");
       i += 2;
     } else if (ch === '"') {
-      // Peek past whitespace to see if the next token is structural.
+      // Peek past whitespace to see what follows this quote.
       let j = i + 1;
       while (j < str.length && " \t\n\r".includes(str[j])) j++;
       const next = str[j];
-      if (j >= str.length || "}],:".includes(next)) {
+      let closes;
+      if (j >= str.length || next === "}" || next === "]" || next === ":") {
+        closes = true;
+      } else if (next === ",") {
+        const rest = str.slice(j + 1);
+        closes = /^\s*"(?:[^"\\]|\\.)*"\s*:/.test(rest)      // next object key
+              || /^\s*"(?:[^"\\]|\\.)*"\s*[,\]]/.test(rest); // next array element
+      } else {
+        closes = false;
+      }
+      if (closes) {
         out += '"'; inStr = false; i++;   // valid end of string
       } else {
         out += '\\"'; i++;                 // unescaped inner quote — escape it
@@ -147,7 +163,11 @@ async function callWithKey(key, system, messages, opts) {
       const data   = await resp.json();
       const raw    = data?.choices?.[0]?.message?.content || "";
       const result = extractJSON(raw);
-      return result || { story: raw, choices: [], gameOver: false, gameOverReason: "" };
+      // Never hand back the raw blob as story text — it would be written into
+      // storyLog, re-serialized into history every turn, and progressively
+      // corrupt the run. An unparseable response is a failed turn, full stop.
+      if (!result) throw new Error("Model returned malformed output — please try again.");
+      return result;
     }
 
     if (!RETRY_STATUSES.has(resp.status)) {
@@ -217,7 +237,9 @@ async function callViaProxy(system, messages, opts) {
       const data   = await resp.json();
       const raw    = data?.choices?.[0]?.message?.content || "";
       const result = extractJSON(raw);
-      return result || { story: raw, choices: [], gameOver: false, gameOverReason: "" };
+      // See callWithKey — a malformed response must never reach storyLog.
+      if (!result) throw new Error("Model returned malformed output — please try again.");
+      return result;
     }
 
     if (!RETRY_STATUSES.has(resp.status)) {
