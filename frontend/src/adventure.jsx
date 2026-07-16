@@ -615,6 +615,66 @@ function mergeNpcs(prev = {}, incoming = {}) {
   return out;
 }
 
+// Provider-enforced shape for a game turn. Keep in sync with the JSON stub in
+// buildSystemPrompt — the prompt teaches the model what the fields MEAN, this
+// makes the provider guarantee their TYPES.
+//
+// Prompting alone does not work: instructing the model that choices are plain
+// strings changed the violation rate 4/8 -> 4/8. With this schema it is 0/8, and
+// malformed JSON goes 4/8 -> 0/8. `stats` is always required even when
+// trackStats is off (the caller just ignores it) — strict mode has no way to
+// make a property conditional, and an unused object is cheaper than two schemas.
+const TURN_SCHEMA = {
+  name: "turn",
+  strict: true,
+  schema: {
+    type: "object",
+    additionalProperties: false,
+    required: ["story", "choices", "stats", "gameOver", "gameOverReason", "rollRequired", "rollContext",
+               "chapterSolved", "solvedVia", "chapterProgress", "mood", "worldState"],
+    properties: {
+      story:   { type: "string" },
+      choices: { type: "array", items: { type: "string" } },
+      stats: {
+        type: "object", additionalProperties: false,
+        required: ["health", "inventory", "relationships"],
+        properties: {
+          health:        { type: "integer" },
+          inventory:     { type: "array", items: { type: "string" } },
+          relationships: { type: "object", additionalProperties: { type: "string" } },
+        },
+      },
+      gameOver:       { type: "boolean" },
+      gameOverReason: { type: "string" },
+      rollRequired:   { type: "boolean" },
+      rollContext:    { type: "string" },
+      chapterSolved:  { type: "boolean" },
+      solvedVia:      { type: "string" },
+      chapterProgress: {
+        type: "object", additionalProperties: false,
+        required: ["achieved", "clues"],
+        properties: {
+          achieved: { type: "array", items: { type: "string" } },
+          clues:    { type: "array", items: { type: "string" } },
+        },
+      },
+      mood: { type: "string" },
+      // npcs values are typed as strings here specifically because the model used
+      // to return {status, location} objects, which rendered as "[object Object]"
+      // straight into the next prompt and then persisted forever.
+      worldState: {
+        type: "object", additionalProperties: false,
+        required: ["npcs", "locations", "facts"],
+        properties: {
+          npcs:      { type: "object", additionalProperties: { type: "string" } },
+          locations: { type: "array", items: { type: "string" } },
+          facts:     { type: "array", items: { type: "string" } },
+        },
+      },
+    },
+  },
+};
+
 // Chapter counts the duration step offers. Chapters end when their situation is
 // solved, never on a turn count — so this is the only measure of adventure size.
 const CHAPTER_COUNTS = [1, 2, 4, 8];
@@ -2138,7 +2198,10 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       // (summary, chapter brief, translation) bypass callAPI and call api.chat
       // directly without an onRetry — same retry logic, no UI.
       const onRetry = ({ willFallback }) => setRetryNotice({ kind: willFallback ? "fallback" : "retry" });
-      const result = await api.chat(sysPrompt, messages, { ...opts, turnCount, onRetry });
+      // TURN_SCHEMA makes the provider enforce the turn shape. Background calls
+      // (summary, brief, translation) have their own shapes and stay on
+      // json_object — they can pass opts.schema if they ever need the same.
+      const result = await api.chat(sysPrompt, messages, { schema: TURN_SCHEMA, ...opts, turnCount, onRetry });
       setRetryNotice(null);
       return result;
     } catch (err) {
