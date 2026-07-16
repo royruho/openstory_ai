@@ -201,7 +201,11 @@ Models routinely emit JSON with **unescaped `"` inside string values** — espec
 
 > ⚠️ Do **not** simplify this back to "next non-whitespace char is one of `}],:`". That treats `אמר: "עצור שם", ואז שלף` as end-of-value, derails the parse, and returns `null`.
 
-**Invariant: a response that fails to parse must never reach `storyLog`.** `callWithKey` and `callViaProxy` **throw** on `extractJSON` returning null. They must never `return { story: raw, ... }` — that writes a raw JSON blob into `storyLog`, which `makeChoice` then re-serializes into history every turn, compounding escape artifacts until the run degrades into gibberish. Every `api.chat` caller is wrapped in try/catch, so throwing degrades to the normal error + retry entry, which is filtered out of history.
+**Invariant: a response that fails to parse must never reach `storyLog`.** `callWithKey` and `callViaProxy` must never `return { story: raw, ... }` — that writes a raw JSON blob into `storyLog`, which `makeChoice` then re-serializes into history every turn, compounding escape artifacts until the run degrades into gibberish.
+
+Instead they **retry** on an unparseable response (flipping to the fallback chain), up to `MAX_PARSE_FAILURES` (3), and only throw once exhausted. The retry matters: OpenRouter intermittently returns **HTTP 200 with `finish_reason: "error"`, `completion_tokens: 0`, and content truncated mid-sentence** when the upstream provider fails mid-generation. That is a transient blip, not a bad turn — but it never touches the `RETRY_STATUSES` path, because the HTTP status is 200. Failing terminally on it ends the game mid-adventure.
+
+Every `api.chat` caller is wrapped in try/catch, so a genuine exhaustion degrades to the normal error + retry entry, which is filtered out of history.
 
 ---
 
@@ -410,6 +414,8 @@ Phase is calculated from `Math.min(turnCount, storyLength)` so it never overflow
 - Do not let the caller pick the model — `proxy.js` locks both the primary and the fallback chain server-side
 - Do not change the model ID in only one file — `api.js` and `proxy.js` must stay in sync
 - Do not return `{ story: raw }` when `extractJSON` fails — it poisons `storyLog` and compounds through the history round-trip (see the malformed-output invariant above)
+- Do not make an unparseable response terminal — retry first. An HTTP 200 carrying `finish_reason: "error"` is a transient provider blip and must not end the game
+- Do not interpolate `worldState` / `storySummary.world` values into the prompt without `asText()` — models return objects where a string is documented, and `[object Object]` then merges forward permanently
 - Do not loosen `repairUnescapedQuotes` back to the "any of `}],:`" heuristic — it breaks on Hebrew/Arabic dialogue
 - Do not add 404 to `RETRY_STATUSES` — a retired model must fail loudly, not silently fall back forever
 - Do not hardcode step numbers — indices differ per mode; always use `stepIdx("key")`

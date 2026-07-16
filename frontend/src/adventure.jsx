@@ -1892,20 +1892,32 @@ Obstacle: ${chapterBrief.obstacle}
 → Set chapterComplete:true only when the goal above is concretely achieved (the specific answer learned, artifact obtained, or problem fixed). Player may explore freely and hit dead ends.`
       : "";
 
+    // Models don't reliably honour the "Name": "status string" shape — they often
+    // return an object ({status, location, ...}) or a nested value instead. Left
+    // raw, `${v}` renders "[object Object]", which is then merged back into
+    // worldState and re-injected into the prompt every turn, forever. Coerce.
+    const asText = (v) => {
+      if (typeof v === "string") return v;
+      if (v == null) return "";
+      if (Array.isArray(v)) return v.map(asText).filter(Boolean).join(", ");
+      if (typeof v === "object") return Object.values(v).map(asText).filter(Boolean).join(" — ");
+      return String(v);
+    };
+
     const hasWorldState = Object.keys(worldState.npcs).length || worldState.locations.length || worldState.facts.length;
     const worldStateSection = hasWorldState ? `
 WORLD STATE (persistent facts — always true, never contradict):${Object.keys(worldState.npcs).length ? `
-NPCs: ${Object.entries(worldState.npcs).map(([k, v]) => `${k} (${v})`).join(" | ")}` : ""}${worldState.locations.length ? `
-Locations: ${worldState.locations.join(" | ")}` : ""}${worldState.facts.length ? `
-Facts: ${worldState.facts.join(" | ")}` : ""}` : "";
+NPCs: ${Object.entries(worldState.npcs).map(([k, v]) => `${k} (${asText(v)})`).join(" | ")}` : ""}${worldState.locations.length ? `
+Locations: ${worldState.locations.map(asText).join(" | ")}` : ""}${worldState.facts.length ? `
+Facts: ${worldState.facts.map(asText).join(" | ")}` : ""}` : "";
 
     const storyContextSection = storySummary.narrative ? `
 STORY CONTEXT (events before recent turns — stay consistent, never contradict):
 ${storySummary.narrative}${storySummary.world?.npcs && Object.keys(storySummary.world.npcs).length ? `
-NPCs: ${Object.entries(storySummary.world.npcs).map(([k, v]) => `${k} (${v})`).join(", ")}` : ""}${storySummary.world?.locations?.length ? `
-Locations: ${storySummary.world.locations.join(", ")}` : ""}${storySummary.world?.decisions?.length ? `
-Key decisions: ${storySummary.world.decisions.join("; ")}` : ""}${storySummary.world?.threads?.length ? `
-Active threads: ${storySummary.world.threads.join("; ")}` : ""}` : "";
+NPCs: ${Object.entries(storySummary.world.npcs).map(([k, v]) => `${k} (${asText(v)})`).join(", ")}` : ""}${storySummary.world?.locations?.length ? `
+Locations: ${storySummary.world.locations.map(asText).join(", ")}` : ""}${storySummary.world?.decisions?.length ? `
+Key decisions: ${storySummary.world.decisions.map(asText).join("; ")}` : ""}${storySummary.world?.threads?.length ? `
+Active threads: ${storySummary.world.threads.map(asText).join("; ")}` : ""}` : "";
 
     const total = cfg.storyLength || 20;
     const effectiveTurn = Math.min(turnCount, total);

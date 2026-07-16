@@ -11,6 +11,10 @@ const RETRY_STATUSES    = new Set([429, 503, 504]);
 // Hard per-attempt timeout — if a model responds slowly but doesn't error,
 // abort and fall back rather than waiting indefinitely.
 const ATTEMPT_TIMEOUT_MS = 25000;
+// How many unparseable responses to tolerate before failing the turn. Upstream
+// providers intermittently return HTTP 200 with finish_reason:"error" and
+// truncated content, so this must be >1 or a transient blip ends the turn.
+const MAX_PARSE_FAILURES = 3;
 export const FREE_TURN_LIMIT = 20;
 
 // ─── User key (stored in localStorage after turn 20) ────────────
@@ -129,6 +133,7 @@ async function callWithKey(key, system, messages, opts) {
   const startMs   = Date.now();
   let attempt = 0;
   let useFallback = false;
+  let parseFailures = 0;
 
   while (true) {
     attempt++;
@@ -163,11 +168,18 @@ async function callWithKey(key, system, messages, opts) {
       const data   = await resp.json();
       const raw    = data?.choices?.[0]?.message?.content || "";
       const result = extractJSON(raw);
-      // Never hand back the raw blob as story text — it would be written into
-      // storyLog, re-serialized into history every turn, and progressively
-      // corrupt the run. An unparseable response is a failed turn, full stop.
-      if (!result) throw new Error("Model returned malformed output — please try again.");
-      return result;
+      if (result) return result;
+      // Unparseable. Never hand back the raw blob as story text — it would be
+      // written into storyLog, re-serialized into history every turn, and
+      // progressively corrupt the run. Retry instead: the usual cause is a
+      // transient upstream failure that arrives as HTTP 200 with
+      // finish_reason:"error" and content truncated mid-sentence, which the
+      // status-code retry path above never sees.
+      parseFailures++;
+      if (parseFailures >= MAX_PARSE_FAILURES) throw new Error("Model returned malformed output — please try again.");
+      useFallback = true;
+      onRetry?.({ secsElapsed: Math.round((Date.now() - startMs) / 1000), willFallback: true, attempt });
+      continue;
     }
 
     if (!RETRY_STATUSES.has(resp.status)) {
@@ -204,6 +216,7 @@ async function callViaProxy(system, messages, opts) {
   const startMs   = Date.now();
   let attempt = 0;
   let useFallback = false;
+  let parseFailures = 0;
 
   while (true) {
     attempt++;
@@ -237,9 +250,14 @@ async function callViaProxy(system, messages, opts) {
       const data   = await resp.json();
       const raw    = data?.choices?.[0]?.message?.content || "";
       const result = extractJSON(raw);
-      // See callWithKey — a malformed response must never reach storyLog.
-      if (!result) throw new Error("Model returned malformed output — please try again.");
-      return result;
+      if (result) return result;
+      // See callWithKey — a malformed response must never reach storyLog, and
+      // an HTTP 200 carrying finish_reason:"error" is retryable, not terminal.
+      parseFailures++;
+      if (parseFailures >= MAX_PARSE_FAILURES) throw new Error("Model returned malformed output — please try again.");
+      useFallback = true;
+      onRetry?.({ secsElapsed: Math.round((Date.now() - startMs) / 1000), willFallback: true, attempt });
+      continue;
     }
 
     if (!RETRY_STATUSES.has(resp.status)) {
