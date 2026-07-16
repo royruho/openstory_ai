@@ -218,7 +218,7 @@ Everything lives in `frontend/src/adventure.jsx` — a single React component.
 | State | Type | Description |
 |---|---|---|
 | `storyLog` | `Array<LogEntry>` | Full story log (see entry types below) |
-| `config` | object | All setup choices — includes `mode`, `language`, `storyLength` |
+| `config` | object | All setup choices — includes `mode`, `language`, `chapterCount` |
 | `character` | object | name, gender, age, appearance, skills + `dndRace`, `dndClass`, `abilityScores` |
 | `stats` | object | health, inventory, relationships |
 | `choices` | string[] | Current choice buttons |
@@ -226,10 +226,12 @@ Everything lives in `frontend/src/adventure.jsx` — a single React component.
 | `storySummary` | object | Rolling LLM summary `{narrative, world}` |
 | `worldState` | object | `{npcs, locations, facts}` — persistent, merged every turn |
 | `chapterNumber` | number | Current chapter (1-based) |
-| `chapterBrief` | object\|null | `{title, goal, obstacle}` — generated once, immutable for the chapter |
+| `chapterBrief` | object\|null | `{title, situation, winCondition, approaches}` — generated once, immutable for the chapter |
 | `chapterBanner` | string\|null | Title shown in overlay when chapter starts |
 | `chapterProgress` | object | `{achieved: string[], clues: string[]}` |
-| `hintLevel` | number | 0=hidden, 1=goal, 2=goal+challenge — resets on chapter transition |
+| `hintLevel` | number | How many of `chapterBrief.approaches` are revealed. Monotonic within a chapter (never re-hidden — each was earned), resets on transition, **is saved** |
+| `stuckTurns` | number | Turns with no `chapterProgress` movement; at `STUCK_TURNS_LIMIT` the costly out is required |
+| `briefStatus` | string | `"idle" \| "loading" \| "error"` — gates the choices panel while the brief lands |
 | `pendingRoll` | object\|null | `{context, choiceText}` — dice waiting to be rolled |
 | `nextRollRequired` | object | `{required, context}` from last LLM response |
 | `currentMood` | string | Drives ambient UI tone; from the LLM's `mood` field |
@@ -276,23 +278,35 @@ Error/retry entries (localized "Something went wrong" narrator + "Try again" pla
 
 ## Chapter system
 
-Adventure length maps to chapter count via `CHAPTER_MAP = { 5: 1, 10: 2, 20: 4, 40: 8 }` (fallback: `round(storyLength / 5)`, min 1).
+**A chapter is ONE situation with a solution decided up front.** The player cannot progress until it is solved; the narrative keeps pointing back at it.
 
-| Length | Turns | Chapters |
-|---|---|---|
-| Sprint | 5 | 1 |
-| Short | 10 | 2 |
-| Standard | 20 | 4 |
-| Epic | 40 | 8 |
+**There is no turn cap.** Adventure size is measured only in chapters — `config.chapterCount`, chosen directly by the duration step (`CHAPTER_COUNTS = [1, 2, 4, 8]` = Sprint/Short/Standard/Epic). A chapter lasts exactly as long as the player takes to solve it. The story ends only when the final chapter's win condition is met.
 
-Each chapter has **one single overarching goal** (not a list of steps or items). The brief is generated once by a background call and never changes mid-chapter. Chapter ends when the LLM returns `chapterComplete: true`, not by turn count — the player can explore freely, hit dead ends, and try multiple approaches.
+**Chapter brief format** (`chapterBrief`): `{title, situation, winCondition, approaches}`.
+- `situation` — the concrete predicament. **Always visible to the player.**
+- `winCondition` — the objectively checkable end-state that resolves it. Must be answerable yes/no by looking at the world ("Aran is inside the city walls"), never an activity ("investigate the ruins"). **Always visible.**
+- `approaches` — 2-4 pre-decided viable routes. **Hidden**; sent to the LLM (it needs them to judge), revealed one per click of the hint bulb via `hintLevel`.
+- `goal`/`obstacle` are gone; `setting`/`resolutionCondition` remain intentionally absent.
 
-**Chapter brief format** (`chapterBrief`): `{title, goal, obstacle}` — three fields only.
-- `goal`: one concrete, falsifiable objective — a specific answer to discover, artifact to obtain, or problem to fix
-- `obstacle`: the main force blocking the goal, plus the broad approach needed
-- `setting` and `resolutionCondition` are intentionally omitted — the premise sets the world; the goal IS the resolution condition
+The brief is **generated once per chapter and awaited** — see the blocking exception below. The chapter ends when the LLM returns `chapterSolved: true`, never by turn count.
 
-**Chapter progress** (`chapterProgress`) is tracked cumulatively in the `[CURRENT STATE]` user message block — NOT in the system prompt. Achieved items and clues accumulate (deduped) and both reset on chapter transition. Shown in the header as tags and in the sidebar.
+**Judging.** The LLM checks each turn whether the player's action genuinely achieved `winCondition`. An unlisted-but-valid approach still counts. Intent, planning and near-misses do not. The prompt explicitly forbids advancing the plot, opening unrelated threads, or relocating the player until it is met.
+
+**Stuck / costly out.** `stuckTurns` counts turns where `chapterProgress` did not move (an *absent* `chapterProgress` counts as no movement). At `STUCK_TURNS_LIMIT` (4) the `[CURRENT STATE]` block requires the narrator to offer exactly one choice that resolves the situation at a concrete, named price. The player opts in; a hard gate never becomes a dead end.
+
+**Chapter progress** (`chapterProgress`) is tracked cumulatively in the `[CURRENT STATE]` user message block — NOT in the system prompt. The stuck directive lives there too, since it is derived from `chapterProgress` (and it keeps the system prompt stable turn to turn). Achieved items and clues accumulate (deduped) and both reset on chapter transition.
+
+### The blocking exception
+
+`startChapter(chNum, summaryCtx, cfgOv, charOv, totalOv)` is the **one background call that blocks play** (`briefStatus: "idle" | "loading" | "error"` gates the choices panel): without a `winCondition` there is nothing to solve against. It:
+- bumps `chapterNumber` **immediately**, not in the brief's success handler — that used to mean a failed brief silently left the player in the previous chapter forever;
+- retries up to `BRIEF_MAX_ATTEMPTS` (3), then offers **Retry** or **Continue anyway** (plays on with no `chapterSection` rather than bricking the run);
+- uses `briefReqRef` to discard a brief that resolves after a reset/load;
+- **returns** the brief, because `setChapterBrief` has not landed for a caller building a prompt in the same tick.
+
+`startAdventure` awaits chapter 1's brief **before** the opening call and passes it via `buildSystemPrompt(cfg, char, briefOverride, chapNumOverride)`. Previously the brief was on a 5 s timer racing an opening written with `chapterBrief === null`, so the opening and the chapter routinely described different things.
+
+`generateChapterBrief` is a pure producer (returns brief or null, sets no state) and takes `cfgOverride`/`charOverride` — `startAdventure` calls `setConfig(finalCfg)` and starts chapter 1 in the same tick, so the closure's `config` is still pre-defaults.
 
 ---
 
@@ -353,7 +367,8 @@ Every game turn the LLM must return:
   "gameOverReason": "",
   "rollRequired": false,
   "rollContext": "",
-  "chapterComplete": false,
+  "chapterSolved": false,
+  "solvedVia": "",
   "chapterProgress": { "achieved": ["milestone"], "clues": ["hint"] },
   "mood": "neutral",
   "worldState": { "npcs": {}, "locations": [], "facts": [] }
@@ -362,24 +377,26 @@ Every game turn the LLM must return:
 
 - `stats` only required when `config.trackStats` is true
 - `rollRequired` / `rollContext`: signal to show dice before the next action
-- `chapterComplete`: signal to generate the next chapter brief and reset progress
-- `chapterProgress` / `worldState`: cumulative — the LLM carries forward existing entries and adds new ones
+- `chapterSolved`: the chapter's `winCondition` is objectively met (renamed from `chapterComplete` — "complete" invited "we've spent enough time here"; "solved" is binary). `makeChoice` reads `result.chapterSolved ?? result.chapterComplete` for one release.
+- `solvedVia`: short phrase naming what the player actually did; shown on the chapter marker
+- `chapterProgress` / `worldState`: cumulative — the LLM carries forward existing entries and adds new ones. An **empty** `chapterProgress` is meaningful: it is how the stuck counter detects no headway, so the prompt tells the LLM not to pad it.
 - `mood`: one of peaceful, tense, action, dramatic, sad, triumphant, mysterious, neutral
 
 ---
 
 ## Story arc pacing
 
-Phase is calculated from `Math.min(turnCount, storyLength)` so it never overflows. FINALE and CLIMAX are additionally gated by `isLastChapter` — the LLM is never told "last turn, set gameOver" while the player is on an earlier chapter.
+Phase is keyed to **chapter number, never turn count**. There is no turn budget, so the story cannot end because turns ran out.
 
 | Progress | Phase | Instruction |
 |---|---|---|
-| Turn 0 | OPENING | Establish world, character, inciting situation |
-| 0–35% | EARLY | Develop world, introduce complications |
-| 35–65% | MIDDLE | Escalate tension, introduce twist |
-| 65–100% | LATE | Push toward climax, N turns remaining |
-| Last 2 turns + last chapter | CLIMAX | Bring all threads to a head |
-| At/past turn limit + last chapter | FINALE | Satisfying conclusion, `gameOver: true` |
+| Turn 0 | OPENING | Establish world and character, drop the player into chapter 1's situation |
+| Chapter 1 | EARLY | Develop world and cast while the player works the situation |
+| Middle chapters (<65%) | MIDDLE | Escalate; earlier consequences resurface |
+| Later chapters | LATE | Push toward the climax |
+| Last chapter | CLIMAX | Bring all threads to a head |
+
+There is no separate FINALE phase. The last chapter's solve **is** the ending: the CLIMAX instruction tells the LLM to set `chapterSolved` and `gameOver` together and narrate the conclusion in the same response. A separate finale turn would leave the player a turn with nothing to choose.
 
 ---
 
@@ -419,10 +436,13 @@ Phase is calculated from `Math.min(turnCount, storyLength)` so it never overflow
 - Do not loosen `repairUnescapedQuotes` back to the "any of `}],:`" heuristic — it breaks on Hebrew/Arabic dialogue
 - Do not add 404 to `RETRY_STATUSES` — a retired model must fail loudly, not silently fall back forever
 - Do not hardcode step numbers — indices differ per mode; always use `stepIdx("key")`
-- Background calls (`triggerSummarize`, `generateChapterBrief`) must not block gameplay — never `await` them
-- Do not set `chapterComplete: true` based on turn count — only when the single chapter goal is achieved
-- Chapter goals must be a single overarching objective — never a list of specific items or steps
-- Do not add `setting` or `resolutionCondition` back to the chapter brief — both were intentionally removed
-- Do not put `chapterProgress` in the system prompt — it belongs only in the `[CURRENT STATE]` user message block
-- Do not trigger FINALE/CLIMAX when the player is not on the last chapter — the phase calculation uses the `isLastChapter` guard for exactly this reason
-- Save files use `version: 3`. `loadAndValidateSave()` accepts v2 and v3; anything below v2 throws the `"version"` error so the caller shows `t("versionError")` instead of `t("loadError")`
+- `triggerSummarize` must never block gameplay — never `await` it. The chapter brief is the **deliberate exception**: it is awaited, because a chapter with no `winCondition` has nothing to solve against
+- **Never read `config.storyLength` as a chapter count.** In v2/v3 saves it is a TURN budget (5/10/20/40); `LEGACY_CHAPTER_MAP` exists solely to migrate it to `config.chapterCount`, and nothing else may read it
+- Do not reintroduce a turn cap — pacing is chapters only, and the story must never end because turns ran out
+- Do not set `chapterSolved: true` on intent, planning, a near-miss, or because the player is struggling — only when the `winCondition` is objectively met
+- Do not render `chapterBrief.approaches` — they are the puzzle. They go to the LLM only. (They *are* visible in the save JSON; unavoidable with no backend, and self-inflicted.)
+- Do not gate the `chapterProgress` merge on `result.chapterProgress` being present — an absent value is exactly the no-movement signal `stuckTurns` depends on
+- Do not add `setting` or `resolutionCondition` back to the chapter brief — both were intentionally removed. `winCondition` is the goal made falsifiable, not a revival of `resolutionCondition` (which described how the narration should wrap up)
+- Do not put `chapterProgress` — or the stuck directive derived from it — in the system prompt; both belong only in the `[CURRENT STATE]` user message block
+- Do not bump `chapterNumber` inside the brief's success handler — a failed brief then silently strands the player in the previous chapter forever. `startChapter` bumps it up front
+- Save files use `version: 4`. `loadAndValidateSave()` accepts v2/v3 and migrates them (`storyLength` → `chapterCount`, `{goal, obstacle}` → `{situation, winCondition, approaches: []}`); anything below v2 throws the `"version"` error so the caller shows `t("versionError")` instead of `t("loadError")`

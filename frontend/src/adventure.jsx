@@ -18,7 +18,7 @@ const TR = {
   adult:            { English: "Adult (18+)", Hebrew: "מבוגרים (18+)", Arabic: "بالغون (18+)", Portuguese: "Adulto (18+)" },
   adultSub:         { English: "Full range of themes, vivid descriptions, mature content", Hebrew: "מגוון נושאים מלא, תיאורים חיים, תוכן בוגר", Arabic: "مجموعة كاملة من المواضيع، أوصاف حية، محتوى ناضج", Portuguese: "Temas completos, descrições vívidas, conteúdo adulto" },
   storyDuration:    { English: "Adventure Length", Hebrew: "אורך ההרפתקה", Arabic: "طول المغامرة", Portuguese: "Duração da Aventura" },
-  storyDurationSub: { English: "How many turns should the adventure last?", Hebrew: "כמה תורות תימשך ההרפתקה?", Arabic: "كم عدد الدورات التي ستستغرقها المغامرة؟", Portuguese: "Quantos turnos durará a aventura?" },
+  storyDurationSub: { English: "How many chapters should the adventure last?", Hebrew: "כמה פרקים תימשך ההרפתקה?", Arabic: "كم عدد الفصول التي ستستغرقها المغامرة؟", Portuguese: "Quantos capítulos durará a aventura?" },
   perspective:      { English: "Narrative Perspective", Hebrew: "נקודת מבט", Arabic: "منظور السرد", Portuguese: "Perspectiva Narrativa" },
   perspectiveSub:   { English: "How should the story refer to you?", Hebrew: "איך הסיפור יתייחס אליך?", Arabic: "كيف يجب أن تشير القصة إليك؟", Portuguese: "Como a história deve se referir a você?" },
   firstPerson:      { English: "First Person", Hebrew: "גוף ראשון", Arabic: "ضمير المتكلم", Portuguese: "Primeira Pessoa" },
@@ -213,12 +213,19 @@ const TR = {
   translating:      { English: "Translating…",   Hebrew: "מתרגם…",       Arabic: "جارٍ الترجمة…", Portuguese: "Traduzindo…" },
   hideTranslation:  { English: "Hide translation", Hebrew: "הסתר תרגום", Arabic: "إخفاء الترجمة", Portuguese: "Ocultar tradução" },
   translationError: { English: "Translation failed — try again.", Hebrew: "התרגום נכשל — נסה שוב.", Arabic: "فشلت الترجمة — حاول مرة أخرى.", Portuguese: "Falha na tradução — tente novamente." },
-  // ── Hints (chapter goal / obstacle) ──
+  // ── Chapter situation / approach hints ──
   revealHint:       { English: "Reveal hint",          Hebrew: "חשוף רמז",           Arabic: "كشف تلميح",            Portuguese: "Revelar dica" },
   hideHint:         { English: "Hide hint",            Hebrew: "הסתר רמז",           Arabic: "إخفاء التلميح",       Portuguese: "Ocultar dica" },
-  yourGoal:         { English: "Your goal",            Hebrew: "המטרה שלך",          Arabic: "هدفك",                  Portuguese: "Seu objetivo" },
-  theChallenge:     { English: "The challenge",        Hebrew: "האתגר",              Arabic: "التحدي",                Portuguese: "O desafio" },
-  revealChallenge:  { English: "Reveal the challenge", Hebrew: "חשוף את האתגר",      Arabic: "كشف التحدي",           Portuguese: "Revelar o desafio" },
+  theSituation:     { English: "The situation",        Hebrew: "המצב",               Arabic: "الموقف",                Portuguese: "A situação" },
+  winCondition:     { English: "To move on",           Hebrew: "כדי להמשיך",         Arabic: "للمضي قدماً",           Portuguese: "Para avançar" },
+  revealApproach:   { English: "Reveal an approach",   Hebrew: "חשוף דרך פעולה",     Arabic: "كشف طريقة",            Portuguese: "Revelar uma abordagem" },
+  anApproach:       { English: "An approach",          Hebrew: "דרך אפשרית",         Arabic: "طريقة ممكنة",          Portuguese: "Uma abordagem" },
+  progressLabel:    { English: "Progress",             Hebrew: "התקדמות",            Arabic: "التقدم",                Portuguese: "Progresso" },
+  chapterSolvedMsg: { English: "Situation resolved",   Hebrew: "המצב נפתר",          Arabic: "تم حل الموقف",         Portuguese: "Situação resolvida" },
+  preparingChapter: { English: "Preparing the next chapter...", Hebrew: "מכין את הפרק הבא...", Arabic: "جارٍ تحضير الفصل التالي...", Portuguese: "Preparando o próximo capítulo..." },
+  chapterBriefFailed: { English: "Could not prepare the chapter.", Hebrew: "לא ניתן היה להכין את הפרק.", Arabic: "تعذّر تحضير الفصل.", Portuguese: "Não foi possível preparar o capítulo." },
+  retryChapterBrief: { English: "Try again",                     Hebrew: "נסה שוב",             Arabic: "حاول مرة أخرى",        Portuguese: "Tentar novamente" },
+  continueAnyway:   { English: "Continue without a chapter goal", Hebrew: "המשך ללא מטרת פרק",  Arabic: "المتابعة بدون هدف للفصل", Portuguese: "Continuar sem objetivo de capítulo" },
   // ── Settings ──
   settings:         { English: "Settings", Hebrew: "הגדרות", Arabic: "إعدادات", Portuguese: "Configurações" },
   settingsSub:      { English: "Customize your reading experience", Hebrew: "התאם את חוויית הקריאה שלך", Arabic: "خصّص تجربة القراءة", Portuguese: "Personalize a sua experiência de leitura" },
@@ -238,13 +245,13 @@ const TR = {
   music_:           { English: "Music", Hebrew: "מוזיקה", Arabic: "موسيقى", Portuguese: "Música" },
   // ── Adventure length options ──
   sprint:           { English: "Sprint",   Hebrew: "ספרינט",  Arabic: "سريع",   Portuguese: "Sprint" },
-  sprintDesc:       { English: "~5 turns — 1 chapter",   Hebrew: "~5 תורות — פרק אחד",   Arabic: "~5 جولات — فصل واحد",  Portuguese: "~5 turnos — 1 capítulo" },
+  sprintDesc:       { English: "1 chapter — one situation to solve", Hebrew: "פרק אחד — מצב אחד לפתור", Arabic: "فصل واحد — موقف واحد لحله", Portuguese: "1 capítulo — uma situação para resolver" },
   shortAdv:         { English: "Short",    Hebrew: "קצר",     Arabic: "قصير",   Portuguese: "Curta" },
-  shortAdvDesc:     { English: "~10 turns — 2 chapters", Hebrew: "~10 תורות — 2 פרקים",  Arabic: "~10 جولات — فصلان",    Portuguese: "~10 turnos — 2 capítulos" },
+  shortAdvDesc:     { English: "2 chapters",             Hebrew: "2 פרקים",              Arabic: "فصلان",                Portuguese: "2 capítulos" },
   standard:         { English: "Standard", Hebrew: "רגיל",    Arabic: "عادي",   Portuguese: "Padrão" },
-  standardDesc:     { English: "~20 turns — 4 chapters", Hebrew: "~20 תורות — 4 פרקים",  Arabic: "~20 جولات — 4 فصول",   Portuguese: "~20 turnos — 4 capítulos" },
+  standardDesc:     { English: "4 chapters",             Hebrew: "4 פרקים",              Arabic: "4 فصول",               Portuguese: "4 capítulos" },
   epic:             { English: "Epic",     Hebrew: "אפי",     Arabic: "ملحمي",  Portuguese: "Épica" },
-  epicDesc:         { English: "~40 turns — 8 chapters", Hebrew: "~40 תורות — 8 פרקים",  Arabic: "~40 جولات — 8 فصول",   Portuguese: "~40 turnos — 8 capítulos" },
+  epicDesc:         { English: "8 chapters",             Hebrew: "8 פרקים",              Arabic: "8 فصول",               Portuguese: "8 capítulos" },
   // ── Mode picker ──
   modePickerTitle:    { English: "How do you want to play?", Hebrew: "איך תרצו לשחק?", Arabic: "كيف تريد أن تلعب؟", Portuguese: "Como queres jogar?" },
   modeAdventure:      { English: "Choose Your Own Adventure", Hebrew: "בחר את ההרפתקה שלך", Arabic: "اختر مغامرتك بنفسك", Portuguese: "Escolhe a Tua Aventura" },
@@ -537,7 +544,17 @@ const SUMMARY_EVERY = 5;
 const WINDOW_SIZE   = 16;
 const RTL_LANGS     = ["Hebrew", "Arabic"];
 // Chapter count per adventure length (goal-based, not turn-based)
-const CHAPTER_MAP   = { 5: 1, 10: 2, 20: 4, 40: 8 };
+// Chapter counts the duration step offers. Chapters end when their situation is
+// solved, never on a turn count — so this is the only measure of adventure size.
+const CHAPTER_COUNTS = [1, 2, 4, 8];
+// v2/v3 saves stored config.storyLength as a TURN budget (5/10/20/40). Used only
+// to migrate those to config.chapterCount — never in live gameplay.
+const LEGACY_CHAPTER_MAP = { 5: 1, 10: 2, 20: 4, 40: 8 };
+// Turns without chapterProgress movement before the narrator must offer a costly
+// way out, so a stuck player is never hard-blocked.
+const STUCK_TURNS_LIMIT = 4;
+// The chapter brief blocks play, so it retries before surfacing an error.
+const BRIEF_MAX_ATTEMPTS = 3;
 
 // Dice outcome table
 const DICE_OUTCOMES = [
@@ -1693,11 +1710,15 @@ function triggerDownload(filename, content, mime) {
   URL.revokeObjectURL(url);
 }
 
-function buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress }) {
+// hintLevel is persisted from v4 on: it used to be a re-derivable view toggle,
+// but it now records how many chapter approaches the player has unlocked —
+// earned progress that would silently vanish on load.
+function buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress, stuckTurns, hintLevel }) {
   return {
-    version: 3, savedAt: new Date().toISOString(),
+    version: 4, savedAt: new Date().toISOString(),
     config, character, stats, storyLog, choices, turnCount, gameOver,
     storySummary, worldState, chapterNumber, chapterBrief, chapterProgress,
+    stuckTurns, hintLevel,
   };
 }
 
@@ -1715,6 +1736,27 @@ function loadAndValidateSave(json) {
   if (data.character.dndRace === undefined) data.character.dndRace = "";
   if (data.character.dndClass === undefined) data.character.dndClass = "";
   if (!data.worldState) data.worldState = { npcs: {}, locations: [], facts: [] };
+  // ── v4: config.storyLength (a TURN budget) → config.chapterCount (CHAPTERS) ──
+  // These must never be confused: a v3 save's storyLength:20 means 20 turns /
+  // 4 chapters, and reading it as 20 chapters would 5x the adventure.
+  if (data.config.chapterCount === undefined) {
+    data.config.chapterCount = LEGACY_CHAPTER_MAP[data.config.storyLength]
+      || Math.max(1, Math.min(8, Math.round((data.config.storyLength || 10) / 5)));
+  }
+  // ── v4: chapterBrief {goal, obstacle} → {situation, winCondition, approaches} ──
+  // Pre-v4 briefs have no predecided approaches; the hint ladder is simply empty
+  // for the chapter in progress and correct from the next one on.
+  if (data.chapterBrief && data.chapterBrief.winCondition === undefined) {
+    const b = data.chapterBrief;
+    data.chapterBrief = {
+      title:        b.title || "",
+      situation:    b.obstacle || b.goal || "",
+      winCondition: b.goal || "",
+      approaches:   [],
+    };
+  }
+  if (data.stuckTurns === undefined) data.stuckTurns = 0;
+  if (data.hintLevel  === undefined) data.hintLevel  = 0;
   return data;
 }
 
@@ -1723,7 +1765,7 @@ export default function AdventureGame() {
   const [phase, setPhase]           = useState("home");
   const [setupStep, setSetupStep]   = useState(0);
   const [stepSelections, setStepSelections] = useState({});
-  const [config, setConfig]         = useState(() => ({ mode: "", genre: "", language: loadPrefs()?.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" }));
+  const [config, setConfig]         = useState(() => ({ mode: "", genre: "", language: loadPrefs()?.language || "English", ageTier: "", responseLength: "", chapterCount: 0, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" }));
   const [character, setCharacter]   = useState({ name: "", gender: "", age: "", appearance: "", skills: [], dndRace: "", dndClass: "", abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 } });
   const [storyLog, setStoryLog]     = useState([]);
   const [stats, setStats]           = useState({ health: 100, inventory: [], relationships: {} });
@@ -1746,7 +1788,11 @@ export default function AdventureGame() {
   const [nextRollRequired, setNextRollRequired] = useState({ required: false, context: "" });
   // Chapter progress — tracks partial goal completion within current chapter
   const [chapterProgress, setChapterProgress] = useState({ achieved: [], clues: [] });
-  const [hintLevel, setHintLevel]           = useState(0); // 0=hidden, 1=goal revealed, 2=goal+challenge revealed — resets on chapter transition
+  const [hintLevel, setHintLevel]           = useState(0); // how many of chapterBrief.approaches are revealed — resets on chapter transition
+  const [stuckTurns, setStuckTurns]         = useState(0); // turns with no chapterProgress movement; at STUCK_TURNS_LIMIT the narrator must offer a costly way out
+  const [briefStatus, setBriefStatus]       = useState("idle"); // "idle" | "loading" | "error" — gates input while the chapter brief lands
+  const briefReqRef        = useRef(0);  // discards a brief that resolves after the player reset/loaded
+  const lastSummaryCtxRef  = useRef(""); // lets the error panel re-issue the same brief request
   // Inline translations of narrator passages — keyed by storyLog index.
   // Shape: { [logIdx]: { lang, text, loading, error, picker } } — ephemeral, not saved.
   const [translations, setTranslations]     = useState({});
@@ -1842,7 +1888,7 @@ export default function AdventureGame() {
   const modeSetupSteps  = getSetupSteps(config.mode);
   const modeAutoAdvance = getAutoAdvanceSteps(config.mode);
   const currentStep     = modeSetupSteps[setupStep];
-  const totalChapters = CHAPTER_MAP[config.storyLength] || Math.max(1, Math.round((config.storyLength || 10) / 5));
+  const totalChapters = CHAPTER_COUNTS.includes(config.chapterCount) ? config.chapterCount : 1;
 
   const getSkillsDisplay = (genre) => isHebrew ? (GENRE_SKILLS[genre]?.he || []) : (GENRE_SKILLS[genre]?.en || []);
   const getSkillEN = (genre, displaySkill) => {
@@ -1857,9 +1903,14 @@ export default function AdventureGame() {
   }, [storyLog, choices]);
 
   // ─── SYSTEM PROMPT ────────────────────────────────────────────
-  const buildSystemPrompt = useCallback((cfgOverride, charOverride) => {
-    const cfg  = cfgOverride  ?? config;
-    const char = charOverride ?? character;
+  // briefOverride/chapNumOverride exist because callers that have just awaited a
+  // freshly generated brief cannot rely on the state update having landed yet
+  // (same reason cfgOverride exists — see startAdventure).
+  const buildSystemPrompt = useCallback((cfgOverride, charOverride, briefOverride, chapNumOverride) => {
+    const cfg   = cfgOverride  ?? config;
+    const char  = charOverride ?? character;
+    const brief = briefOverride ?? chapterBrief;
+    const chNum = chapNumOverride ?? chapterNumber;
     const eLang       = cfg.language || "English";
     const eHebrew     = eLang === "Hebrew";
     const eRTL        = RTL_LANGS.includes(eLang);
@@ -1885,11 +1936,19 @@ export default function AdventureGame() {
       return idx >= 0 ? g.en[idx] : s;
     });
 
-    const chapterSection = chapterBrief
-      ? `CHAPTER ${chapterNumber}${totalChapters > 1 ? ` of ${totalChapters}` : ""}: "${chapterBrief.title}"
-Goal: ${chapterBrief.goal}
-Obstacle: ${chapterBrief.obstacle}
-→ Set chapterComplete:true only when the goal above is concretely achieved (the specific answer learned, artifact obtained, or problem fixed). Player may explore freely and hit dead ends.`
+    // The chapter is a contract: the situation holds the story in place until the
+    // win condition is objectively met. `approaches` are for the narrator's eyes
+    // only — the UI never renders them; they are what the player is solving for.
+    const chapterSection = brief
+      ? `CHAPTER ${chNum}${totalChapters > 1 ? ` of ${totalChapters}` : ""}: "${brief.title}"
+SITUATION (unresolved — the story stays here until it is resolved): ${brief.situation}
+WIN CONDITION: ${brief.winCondition}
+VIABLE APPROACHES (never state these verbatim, never list them to the player — accept ANY action that genuinely achieves the win condition, whether listed here or not):
+${(brief.approaches || []).map(a => `  - ${a}`).join("\n")}
+→ Until the win condition is met: do NOT advance the main plot, do NOT introduce new locations, threads or goals unrelated to this situation, and end every turn with the situation still pressing. Detail, dialogue, character and atmosphere may develop freely — the PLOT may not.
+→ If the player wanders off, let them, but narrate the pull back: the situation intrudes, an NPC redirects, or the stakes remind them.
+→ Every turn, at least one choice must be a plausible move against this situation.
+→ Set chapterSolved:true ONLY when the win condition is objectively, concretely met — not when the player merely intends, plans, or attempts it. Do not lower the bar because the player is struggling. State the approach used in solvedVia.`
       : "";
 
     // Models don't reliably honour the "Name": "status string" shape — they often
@@ -1919,17 +1978,17 @@ Locations: ${storySummary.world.locations.map(asText).join(", ")}` : ""}${storyS
 Key decisions: ${storySummary.world.decisions.map(asText).join("; ")}` : ""}${storySummary.world?.threads?.length ? `
 Active threads: ${storySummary.world.threads.map(asText).join("; ")}` : ""}` : "";
 
-    const total = cfg.storyLength || 20;
-    const effectiveTurn = Math.min(turnCount, total);
-    const pct = effectiveTurn / total;
-    const isLastChapter = chapterNumber >= totalChapters;
+    // Pacing is measured in CHAPTERS, never turns. A chapter lasts exactly as long
+    // as it takes the player to solve it, so there is no turn budget to spend and
+    // the story ends only when the final chapter's win condition is met.
+    const isLastChapter = chNum >= totalChapters;
+    const chapterPct = totalChapters > 1 ? (chNum - 1) / (totalChapters - 1) : 1;
     let phaseInstr;
-    if (turnCount === 0)                              phaseInstr = "PHASE — OPENING: Establish the world, character background, and inciting situation.";
-    else if (turnCount >= total && isLastChapter)     phaseInstr = "PHASE — FINALE: Deliver a satisfying conclusion. Set gameOver:true once the story reaches a complete resolution.";
-    else if (turnCount >= total - 1 && isLastChapter) phaseInstr = "PHASE — CLIMAX: Bring all threads to a head — resolution is close.";
-    else if (pct < 0.35)                              phaseInstr = "PHASE — EARLY: Develop the world, introduce complications, build toward the central conflict.";
-    else if (pct < 0.65)                              phaseInstr = "PHASE — MIDDLE: Escalate tension, raise stakes, introduce a twist.";
-    else                                              phaseInstr = `PHASE — LATE: Push toward the climax. Consequences mount, ${Math.max(1, total - turnCount)} turn(s) remaining.`;
+    if (turnCount === 0)        phaseInstr = "PHASE — OPENING: Establish the world, the character's background, and drop the player straight into this chapter's situation.";
+    else if (isLastChapter)     phaseInstr = "PHASE — CLIMAX: This is the final chapter. Bring every thread to a head. When this chapter's win condition is met, set BOTH chapterSolved:true and gameOver:true, and deliver a satisfying conclusion in the same turn.";
+    else if (chNum === 1)       phaseInstr = "PHASE — EARLY: Develop the world and the cast while the player works on this chapter's situation.";
+    else if (chapterPct < 0.65) phaseInstr = "PHASE — MIDDLE: Escalate. Consequences from earlier chapters resurface and raise the stakes of this situation.";
+    else                        phaseInstr = "PHASE — LATE: Push toward the climax. Consequences mount and the story converges on its ending.";
 
     const isDnd = cfg.mode === "dnd";
     const isEducational = cfg.mode === "educational";
@@ -1983,12 +2042,13 @@ ${chapterSection}
 STORY ARC: ${phaseInstr}
 
 RESPOND WITH VALID JSON ONLY (no markdown fences):
-{"story":"...","choices":["...","...","..."],${cfg.trackStats ? '"stats":{"health":100,"inventory":[],"relationships":{}},' : ''}"gameOver":false,"gameOverReason":"","rollRequired":false,"rollContext":"","chapterComplete":false,"chapterProgress":{"achieved":[],"clues":[]},"mood":"neutral","worldState":{"npcs":{},"locations":[],"facts":[]}}
+{"story":"...","choices":["...","...","..."],${cfg.trackStats ? '"stats":{"health":100,"inventory":[],"relationships":{}},' : ''}"gameOver":false,"gameOverReason":"","rollRequired":false,"rollContext":"","chapterSolved":false,"solvedVia":"","chapterProgress":{"achieved":[],"clues":[]},"mood":"neutral","worldState":{"npcs":{},"locations":[],"facts":[]}}
 
 ${rollInstruction}
 rollContext: Short phrase shown to player before rolling (e.g. "pick the ancient lock").
-chapterComplete: true ONLY when the single chapter goal is conclusively achieved.
-chapterProgress: Update every turn — achieved: specific milestones completed toward the one chapter goal (cumulative, carry forward); clues: hints/info the player has discovered that help reach the goal (cumulative).
+chapterSolved: true ONLY when the chapter's WIN CONDITION above is objectively met. Intending, planning or attempting it is NOT solving it. When in doubt, false.
+solvedVia: when chapterSolved is true, one short phrase naming how the player actually did it. Empty otherwise.
+chapterProgress: Update every turn — achieved: concrete milestones the player has completed toward the win condition (cumulative, carry forward); clues: information they have learned that helps reach it (cumulative). Only add an entry when something genuinely changed this turn — an empty list is correct when the player made no headway.
 mood: Emotional tone of the story text just returned. One of: peaceful, tense, action, dramatic, sad, triumphant, mysterious, neutral.
 worldState: Update every turn — carry ALL existing entries forward and add new ones.
   npcs: {"Name": "role/relationship — one-sentence current status"} — every character the player has met.
@@ -2021,7 +2081,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       return {
         story: errorMsg,
         choices: [retryMsg],
-        gameOver: false, rollRequired: false, rollContext: "", chapterComplete: false,
+        gameOver: false, rollRequired: false, rollContext: "", chapterSolved: false,
       };
     }
   }, [buildSystemPrompt, lang, turnCount]);
@@ -2175,48 +2235,113 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
   }, [turnCount, config.language]);
 
   // ─── CHAPTER BRIEF GENERATOR ──────────────────────────────────
-  const generateChapterBrief = useCallback(async (chNum, total, summaryContext) => {
-    const genreLabel = THEMES[config.genre]?.nameKey || "fantasy";
-    const eLang = config.language || "English";
+  // Designs the chapter's situation and — crucially — decides HOW it can be
+  // solved up front. The winCondition is the contract the narrator checks the
+  // player's actions against each turn; `approaches` are hidden routes that keep
+  // the narrator honest about what "solvable" means. Nothing else gates the plot.
+  //
+  // Unlike triggerSummarize, this call IS awaited (startChapter blocks play on it):
+  // without a winCondition there is nothing for the chapter to be solved against.
+  // Pure producer — returns the brief or null, sets no state. startChapter owns
+  // retries and installation.
+  //
+  // cfgOverride/charOverride matter: startAdventure calls setConfig(finalCfg) and
+  // then starts chapter 1 in the same tick, so `config` here is still the
+  // pre-defaults value. Without the override the brief is built with the wrong
+  // genre/language — same reason buildSystemPrompt takes overrides.
+  const generateChapterBrief = useCallback(async (chNum, total, summaryContext, cfgOverride, charOverride) => {
+    const cfg  = cfgOverride  ?? config;
+    const char = charOverride ?? character;
+    const genreLabel = THEMES[cfg.genre]?.nameKey || "fantasy";
+    const eLang = cfg.language || "English";
     const ePortuguese = eLang === "Portuguese";
     const langDirective = ePortuguese
       ? "European Portuguese (pt-PT, as spoken in Portugal — NOT Brazilian Portuguese; use words like 'ficheiro' not 'arquivo', 'ecrã' not 'tela', 'autocarro' not 'ônibus', 'telemóvel' not 'celular')"
       : eLang;
     const SYSTEM =
       `You are a story architect for an interactive ${genreLabel} adventure. ` +
-      `Design a chapter brief with ONE concrete goal. The player explores freely and may hit dead ends.\n\n` +
-      `LANGUAGE: Write the title, goal, and obstacle ENTIRELY in ${langDirective}. The JSON keys ("title","goal","obstacle") stay in English, but every value must be in ${eLang}.\n\n` +
-      `RESPOND WITH VALID JSON ONLY — a single object (NOT an array), three fields, nothing else:\n` +
+      `Design ONE concrete situation the player must solve to finish this chapter, and decide NOW how it can be solved.\n\n` +
+      `LANGUAGE: Write every value ENTIRELY in ${langDirective}. The JSON keys stay in English; every value must be in ${eLang}.\n\n` +
+      `RESPOND WITH VALID JSON ONLY — a single object (NOT an array), four fields, nothing else:\n` +
       `{\n` +
       `  "title": "evocative chapter title (3-6 words) in ${eLang}",\n` +
-      `  "goal": "ONE concrete, falsifiable objective in ${eLang}. Must be one of: (a) a specific answer/truth to discover, (b) a specific artifact/object to obtain, or (c) a specific problem/situation to fix. Name WHAT is learned, obtained, or fixed — do not use vague verbs like 'investigate' or 'uncover' on their own.",\n` +
-      `  "obstacle": "2-3 sentences in ${eLang}. Sentence 1: the specific challenge, threat, or complication blocking the goal — who/what opposes the player, and any key detail that makes the situation tricky. Sentence 2-3: the general approach the player will need to take to overcome it — broad strokes only, no specific steps or items. Keep it open-ended enough that the player has real choices."\n` +
+      `  "situation": "1-2 sentences in ${eLang}. A specific, concrete predicament facing the player RIGHT NOW — who or what opposes them, here, in this place. Not a theme or a quest description: a scene. The player is stuck in it until they solve it.",\n` +
+      `  "winCondition": "ONE sentence in ${eLang} naming the objectively checkable state of the world that ends this situation. It must be answerable yes/no by looking at the world — e.g. 'Aran is inside the city walls', 'The identity of the traitor is spoken aloud to Aran', 'The seal is in Aran's hands'. NEVER use vague verbs like 'investigate', 'explore', 'confront' or 'uncover' on their own — name the end STATE, not the activity.",\n` +
+      `  "approaches": ["2-4 genuinely different ways in ${eLang} the player could reach the win condition. Each must be concrete and actually workable in this situation. These are hidden from the player — they are a sanity check that the situation is solvable at all, and a menu of hints."]\n` +
       `}\n` +
+      `The situation and the winCondition must match: solving the situation MUST be exactly what the winCondition describes.\n` +
       `Return ONLY the JSON object — no wrapping array, no markdown fences, no commentary. Every value MUST be in ${eLang}.`;
 
     const parts = [
       `Chapter ${chNum} of ${total} in a ${genreLabel} adventure.`,
-      `Character: ${character.name}${character.skills.length ? `, skilled in ${character.skills.join(", ")}` : ""}.`,
-      config.storyPrompt ? `Premise: ${config.storyPrompt}` : "",
+      `Character: ${char.name}${char.skills.length ? `, skilled in ${char.skills.join(", ")}` : ""}.`,
+      cfg.storyPrompt ? `Premise: ${cfg.storyPrompt}` : "",
       summaryContext ? `Story so far: ${summaryContext}` : "This is the very beginning of the adventure.",
-      `Design chapter ${chNum} of ${total}. ${chNum === 1 ? "This is the opening chapter — establish the world and first conflict." : chNum === total ? "This is the final chapter — converge all threads for a satisfying conclusion." : "Build on events so far, escalate stakes."}`,
+      `Design chapter ${chNum} of ${total}. ${chNum === 1 ? "This is the opening chapter — establish the world and the first concrete predicament." : chNum === total ? "This is the final chapter — its situation resolves the whole story." : "Build on events so far, escalate stakes."}`,
     ].filter(Boolean);
 
     try {
-      let result = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 500, turnCount });
+      let result = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 700, turnCount });
       // Unwrap if model returned [{...}] instead of {...}
       if (Array.isArray(result) && result[0]) result = result[0];
-      if (result?.title && result?.goal && result?.obstacle) {
-        setChapterBrief(result);
-        setChapterNumber(chNum);
-        if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
-        setChapterBanner(result.title);
-        bannerTimerRef.current = setTimeout(() => setChapterBanner(null), 5000);
+      const approaches = Array.isArray(result?.approaches)
+        ? result.approaches.filter(a => typeof a === "string" && a.trim())
+        : [];
+      // Accept a single approach: one workable route still makes a playable
+      // chapter, and blocking the game over a cosmetic shortfall is worse.
+      if (result?.title && result?.situation && result?.winCondition && approaches.length >= 1) {
+        return {
+          title:        result.title,
+          situation:    result.situation,
+          winCondition: result.winCondition,
+          approaches:   approaches.slice(0, 4),
+        };
       }
+      console.warn("Chapter brief: malformed shape", result);
+      return null;
     } catch (e) {
-      console.warn("Chapter brief generation failed (non-critical):", e);
+      console.warn("Chapter brief generation failed:", e);
+      return null;
     }
   }, [config, character, turnCount]);
+
+  // ─── CHAPTER START ────────────────────────────────────────────
+  // Advances to chNum and installs its brief. Play is BLOCKED while this runs —
+  // the situation must be on screen and in the system prompt before the player
+  // can act, so this is the one background call we deliberately wait on.
+  //
+  // chapterNumber is bumped up front, NOT after the brief lands: it used to be
+  // set inside the brief's success handler, so a failed brief silently left the
+  // player stuck in the previous chapter forever.
+  // Returns the installed brief (or null) so a caller that must build a prompt in
+  // the same tick can pass it as an override — setChapterBrief has not landed yet.
+  const startChapter = useCallback(async (chNum, summaryCtx, cfgOv, charOv, totalOv) => {
+    const total = totalOv ?? totalChapters;
+    const req = ++briefReqRef.current;
+    lastSummaryCtxRef.current = summaryCtx;
+    setChapterNumber(chNum);
+    setChapterBrief(null);
+    setChapterProgress({ achieved: [], clues: [] });
+    setStuckTurns(0);
+    setHintLevel(0);                 // new chapter — approaches hidden again
+    setBriefStatus("loading");
+    // No backoff between attempts: api.chat already retries and has a 25s
+    // per-attempt timeout, so this is plenty of wall time on a blocking screen.
+    for (let attempt = 1; attempt <= BRIEF_MAX_ATTEMPTS; attempt++) {
+      const brief = await generateChapterBrief(chNum, total, summaryCtx, cfgOv, charOv);
+      if (req !== briefReqRef.current) return null;  // superseded by reset/load — drop it
+      if (brief) {
+        setChapterBrief(brief);
+        setBriefStatus("idle");
+        if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+        setChapterBanner(brief.title);
+        bannerTimerRef.current = setTimeout(() => setChapterBanner(null), 5000);
+        return brief;
+      }
+    }
+    if (req === briefReqRef.current) setBriefStatus("error");
+    return null;
+  }, [generateChapterBrief, totalChapters]);
 
   // ─── KEY SETUP ────────────────────────────────────────────────
   const handleValidateKey = async () => {
@@ -2254,12 +2379,13 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     };
 
     const isDndMode = config.mode === "dnd";
-    const validLengths = [5, 10, 20, 40];
     const finalCfg = {
       ...config,
       ageTier:        config.ageTier        || "teen",
       responseLength: isDndMode ? "medium" : (config.responseLength  || "short"),
-      storyLength:    validLengths.includes(config.storyLength) ? config.storyLength : 5,
+      // Fallback 1, matching the old behaviour: the unset default was never a
+      // valid length either, and fell through to the shortest adventure.
+      chapterCount:   CHAPTER_COUNTS.includes(config.chapterCount) ? config.chapterCount : 1,
       deathPossible:  isDndMode ? true  : (config.deathPossible  ?? false),
       trackStats:     isDndMode ? true  : (config.trackStats     ?? false),
       perspective:    config.perspective    || "second",
@@ -2272,8 +2398,12 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     setPhase("game");
     setLoading(true);
 
-    const finalTotalChapters = CHAPTER_MAP[finalCfg.storyLength] || 1;
-    setTimeout(() => generateChapterBrief(1, finalTotalChapters, ""), 5000);
+    // Chapter 1's brief must exist BEFORE the opening call: the opening has to
+    // drop the player into the situation. Previously this was a 5s timer racing
+    // an opening that was therefore written with chapterBrief === null, so the
+    // opening and the chapter routinely described different things.
+    const finalTotalChapters = finalCfg.chapterCount;
+    const brief1 = await startChapter(1, "", finalCfg, finalChar, finalTotalChapters);
 
     const openingLength = {
       short:  "3-4 sentences",
@@ -2286,11 +2416,13 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       `(1) a brief background on ${finalChar.name} — who they are, personality, and what shaped them; ` +
       `(2) the world — its tone, state, and defining features; ` +
       `(3) the current situation — what is happening right now that sets the story in motion. ` +
+      (brief1 ? `Land the opening squarely in the CHAPTER SITUATION described in your instructions — by the final sentence the player must be facing it directly. Do not resolve it. ` : "") +
       `End with 2-5 meaningful choices.`
     }];
 
-    // Build system prompt with final values (state updates above are async; pass overrides directly)
-    const systemPrompt = buildSystemPrompt(finalCfg, finalChar);
+    // Build system prompt with final values (state updates above are async; pass
+    // overrides directly — including the brief we just awaited)
+    const systemPrompt = buildSystemPrompt(finalCfg, finalChar, brief1, 1);
     const result = await callAPI(firstMessage, { systemPrompt });
     if (!result) { setLoading(false); return; } // key modal shown
     setStoryLog([{ role: "narrator", text: result.story }]);
@@ -2394,6 +2526,14 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       if (chapterBrief) {
         if (chapterProgress.achieved.length) stateLines.push(`Chapter achieved so far: ${chapterProgress.achieved.join("; ")}`);
         if (chapterProgress.clues.length)    stateLines.push(`Clues found: ${chapterProgress.clues.join("; ")}`);
+        // The costly out lives here rather than the system prompt: it is derived
+        // from chapterProgress (which belongs only in [CURRENT STATE]), and it
+        // keeps the system prompt identical turn to turn.
+        if (stuckTurns >= STUCK_TURNS_LIMIT) {
+          stateLines.push(
+            `STUCK: ${stuckTurns} turns without progress. This turn you MUST include exactly one choice that genuinely solves or bypasses the situation at a concrete, stated price — health lost, an item given up or destroyed, an NPC turned hostile, or a secret surrendered. Name the price in the choice text. Do not offer it for free, and do not apply the price unless the player picks it.`
+          );
+        }
       }
       if (stateLines.length) {
         lastMsg += `\n\n[CURRENT STATE — carry these values forward and return updated versions]\n${stateLines.join(" | ")}`;
@@ -2433,6 +2573,10 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     const result = await callAPI(history);
     if (!result) { setLoading(false); return; } // key modal shown
 
+    // Tolerate the old field name for one release — a response may be in flight
+    // from a client that predates the chapterComplete → chapterSolved rename.
+    const solved = result.chapterSolved ?? result.chapterComplete ?? false;
+
     setStoryLog(prev => [...prev, { role: "narrator", text: result.story }]);
     setChoices(result.choices?.length ? result.choices : (result.gameOver ? [] : [t("continue_")]));
     if (result.stats && config.trackStats) setStats(result.stats);
@@ -2440,7 +2584,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       setGameOver(true);
       setChoices([]);
       setCurrentMood(result.gameOverReason?.toLowerCase().includes("death") ? "sad" : "triumphant");
-    } else if (result.chapterComplete) {
+    } else if (solved) {
       setCurrentMood("triumphant");
     } else {
       setCurrentMood(result.mood || "neutral");
@@ -2454,13 +2598,23 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     // Store next roll requirement
     setNextRollRequired({ required: !!result.rollRequired, context: result.rollContext || "" });
 
-    // Update chapter progress (cumulative — merge with existing)
-    if (result.chapterProgress) {
-      const cp = result.chapterProgress;
+    // Chapter progress (cumulative) + stuck detection. Runs every turn — an
+    // absent chapterProgress is itself a no-movement signal, so this must not be
+    // gated on `result.chapterProgress` being present. Deltas are computed
+    // against the render snapshot rather than inside the updater because we need
+    // to know whether the merge actually moved; safe because makeChoice is
+    // guarded by `loading` and never runs concurrently with itself.
+    const cp     = result.chapterProgress || {};
+    const newAch = (cp.achieved || []).filter(a => a && !chapterProgress.achieved.includes(a));
+    const newClu = (cp.clues    || []).filter(c => c && !chapterProgress.clues.includes(c));
+    if (newAch.length || newClu.length) {
       setChapterProgress(prev => ({
-        achieved: [...new Set([...prev.achieved, ...(cp.achieved || [])])],
-        clues:    [...new Set([...prev.clues,    ...(cp.clues    || [])])],
+        achieved: [...new Set([...prev.achieved, ...newAch])],
+        clues:    [...new Set([...prev.clues,    ...newClu])],
       }));
+      setStuckTurns(0);
+    } else if (!solved) {
+      setStuckTurns(n => n + 1);
     }
 
     // Merge worldState — npcs by key, locations/facts deduplicated
@@ -2473,17 +2627,19 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
       }));
     }
 
-    // Chapter completion
-    if (result.chapterComplete && !result.gameOver) {
+    // Chapter solved — drop a permanent marker in the feed, then advance. The old
+    // 10s delay on the brief existed so it wouldn't compete with the main call;
+    // the main call has already resolved here, and startChapter now blocks input,
+    // so the delay would just be dead air.
+    if (solved && !result.gameOver) {
+      const fullLog = [...storyLog, { role: "player", text: choiceText }, { role: "narrator", text: result.story }];
+      const summaryCtx = storySummary.narrative || fullLog.filter(e => e.role !== "roll").map(e => `${e.role}: ${e.text}`).join("\n").slice(0, 600);
+      // Marker uses the OUTGOING chapter — read before startChapter bumps it.
+      setStoryLog(prev => [...prev, { role: "chapter", text: chapterBrief?.title || "", num: chapterNumber, solvedVia: result.solvedVia || "" }]);
       const nextChap = chapterNumber + 1;
       if (nextChap <= totalChapters) {
-        const fullLog = [...storyLog, { role: "player", text: choiceText }, { role: "narrator", text: result.story }];
-        const summaryCtx = storySummary.narrative || fullLog.filter(e => e.role !== "roll").map(e => `${e.role}: ${e.text}`).join("\n").slice(0, 600);
-        setChapterProgress({ achieved: [], clues: [] }); // reset for new chapter
-        setHintLevel(0); // collapse hints — new chapter is a fresh mystery
-        // Delay so it doesn't compete with the just-completed main call
-        setTimeout(() => generateChapterBrief(nextChap, totalChapters, summaryCtx), 10000);
-        setTimeout(() => triggerSummarize(fullLog, storySummary), 2000); // re-ground context for new chapter
+        setTimeout(() => triggerSummarize(fullLog, storySummary), 2000); // re-ground context for the new chapter
+        startChapter(nextChap, summaryCtx);
       }
     }
 
@@ -2507,13 +2663,14 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
     setStats({ health: 100, inventory: [], relationships: {} });
     setGameOver(false); setTurnCount(0); setCustomAction("");
     setCharacter({ name: "", gender: "", age: "", appearance: "", skills: [], dndRace: "", dndClass: "", abilityScores: { STR: 10, DEX: 10, CON: 10, INT: 10, WIS: 10, CHA: 10 } });
-    setConfig({ mode: "", genre: "", language: prefs.language || "English", ageTier: "", responseLength: "", storyLength: 15, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" });
+    setConfig({ mode: "", genre: "", language: prefs.language || "English", ageTier: "", responseLength: "", chapterCount: 0, deathPossible: null, trackStats: null, perspective: "second", storyPrompt: "" });
     setStorySummary({ narrative: "", world: null });
     setWorldState({ npcs: {}, locations: [], facts: [] });
     setChapterNumber(1); setChapterBrief(null); setChapterBanner(null);
     setPendingRoll(null); setNextRollRequired({ required: false, context: "" });
     setChapterProgress({ achieved: [], clues: [] });
-    setHintLevel(0);
+    setHintLevel(0); setStuckTurns(0);
+    setBriefStatus("idle"); briefReqRef.current++; // invalidate any brief still in flight
   };
 
   const handleExport = () => {
@@ -2522,7 +2679,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
   };
 
   const handleSaveGame = () => {
-    const payload = buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress });
+    const payload = buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress, stuckTurns, hintLevel });
     triggerDownload(`${character.name}-save-${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json");
   };
 
@@ -2550,7 +2707,10 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
         setPendingRoll(null);
         setNextRollRequired({ required: false, context: "" });
         setChapterProgress(save.chapterProgress || { achieved: [], clues: [] });
-        setHintLevel(0);
+        setHintLevel(save.hintLevel || 0);   // revealed approaches are earned — restore them
+        setStuckTurns(save.stuckTurns || 0);
+        setBriefStatus("idle");
+        briefReqRef.current++;               // invalidate any brief in flight from the abandoned run
         setPhase("game");
       } catch (err) {
         alert(err?.message === "version" ? t("versionError") : t("loadError"));
@@ -2696,13 +2856,13 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
           <SetupCard theme={theme} active isRTL={isRTL} {...cardProps} title={t("storyDuration")} subtitle={t("storyDurationSub")}>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {[
-                { turns: 5,  icon: "bolt",     labelKey: "sprint",   descKey: "sprintDesc" },
-                { turns: 10, icon: "run",      labelKey: "shortAdv", descKey: "shortAdvDesc" },
-                { turns: 20, icon: "book",     labelKey: "standard", descKey: "standardDesc" },
-                { turns: 40, icon: "mountain", labelKey: "epic",     descKey: "epicDesc" },
-              ].map(({ turns, icon, labelKey, descKey }) => (
-                <OptionButton key={turns} theme={theme} selected={config.storyLength === turns}
-                  onClick={() => pickAndAdvance(stepIdx("duration"), t(labelKey), () => setConfig(c => ({ ...c, storyLength: turns })))}
+                { chapters: 1, icon: "bolt",     labelKey: "sprint",   descKey: "sprintDesc" },
+                { chapters: 2, icon: "run",      labelKey: "shortAdv", descKey: "shortAdvDesc" },
+                { chapters: 4, icon: "book",     labelKey: "standard", descKey: "standardDesc" },
+                { chapters: 8, icon: "mountain", labelKey: "epic",     descKey: "epicDesc" },
+              ].map(({ chapters, icon, labelKey, descKey }) => (
+                <OptionButton key={chapters} theme={theme} selected={config.chapterCount === chapters}
+                  onClick={() => pickAndAdvance(stepIdx("duration"), t(labelKey), () => setConfig(c => ({ ...c, chapterCount: chapters })))}
                   style={{ textAlign: "center", padding: "16px 12px" }}>
                   <div style={{ marginBottom: 8, color: activePrimary, display: "flex", justifyContent: "center" }}>
                     <Icon name={icon} size={24} strokeWidth={1.5} />
@@ -2973,24 +3133,11 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                     {totalChapters === 1 && (
                       <span style={{ color: theme.primary, fontStyle: "italic" }}>{chapterBrief.title}</span>
                     )}
-                    <button
-                      onClick={() => setHintLevel(l => l === 0 ? 1 : 0)}
-                      title={hintLevel > 0 ? t("hideHint") : t("revealHint")}
-                      style={{
-                        background: hintLevel > 0 ? `${theme.primary}22` : "transparent",
-                        border: `1px solid ${hintLevel > 0 ? theme.primary : theme.border}`,
-                        borderRadius: 999, padding: "2px 9px",
-                        color: hintLevel > 0 ? theme.primary : theme.textMuted,
-                        fontFamily: theme.body, fontSize: 10, cursor: "pointer",
-                        display: "inline-flex", alignItems: "center", gap: 5,
-                        letterSpacing: "0.04em", transition: "all 0.2s",
-                      }}
-                    >
-                      <Icon name="bulb" size={11} /> {hintLevel > 0 ? t("hideHint") : t("revealHint")}
-                    </button>
                   </div>
                 )}
-                {chapterBrief && hintLevel >= 1 && (
+                {/* The situation is ALWAYS visible — it is what the player is solving.
+                    Only `approaches` are hidden, revealed one at a time via the bulb. */}
+                {chapterBrief && (
                   <div style={{
                     marginTop: 10, padding: "10px 14px",
                     background: `${theme.primary}0E`, border: `1px dashed ${theme.primary}55`,
@@ -2998,20 +3145,37 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                     color: theme.text, maxWidth: 560,
                   }}>
                     <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: theme.primary, marginBottom: 4 }}>
-                      {t("yourGoal")}
+                      {t("theSituation")}
                     </div>
-                    <div style={{ marginBottom: hintLevel >= 2 ? 10 : 0 }}>{chapterBrief.goal}</div>
-                    {hintLevel >= 2 && (
-                      <>
-                        <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: theme.primary, marginBottom: 4, marginTop: 4 }}>
-                          {t("theChallenge")}
-                        </div>
-                        <div>{chapterBrief.obstacle}</div>
-                      </>
+                    <div style={{ marginBottom: 10 }}>{chapterBrief.situation}</div>
+                    <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: 1.5, color: theme.primary, marginBottom: 4 }}>
+                      {t("winCondition")}
+                    </div>
+                    <div>{chapterBrief.winCondition}</div>
+
+                    {chapterProgress.achieved.length > 0 && (
+                      <div style={{ fontSize: 11, marginTop: 10, display: "flex", flexWrap: "wrap", gap: 4 }}>
+                        {chapterProgress.achieved.map((item, i) => (
+                          <span key={i} style={{
+                            background: `${theme.secondary || theme.primary}22`, border: `1px solid ${theme.secondary || theme.primary}44`,
+                            borderRadius: 4, padding: "1px 7px 1px 5px", color: theme.secondary || theme.primary, fontSize: 10,
+                            display: "inline-flex", alignItems: "center", gap: 4,
+                          }}><Icon name="check" size={10} strokeWidth={2} /> {item}</span>
+                        ))}
+                      </div>
                     )}
-                    {hintLevel === 1 && (
+
+                    {/* Revealed approaches accumulate — never re-hidden, since the
+                        player spent a hint to earn each one. */}
+                    {chapterBrief.approaches?.slice(0, hintLevel).map((a, i) => (
+                      <div key={i} style={{ marginTop: 8, paddingTop: 8, borderTop: `1px solid ${theme.primary}22`, display: "flex", gap: 6, alignItems: "flex-start" }}>
+                        <Icon name="bulb" size={11} style={{ marginTop: 2, color: theme.primary, flexShrink: 0 }} />
+                        <span><em style={{ color: theme.textMuted }}>{t("anApproach")} {i + 1}</em> — {a}</span>
+                      </div>
+                    ))}
+                    {hintLevel < (chapterBrief.approaches?.length || 0) && (
                       <button
-                        onClick={() => setHintLevel(2)}
+                        onClick={() => setHintLevel(l => l + 1)}
                         style={{
                           marginTop: 8, background: "transparent",
                           border: `1px solid ${theme.primary}55`, borderRadius: 6,
@@ -3021,20 +3185,9 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                           display: "inline-flex", alignItems: "center", gap: 5,
                         }}
                       >
-                        <Icon name="bulb" size={10} /> {t("revealChallenge")}
+                        <Icon name="bulb" size={10} /> {hintLevel === 0 ? t("revealHint") : t("revealApproach")}
                       </button>
                     )}
-                  </div>
-                )}
-                {chapterBrief && chapterProgress.achieved.length > 0 && (
-                  <div style={{ fontFamily: theme.body, fontSize: 11, marginTop: 6, display: "flex", flexWrap: "wrap", gap: 4 }}>
-                    {chapterProgress.achieved.map((item, i) => (
-                      <span key={i} style={{
-                        background: `${theme.secondary || theme.primary}22`, border: `1px solid ${theme.secondary || theme.primary}44`,
-                        borderRadius: 4, padding: "1px 7px 1px 5px", color: theme.secondary || theme.primary, fontSize: 10,
-                        display: "inline-flex", alignItems: "center", gap: 4,
-                      }}><Icon name="check" size={10} strokeWidth={2} /> {item}</span>
-                    ))}
                   </div>
                 )}
               </div>
@@ -3105,6 +3258,11 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                   <div style={{ fontFamily: theme.heading, color: theme.primary, fontSize: 16, letterSpacing: 1 }}>
                     {entry.text}
                   </div>
+                  {entry.solvedVia && (
+                    <div style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 11, marginTop: 6, fontStyle: "italic" }}>
+                      {t("chapterSolvedMsg")} — {entry.solvedVia}
+                    </div>
+                  )}
                 </div>
               );
             }
@@ -3279,10 +3437,12 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
             );
           })}
 
-          {loading && (
+          {(loading || briefStatus === "loading") && (
             <div style={{ textAlign: "center", padding: 30 }}>
               <div style={{ fontSize: 28, animation: "pulse 1.5s ease-in-out infinite" }}>{theme.icon}</div>
-              <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 13, marginTop: 8 }}>{t("storyUnfolds")}</p>
+              <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 13, marginTop: 8 }}>
+                {briefStatus === "loading" && !loading ? t("preparingChapter") : t("storyUnfolds")}
+              </p>
               {retryNotice && (
                 <p style={{
                   fontFamily: theme.body,
@@ -3292,6 +3452,31 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
                   {t(retryNotice.kind === "fallback" ? "retryFallback" : "retryHighDemand")}
                 </p>
               )}
+            </div>
+          )}
+
+          {/* The brief blocks play, so a failure must never be a dead end: "continue
+              anyway" drops chapterSection from the prompt and plays on unchaptered
+              rather than bricking the run. */}
+          {briefStatus === "error" && !loading && (
+            <div style={{ textAlign: "center", padding: 24, marginTop: 16, background: `${theme.accent}12`, border: `1px solid ${theme.accent}40`, borderRadius: 12 }}>
+              <p style={{ fontFamily: theme.body, color: theme.text, fontSize: 13 }}>{t("chapterBriefFailed")}</p>
+              <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
+                <button
+                  onClick={() => startChapter(chapterNumber, lastSummaryCtxRef.current)}
+                  style={{
+                    background: theme.primary, border: "none", borderRadius: 6, padding: "6px 14px",
+                    color: "#fff", fontFamily: theme.body, fontSize: 12, cursor: "pointer",
+                  }}
+                >{t("retryChapterBrief")}</button>
+                <button
+                  onClick={() => setBriefStatus("idle")}
+                  style={{
+                    background: "transparent", border: `1px solid ${theme.border}`, borderRadius: 6, padding: "6px 14px",
+                    color: theme.textMuted, fontFamily: theme.body, fontSize: 12, cursor: "pointer",
+                  }}
+                >{t("continueAnyway")}</button>
+              </div>
             </div>
           )}
 
@@ -3315,7 +3500,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
         </div>
 
         {/* Choices panel — always show input when game is active, even if LLM returned no suggestions */}
-        {!loading && !gameOver && (
+        {!loading && !gameOver && briefStatus === "idle" && (
           <div style={{
             background: theme.bgCard, backdropFilter: "blur(20px)", border: `1px solid ${theme.border}`,
             borderRadius: 16, padding: "18px 24px", marginTop: 12, boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
@@ -3393,7 +3578,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
           display: "flex", flexDirection: "column",
         }}>
           <h3 style={{ fontFamily: theme.heading, color: theme.primary, fontSize: 12, textTransform: "uppercase", letterSpacing: 1.5, margin: "0 0 12px" }}>
-            {t("chapterLabel")} Progress
+            {t("chapterLabel")} {t("progressLabel")}
           </h3>
           {chapterProgress.achieved.map((a, i) => (
             <div key={i} style={{ fontFamily: theme.body, fontSize: 11, marginBottom: 5, color: theme.secondary || theme.primary, display: "flex", alignItems: "flex-start", gap: 6 }}>
@@ -3452,7 +3637,7 @@ Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unl
           {chapterBrief && (chapterProgress.achieved.length > 0 || chapterProgress.clues.length > 0) && (
             <div>
               <span style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 11, textTransform: "uppercase", letterSpacing: 1 }}>
-                {t("chapterLabel")} {t("stats") === "Stats" ? "Progress" : "התקדמות"}
+                {t("chapterLabel")} {t("progressLabel")}
               </span>
               {chapterProgress.achieved.map((a, i) => (
                 <div key={i} style={{ fontFamily: theme.body, fontSize: 11, marginTop: 5, color: theme.secondary || theme.primary, display: "flex", alignItems: "flex-start", gap: 6 }}>

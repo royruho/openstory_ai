@@ -6,7 +6,7 @@ const envText = fs.readFileSync(path.resolve(".env"), "utf8");
 const KEY = envText.match(/OPENROUTER_KEY\s*=\s*(\S+)/)?.[1]?.trim();
 if (!KEY) { console.error("OPENROUTER_KEY not found in .env"); process.exit(1); }
 
-const MODEL = "google/gemini-2.0-flash-001";
+const MODEL = "google/gemini-2.5-flash";
 const ENDPOINT = "https://openrouter.ai/api/v1/chat/completions";
 const GENRE_LABELS = { fantasy: "fantasy", scifi: "sci-fi", reality: "modern reality", mystery: "mystery" };
 
@@ -14,13 +14,15 @@ function buildPrompt({ genre, chNum, total, character, skills = [], premise = ""
   const genreLabel = GENRE_LABELS[genre] || "fantasy";
   const SYSTEM =
     `You are a story architect for an interactive ${genreLabel} adventure. ` +
-    `Design a chapter brief with ONE concrete goal. The player explores freely and may hit dead ends.\n\n` +
-    `RESPOND WITH VALID JSON ONLY — a single object (NOT an array), three fields, nothing else:\n` +
+    `Design ONE concrete situation the player must solve to finish this chapter, and decide NOW how it can be solved.\n\n` +
+    `RESPOND WITH VALID JSON ONLY — a single object (NOT an array), four fields, nothing else:\n` +
     `{\n` +
     `  "title": "evocative chapter title (3-6 words)",\n` +
-    `  "goal": "ONE concrete, falsifiable objective. Must be one of: (a) a specific answer/truth to discover, (b) a specific artifact/object to obtain, or (c) a specific problem/situation to fix. Name WHAT is learned, obtained, or fixed — do not use vague verbs like 'investigate' or 'uncover' on their own. GOOD: 'Learn the true name of the cursed blacksmith.' / 'Recover the stolen signet ring from the thieves' guild.' / 'Restore power to the station's life-support core.' BAD: 'Investigate the village.' / 'Uncover the mystery.'",\n` +
-    `  "obstacle": "2-3 sentences. Sentence 1: the specific challenge, threat, or complication blocking the goal — who/what opposes the player, and any key detail that makes the situation tricky. Sentence 2-3: the general approach the player will need to take to overcome it — broad strokes only, no specific steps or items. Keep it open-ended enough that the player has real choices."\n` +
+    `  "situation": "1-2 sentences. A specific, concrete predicament facing the player RIGHT NOW — who or what opposes them, here, in this place. Not a theme or a quest description: a scene. The player is stuck in it until they solve it.",\n` +
+    `  "winCondition": "ONE sentence naming the objectively checkable state of the world that ends this situation. It must be answerable yes/no by looking at the world — e.g. 'Aran is inside the city walls', 'The identity of the traitor is spoken aloud to Aran', 'The seal is in Aran's hands'. NEVER use vague verbs like 'investigate', 'explore', 'confront' or 'uncover' on their own — name the end STATE, not the activity.",\n` +
+    `  "approaches": ["2-4 genuinely different ways the player could reach the win condition. Each must be concrete and actually workable in this situation. These are hidden from the player — they are a sanity check that the situation is solvable at all, and a menu of hints."]\n` +
     `}\n` +
+    `The situation and the winCondition must match: solving the situation MUST be exactly what the winCondition describes.\n` +
     `Return ONLY the JSON object — no wrapping array, no markdown fences, no commentary.`;
 
   const parts = [
@@ -28,7 +30,7 @@ function buildPrompt({ genre, chNum, total, character, skills = [], premise = ""
     `Character: ${character}${skills.length ? `, skilled in ${skills.join(", ")}` : ""}.`,
     premise ? `Premise: ${premise}` : "",
     summaryContext ? `Story so far: ${summaryContext}` : "This is the very beginning of the adventure.",
-    `Design chapter ${chNum} of ${total}. ${chNum === 1 ? "This is the opening chapter — establish the world and first conflict." : chNum === total ? "This is the final chapter — converge all threads for a satisfying conclusion." : "Build on events so far, escalate stakes."}`,
+    `Design chapter ${chNum} of ${total}. ${chNum === 1 ? "This is the opening chapter — establish the world and the first concrete predicament." : chNum === total ? "This is the final chapter — its situation resolves the whole story." : "Build on events so far, escalate stakes."}`,
   ].filter(Boolean);
 
   return { SYSTEM, user: parts.join("\n") };
@@ -46,7 +48,7 @@ async function generateBrief(scenario) {
     },
     body: JSON.stringify({
       model: MODEL,
-      max_completion_tokens: 500,
+      max_completion_tokens: 700,
       messages: [{ role: "system", content: SYSTEM }, { role: "user", content: user }],
       response_format: { type: "json_object" },
     }),
@@ -101,9 +103,15 @@ const SCENARIOS = [
       const brief = await generateBrief(s);
       console.log(`\n━━ ${s.label} ━━`);
       if (brief.title) {
-        console.log(`  title:    ${brief.title}`);
-        console.log(`  goal:     ${brief.goal}`);
-        console.log(`  obstacle: ${brief.obstacle}`);
+        const ap = Array.isArray(brief.approaches) ? brief.approaches : [];
+        // Mirrors the validation in generateChapterBrief: a brief without a
+        // checkable winCondition and at least one approach is unusable.
+        const ok = brief.situation && brief.winCondition && ap.length >= 1;
+        console.log(`  ${ok ? "valid" : "*** INVALID SHAPE ***"}`);
+        console.log(`  title:        ${brief.title}`);
+        console.log(`  situation:    ${brief.situation}`);
+        console.log(`  winCondition: ${brief.winCondition}`);
+        ap.forEach((a, i) => console.log(`  approach ${i + 1}:   ${a}`));
       } else {
         console.log(`  MALFORMED: ${JSON.stringify(brief).slice(0, 300)}`);
       }
