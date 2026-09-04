@@ -15,7 +15,7 @@ const ATTEMPT_TIMEOUT_MS = 25000;
 // providers intermittently return HTTP 200 with finish_reason:"error" and
 // truncated content, so this must be >1 or a transient blip ends the turn.
 const MAX_PARSE_FAILURES = 3;
-export const FREE_TURN_LIMIT = 20;
+export const FREE_TURN_LIMIT = 40;
 
 // ─── User key (stored in localStorage after turn 20) ────────────
 

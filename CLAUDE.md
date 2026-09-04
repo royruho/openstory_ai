@@ -6,7 +6,7 @@ This file tells Claude Code everything it needs to know to work effectively in t
 
 ## What this project is
 
-An AI-powered choose-your-own-adventure game with three modes, a chapter-based structure, and dice-roll fate checks.
+An AI-powered choose-your-own-adventure game with three modes, an AI-authored story arc ("bible"), a prologue → point-and-click chapter → closure play loop, and dice-roll fate checks.
 
 - **Frontend**: React + Vite (`frontend/`) — static, deployed on Vercel.
 - **Proxy**: Vercel serverless function (`api/proxy.js`) — holds the preloaded OpenRouter key server-side, never exposed to the browser.
@@ -231,7 +231,9 @@ Everything lives in `frontend/src/adventure.jsx` — a single React component.
 | `chapterProgress` | object | `{achieved: string[], clues: string[]}` |
 | `hintLevel` | number | How many of `chapterBrief.approaches` are revealed. Monotonic within a chapter (never re-hidden — each was earned), resets on transition, **is saved** |
 | `stuckTurns` | number | Turns with no `chapterProgress` movement; at `STUCK_TURNS_LIMIT` the costly out is required |
-| `briefStatus` | string | `"idle" \| "loading" \| "error"` — gates the choices panel while the brief lands |
+| `briefStatus` | string | `"idle" \| "loading" \| "error"` — gates the choices panel while a chapter is prepared |
+| `storyBible` | object\|null | AI-authored arc (see Story bible). Mirrored in `bibleRef` for same-tick reads. **Saved** (v5) |
+| `interlude` | object\|null | `{kind, ready}` — a prologue/closure card is showing; replaces the choices panel with Continue |
 | `pendingRoll` | object\|null | `{context, choiceText}` — dice waiting to be rolled |
 | `nextRollRequired` | object | `{required, context}` from last LLM response |
 | `currentMood` | string | Drives ambient UI tone; from the LLM's `mood` field |
@@ -275,6 +277,28 @@ Error/retry entries (localized "Something went wrong" narrator + "Try again" pla
 | `resetGame()` | Resets all state, returns to home |
 
 ---
+
+## Story bible (the arc)
+
+The plot is AI-authored up front. `generateStoryBible(total, cfgOv, charOv)` designs the whole arc once from the wizard input → `storyBible = {logline, centralConflict, antagonist:{name,goal,method}, stakes, keyFigures, intendedEnding, chapters:[{n,beat}]}` (strict `BIBLE_SCHEMA`). It is generated in `startAdventure` **before** anything else, mirrored into `bibleRef` for same-tick reads, and injected as a compact block (spine + the current chapter's beat) into every in-chapter system prompt — this is the throughline that stops chapters drifting.
+
+**Bounded drift.** The bible is frozen during a chapter. On solve, `resolveChapter` proposes downstream tweaks and `clampBibleUpdate(old, solvedN, upd)` applies them **defensively**: logline, centralConflict, `antagonist.name`, and every already-played chapter's beat are carried over untouched; only the antagonist's goal/method, stakes, intended ending, and *future* beats may change. The clamp is the guarantee — the prompt asking nicely is not (prompt-only rules were ignored ~50% this session). Nullable: pre-v5 saves and generation failures leave `storyBible: null`, and the game degrades to the old unchaptered-arc behaviour.
+
+## Play loop (prologue → chapter → closure)
+
+Rich narrative lives in **cards**; in-chapter turns are terse. The `interlude` state (`{kind: "advPrologue"|"chapterPrologue"|"closure", ready}`) replaces the choices panel with a single **Continue** button while a card is read.
+
+```
+START → bible → adventure-prologue card → [Continue] → chapter-1 prologue card → [Continue] → PLAY
+PLAY  → terse point-and-click turns (buildSystemPrompt forces 1-2 sentences, on/off-track woven into the prose)
+SOLVE → resolveChapter (closure card + clamped bible update) → next chapter prepares in the background;
+        Continue shows "preparing…" and enables when ready → next prologue card → PLAY
+LAST  → closure card → [The End] → gameOver
+```
+
+- `generateChapter(chNum, …)` folds the brief **and** the player-facing prologue (`{text, choices}`) into one call (`CHAPTER_SCHEMA`); `prepareChapter` retries it without committing, `enterChapter` commits it into play on the prologue's Continue.
+- Prologue/closure are `storyLog` roles `"prologue"`/`"closure"`. Prologue text **is** sent to the LLM as narrator context (it grounds the scene); `closure`/`chapter`/`roll` stay display-only. `isNarr()` in `makeChoice` decides this.
+- `responseLength` (the wizard's length step) now governs **prologue/closure** richness only — in-chapter length is always terse.
 
 ## Chapter system
 
@@ -450,4 +474,7 @@ There is no separate FINALE phase. The last chapter's solve **is** the ending: t
 - Do not add `setting` or `resolutionCondition` back to the chapter brief — both were intentionally removed. `winCondition` is the goal made falsifiable, not a revival of `resolutionCondition` (which described how the narration should wrap up)
 - Do not put `chapterProgress` — or the stuck directive derived from it — in the system prompt; both belong only in the `[CURRENT STATE]` user message block
 - Do not bump `chapterNumber` inside the brief's success handler — a failed brief then silently strands the player in the previous chapter forever. `startChapter` bumps it up front
-- Save files use `version: 4`. `loadAndValidateSave()` accepts v2/v3 and migrates them (`storyLength` → `chapterCount`, `{goal, obstacle}` → `{situation, winCondition, approaches: []}`); anything below v2 throws the `"version"` error so the caller shows `t("versionError")` instead of `t("loadError")`
+- Save files use `version: 5`. `loadAndValidateSave()` accepts v2/v3/v4 and migrates them (`storyLength` → `chapterCount`, `{goal, obstacle}` → `{situation, winCondition, approaches: []}`, absent `storyBible` → `null`); anything below v2 throws the `"version"` error so the caller shows `t("versionError")` instead of `t("loadError")`
+- Do not enforce a bible update in the prompt alone — `clampBibleUpdate` is the guarantee that logline/centralConflict/antagonist.name and past beats never change. Structured LLM calls (`BIBLE_SCHEMA`, `CHAPTER_SCHEMA`, `RESOLVE_SCHEMA`, `TURN_SCHEMA`) use strict `json_schema` because prompt-only shape rules are ignored ~half the time
+- Do not send `closure`/`chapter`/`roll` storyLog entries to the LLM as history; `prologue` IS sent (it grounds the scene). `isNarr()` in `makeChoice` is the allowlist
+- `FREE_TURN_LIMIT` is 40 (a billing gate in `api.js`, not story pacing) — prologue/closure/bible/resolve calls all count toward it

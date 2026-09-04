@@ -223,6 +223,12 @@ const TR = {
   progressLabel:    { English: "Progress",             Hebrew: "התקדמות",            Arabic: "التقدم",                Portuguese: "Progresso" },
   chapterSolvedMsg: { English: "Situation resolved",   Hebrew: "המצב נפתר",          Arabic: "تم حل الموقف",         Portuguese: "Situação resolvida" },
   preparingChapter: { English: "Preparing the next chapter...", Hebrew: "מכין את הפרק הבא...", Arabic: "جارٍ تحضير الفصل التالي...", Portuguese: "Preparando o próximo capítulo..." },
+  preparingAdventure: { English: "Preparing your adventure...", Hebrew: "מכין את ההרפתקה שלך...", Arabic: "جارٍ تحضير مغامرتك...", Portuguese: "Preparando a sua aventura..." },
+  continueBtn:      { English: "Continue",             Hebrew: "המשך",                Arabic: "متابعة",                Portuguese: "Continuar" },
+  theEnd:           { English: "The End",              Hebrew: "הסוף",                Arabic: "النهاية",               Portuguese: "Fim" },
+  advPrologueTitle: { English: "The Story",            Hebrew: "הסיפור",              Arabic: "القصة",                 Portuguese: "A História" },
+  chapterPrologueTitle: { English: "Your Objective",   Hebrew: "המשימה שלך",          Arabic: "مهمتك",                 Portuguese: "O Seu Objetivo" },
+  chapterClosureTitle: { English: "Chapter Complete",  Hebrew: "הפרק הושלם",          Arabic: "اكتمل الفصل",          Portuguese: "Capítulo Concluído" },
   chapterBriefFailed: { English: "Could not prepare the chapter.", Hebrew: "לא ניתן היה להכין את הפרק.", Arabic: "تعذّر تحضير الفصل.", Portuguese: "Não foi possível preparar o capítulo." },
   retryChapterBrief: { English: "Try again",                     Hebrew: "נסה שוב",             Arabic: "حاول مرة أخرى",        Portuguese: "Tentar novamente" },
   continueAnyway:   { English: "Continue without a chapter goal", Hebrew: "המשך ללא מטרת פרק",  Arabic: "المتابعة بدون هدف للفصل", Portuguese: "Continuar sem objetivo de capítulo" },
@@ -674,6 +680,123 @@ const TURN_SCHEMA = {
     },
   },
 };
+
+// ─── STORY BIBLE ───────────────────────────────────────────────
+// The whole arc, authored once up front from the wizard input. Frozen during a
+// chapter; nudged only downstream when a chapter is solved (see clampBibleUpdate).
+// This is what gives the game a plot rather than a string of unrelated puzzles.
+const BIBLE_SCHEMA = {
+  name: "bible", strict: true,
+  schema: {
+    type: "object", additionalProperties: false,
+    required: ["logline", "centralConflict", "antagonist", "stakes", "keyFigures", "intendedEnding", "chapters"],
+    properties: {
+      logline:         { type: "string" },
+      centralConflict: { type: "string" },
+      antagonist: {
+        type: "object", additionalProperties: false, required: ["name", "goal", "method"],
+        properties: { name: { type: "string" }, goal: { type: "string" }, method: { type: "string" } },
+      },
+      stakes:         { type: "string" },
+      keyFigures: {
+        type: "array",
+        items: { type: "object", additionalProperties: false, required: ["name", "role"],
+                 properties: { name: { type: "string" }, role: { type: "string" } } },
+      },
+      intendedEnding: { type: "string" },
+      chapters: {
+        type: "array",
+        items: { type: "object", additionalProperties: false, required: ["n", "beat"],
+                 properties: { n: { type: "integer" }, beat: { type: "string" } } },
+      },
+    },
+  },
+};
+
+// One call sets up a chapter: the hidden solving contract (brief) AND the
+// player-facing prologue card with its opening choices. Replaces the old
+// separate brief + opening-turn calls.
+const CHAPTER_SCHEMA = {
+  name: "chapter", strict: true,
+  schema: {
+    type: "object", additionalProperties: false,
+    required: ["brief", "prologue"],
+    properties: {
+      brief: {
+        type: "object", additionalProperties: false, required: ["title", "situation", "winCondition", "approaches"],
+        properties: {
+          title:        { type: "string" },
+          situation:    { type: "string" },
+          winCondition: { type: "string" },
+          approaches:   { type: "array", items: { type: "string" } },
+        },
+      },
+      prologue: {
+        type: "object", additionalProperties: false, required: ["text", "choices"],
+        properties: {
+          text:    { type: "string" },
+          choices: { type: "array", items: { type: "string" } },
+        },
+      },
+    },
+  },
+};
+
+// On solve: the closure card text + a bounded, downstream-only bible update.
+// The update fields are ADVISORY — clampBibleUpdate decides what actually changes.
+const RESOLVE_SCHEMA = {
+  name: "resolve", strict: true,
+  schema: {
+    type: "object", additionalProperties: false,
+    required: ["closureText", "antagonistGoal", "antagonistMethod", "stakes", "intendedEnding", "futureChapters"],
+    properties: {
+      closureText:      { type: "string" },
+      antagonistGoal:   { type: "string" },
+      antagonistMethod: { type: "string" },
+      stakes:           { type: "string" },
+      intendedEnding:   { type: "string" },
+      futureChapters: {
+        type: "array",
+        items: { type: "object", additionalProperties: false, required: ["n", "beat"],
+                 properties: { n: { type: "integer" }, beat: { type: "string" } } },
+      },
+    },
+  },
+};
+
+// The adventure prologue and any single-string narrative card.
+const TEXT_SCHEMA = {
+  name: "text", strict: true,
+  schema: { type: "object", additionalProperties: false, required: ["text"], properties: { text: { type: "string" } } },
+};
+
+// Apply a solve-time update to the bible, clamped so the spine physically cannot
+// move: logline, centralConflict, the antagonist's NAME, and every already-played
+// chapter's beat are carried over untouched. Only the antagonist's goal/method,
+// stakes, the intended ending, and FUTURE chapter beats may drift. Never trust the
+// model to respect this — enforce it here (same posture as normalizeTurn).
+function clampBibleUpdate(old, solvedN, upd) {
+  if (!old) return old;
+  const future = {};
+  for (const c of (upd?.futureChapters || [])) {
+    if (c && typeof c.n === "number" && c.n > solvedN && typeof c.beat === "string" && c.beat.trim()) {
+      future[c.n] = c.beat.trim();
+    }
+  }
+  const keep = (v, fallback) => (typeof v === "string" && v.trim() ? v.trim() : fallback);
+  return {
+    ...old,
+    antagonist: {
+      name:   old.antagonist?.name,                              // frozen
+      goal:   keep(upd?.antagonistGoal,   old.antagonist?.goal),
+      method: keep(upd?.antagonistMethod, old.antagonist?.method),
+    },
+    stakes:         keep(upd?.stakes,         old.stakes),
+    intendedEnding: keep(upd?.intendedEnding, old.intendedEnding),
+    chapters: (old.chapters || []).map(c =>
+      c.n <= solvedN ? c : (future[c.n] != null ? { n: c.n, beat: future[c.n] } : c)),
+  };
+}
 
 // Chapter counts the duration step offers. Chapters end when their situation is
 // solved, never on a turn count — so this is the only measure of adventure size.
@@ -1805,7 +1928,9 @@ function exportStoryAsText({ storyLog, config, character, stats, turnCount, game
 
   let turn = 0;
   storyLog.forEach(entry => {
-    if (entry.role === "chapter") {
+    if (entry.role === "prologue" || entry.role === "closure") {
+      lines.push("", `${"─".repeat(42)}`, entry.text, entry.solvedVia ? `  (${entry.solvedVia})` : "", `${"─".repeat(42)}`, "");
+    } else if (entry.role === "chapter") {
       lines.push("", `${"─".repeat(42)}`, `  ${entry.text}`, `${"─".repeat(42)}`, "");
     } else if (entry.role === "roll") {
       lines.push(`[Fate Check: ${entry.context} — ${entry.value}/${config.mode === "dnd" ? 20 : 6} (${entry.outcome})${entry.skillBonus ? " ★ Skill Bonus" : ""}]`);
@@ -1844,12 +1969,12 @@ function triggerDownload(filename, content, mime) {
 // hintLevel is persisted from v4 on: it used to be a re-derivable view toggle,
 // but it now records how many chapter approaches the player has unlocked —
 // earned progress that would silently vanish on load.
-function buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress, stuckTurns, hintLevel }) {
+function buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress, stuckTurns, hintLevel, storyBible }) {
   return {
-    version: 4, savedAt: new Date().toISOString(),
+    version: 5, savedAt: new Date().toISOString(),
     config, character, stats, storyLog, choices, turnCount, gameOver,
     storySummary, worldState, chapterNumber, chapterBrief, chapterProgress,
-    stuckTurns, hintLevel,
+    stuckTurns, hintLevel, storyBible,
   };
 }
 
@@ -1888,6 +2013,9 @@ function loadAndValidateSave(json) {
   }
   if (data.stuckTurns === undefined) data.stuckTurns = 0;
   if (data.hintLevel  === undefined) data.hintLevel  = 0;
+  // ── v5: story bible ── pre-v5 saves have none; the game runs unchaptered-arc
+  // (buildSystemPrompt omits the bible block), which is exactly the old behaviour.
+  if (data.storyBible === undefined) data.storyBible = null;
   return data;
 }
 
@@ -1922,8 +2050,13 @@ export default function AdventureGame() {
   const [hintLevel, setHintLevel]           = useState(0); // how many of chapterBrief.approaches are revealed — resets on chapter transition
   const [stuckTurns, setStuckTurns]         = useState(0); // turns with no chapterProgress movement; at STUCK_TURNS_LIMIT the narrator must offer a costly way out
   const [briefStatus, setBriefStatus]       = useState("idle"); // "idle" | "loading" | "error" — gates input while the chapter brief lands
+  const [storyBible, setStoryBible]         = useState(null); // the whole-arc plan; null = pre-bible save or generation failed (degrades to unchaptered)
+  const [interlude, setInterlude]           = useState(null); // null | { kind: "advPrologue"|"chapterPrologue"|"closure", ready } — a reading card that replaces the choices panel
   const briefReqRef        = useRef(0);  // discards a brief that resolves after the player reset/loaded
   const lastSummaryCtxRef  = useRef(""); // lets the error panel re-issue the same brief request
+  const pendingChapterRef  = useRef(null); // { chNum, brief, choices } staged while a prologue/closure card is being read
+  const bibleRef           = useRef(null); // mirrors storyBible for same-tick reads (resolve → update → next chapter)
+  const prepareArgsRef     = useRef(null); // last prepareChapter args, so the error panel can retry
   // Inline translations of narrator passages — keyed by storyLog index.
   // Shape: { [logIdx]: { lang, text, loading, error, picker } } — ephemeral, not saved.
   const [translations, setTranslations]     = useState({});
@@ -2037,11 +2170,12 @@ export default function AdventureGame() {
   // briefOverride/chapNumOverride exist because callers that have just awaited a
   // freshly generated brief cannot rely on the state update having landed yet
   // (same reason cfgOverride exists — see startAdventure).
-  const buildSystemPrompt = useCallback((cfgOverride, charOverride, briefOverride, chapNumOverride) => {
+  const buildSystemPrompt = useCallback((cfgOverride, charOverride, briefOverride, chapNumOverride, bibleOverride) => {
     const cfg   = cfgOverride  ?? config;
     const char  = charOverride ?? character;
     const brief = briefOverride ?? chapterBrief;
     const chNum = chapNumOverride ?? chapterNumber;
+    const bible = bibleOverride ?? storyBible;
     const eLang       = cfg.language || "English";
     const eHebrew     = eLang === "Hebrew";
     const eRTL        = RTL_LANGS.includes(eLang);
@@ -2055,17 +2189,36 @@ export default function AdventureGame() {
       teen:  "Content for ages 13+. Moderate action OK. Light romantic tension fine.",
       adult: "Content for 18+. Violence, complex themes, romance, sophisticated vocabulary all acceptable.",
     };
-    const lengthRules = {
-      short:  "1-2 sentences per beat.",
-      medium: "One paragraph (3-5 sentences) per beat.",
-      long:   "2-3 rich paragraphs per beat. Be descriptive and immersive.",
-    };
     const skillsEN = char.skills.map(s => {
       const g = GENRE_SKILLS[cfg.genre];
       if (!g || !eHebrew) return s;
       const idx = g.he.indexOf(s);
       return idx >= 0 ? g.en[idx] : s;
     });
+
+    // Models don't reliably honour the "Name": "status string" shape — they often
+    // return an object ({status, location, ...}) or a nested value instead. Left
+    // raw, `${v}` renders "[object Object]", which then merges forward forever. Coerce.
+    const asText = (v) => {
+      if (typeof v === "string") return v;
+      if (v == null) return "";
+      if (Array.isArray(v)) return v.map(asText).filter(Boolean).join(", ");
+      if (typeof v === "object") return Object.values(v).map(asText).filter(Boolean).join(" — ");
+      return String(v);
+    };
+
+    // The throughline. Present on every in-chapter turn so the story pulls toward
+    // one ending instead of drifting chapter to chapter. Only the spine + THIS
+    // chapter's beat go in — past/future beats stay out to keep the prompt small.
+    const currentBeat = bible?.chapters?.find(c => c.n === chNum)?.beat;
+    const bibleSection = bible ? `
+STORY (the arc this whole adventure is telling — never contradict it, always pull toward it):
+Logline: ${bible.logline}
+Central conflict: ${bible.centralConflict}
+Antagonist: ${bible.antagonist?.name} — ${asText(bible.antagonist?.goal)}${bible.antagonist?.method ? ` (${asText(bible.antagonist.method)})` : ""}
+Stakes: ${asText(bible.stakes)}
+Heading toward: ${asText(bible.intendedEnding)}${currentBeat ? `
+This chapter's role in the arc: ${currentBeat}` : ""}` : "";
 
     // The chapter is a contract: the situation holds the story in place until the
     // win condition is objectively met. `approaches` are for the narrator's eyes
@@ -2081,18 +2234,6 @@ ${(brief.approaches || []).map(a => `  - ${a}`).join("\n")}
 → Every turn, at least one choice must be a plausible move against this situation.
 → Set chapterSolved:true ONLY when the win condition is objectively, concretely met — not when the player merely intends, plans, or attempts it. Do not lower the bar because the player is struggling. State the approach used in solvedVia.`
       : "";
-
-    // Models don't reliably honour the "Name": "status string" shape — they often
-    // return an object ({status, location, ...}) or a nested value instead. Left
-    // raw, `${v}` renders "[object Object]", which is then merged back into
-    // worldState and re-injected into the prompt every turn, forever. Coerce.
-    const asText = (v) => {
-      if (typeof v === "string") return v;
-      if (v == null) return "";
-      if (Array.isArray(v)) return v.map(asText).filter(Boolean).join(", ");
-      if (typeof v === "object") return Object.values(v).map(asText).filter(Boolean).join(" — ");
-      return String(v);
-    };
 
     const hasWorldState = Object.keys(worldState.npcs).length || worldState.locations.length || worldState.facts.length;
     const worldStateSection = hasWorldState ? `
@@ -2160,13 +2301,14 @@ PERSPECTIVE: ${eHebrew
 CHARACTER: Name: ${char.name || "The Adventurer"}, Gender: ${char.gender || "unspecified"}, Age: ${char.age || "unknown"}, Appearance: ${(char.appearance || "unspecified").replace(/\n+/g, ", ")}, Skills: ${skillsEN.join(", ") || "none"}${dndCharBlock}
 
 CONTENT: ${ageRules[cfg.ageTier] || ageRules.teen}
-LENGTH: ${lengthRules[cfg.responseLength] || lengthRules.medium}${eduNote}
+LENGTH: Respond in 1-2 short sentences — point-and-click style. React to the player's SPECIFIC action and make clear, through what happens in the fiction, whether it moves toward the win condition or misses it. Never use a meter, never restate the whole situation, no long description. Keep momentum.${eduNote}
 ${cfg.deathPossible ? "DEATH IS POSSIBLE if very poor choices are made." : "DEATH IS NOT POSSIBLE. Failures redirect the story."}
 ${cfg.trackStats
   ? `TRACK STATS: Always return a "stats" object with the updated values. Current authoritative state — health: ${stats.health}/100, inventory: [${(stats.inventory || []).join(", ") || "empty"}], relationships: {${Object.entries(stats.relationships || {}).map(([k,v]) => `${k}: ${v}`).join(", ") || "none"}}. Carry these forward and modify based on events. Reduce health on dangerous failures.`
   : ""}
 SKILLS: When situations relate to character skills, acknowledge the skill and give more favorable outcomes.
 ${cfg.storyPrompt ? `PREMISE: ${cfg.storyPrompt}` : "Create an original compelling opening."}
+${bibleSection}
 ${storyContextSection}
 ${chapterSection}
 
@@ -2188,7 +2330,7 @@ worldState: Update every turn — carry ALL existing entries forward and add new
 Provide 2-5 meaningfully different choices. ALWAYS include at least 1 choice unless gameOver is true.
 choices: an array of PLAIN STRINGS — the exact text of each option, nothing else. Never objects, never nested, never the outcome of a choice. Correct: ["open the door","wait"]. Wrong: [{"choice":"open the door","outcome":{...}}].
 Return the JSON object above and nothing else — do not add fields, do not nest extra structure inside any field.`;
-  }, [config, character, turnCount, storySummary, worldState, chapterBrief, chapterNumber, totalChapters, stats]);
+  }, [config, character, turnCount, storySummary, worldState, chapterBrief, chapterNumber, totalChapters, stats, storyBible]);
 
   // ─── API CALL ─────────────────────────────────────────────────
   const callAPI = useCallback(async (messages, opts = {}) => {
@@ -2386,114 +2528,221 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     }
   }, [turnCount, config.language]);
 
-  // ─── CHAPTER BRIEF GENERATOR ──────────────────────────────────
-  // Designs the chapter's situation and — crucially — decides HOW it can be
-  // solved up front. The winCondition is the contract the narrator checks the
-  // player's actions against each turn; `approaches` are hidden routes that keep
-  // the narrator honest about what "solvable" means. Nothing else gates the plot.
-  //
-  // Unlike triggerSummarize, this call IS awaited (startChapter blocks play on it):
-  // without a winCondition there is nothing for the chapter to be solved against.
-  // Pure producer — returns the brief or null, sets no state. startChapter owns
-  // retries and installation.
-  //
-  // cfgOverride/charOverride matter: startAdventure calls setConfig(finalCfg) and
-  // then starts chapter 1 in the same tick, so `config` here is still the
-  // pre-defaults value. Without the override the brief is built with the wrong
-  // genre/language — same reason buildSystemPrompt takes overrides.
-  const generateChapterBrief = useCallback(async (chNum, total, summaryContext, cfgOverride, charOverride) => {
+  // Portuguese needs a stronger directive to stay European rather than Brazilian.
+  const langDirectiveFor = (eLang) => eLang === "Portuguese"
+    ? "European Portuguese (pt-PT, as spoken in Portugal — NOT Brazilian Portuguese; use words like 'ficheiro' not 'arquivo', 'ecrã' not 'tela', 'autocarro' not 'ônibus', 'telemóvel' not 'celular')"
+    : eLang;
+  // Rich-prose length for prologues/closures, from the wizard's length step. The
+  // in-chapter turns are always terse (see buildSystemPrompt); this is where the
+  // length choice now actually shows up.
+  const proseLenFor = (responseLength) => ({
+    short:  "2-3 sentences",
+    medium: "one rich paragraph (4-6 sentences)",
+    long:   "2-3 rich, immersive paragraphs",
+  }[responseLength] || "one rich paragraph (4-6 sentences)");
+
+  // ─── STORY BIBLE GENERATOR ────────────────────────────────────
+  // Authors the whole arc up front from the wizard input: central conflict,
+  // antagonist, stakes, intended ending, and one beat per chapter. This is what
+  // makes the adventure a plot rather than a run of unrelated situations.
+  // Pure producer — returns bible or null.
+  const generateStoryBible = useCallback(async (total, cfgOverride, charOverride) => {
     const cfg  = cfgOverride  ?? config;
     const char = charOverride ?? character;
     const genreLabel = THEMES[cfg.genre]?.nameKey || "fantasy";
     const eLang = cfg.language || "English";
-    const ePortuguese = eLang === "Portuguese";
-    const langDirective = ePortuguese
-      ? "European Portuguese (pt-PT, as spoken in Portugal — NOT Brazilian Portuguese; use words like 'ficheiro' not 'arquivo', 'ecrã' not 'tela', 'autocarro' not 'ônibus', 'telemóvel' not 'celular')"
-      : eLang;
+    const langDirective = langDirectiveFor(eLang);
     const SYSTEM =
-      `You are a story architect for an interactive ${genreLabel} adventure. ` +
-      `Design ONE concrete situation the player must solve to finish this chapter, and decide NOW how it can be solved.\n\n` +
-      `LANGUAGE: Write every value ENTIRELY in ${langDirective}. The JSON keys stay in English; every value must be in ${eLang}.\n\n` +
-      `RESPOND WITH VALID JSON ONLY — a single object (NOT an array), four fields, nothing else:\n` +
-      `{\n` +
-      `  "title": "evocative chapter title (3-6 words) in ${eLang}",\n` +
-      `  "situation": "1-2 sentences in ${eLang}. A specific, concrete predicament facing the player RIGHT NOW — who or what opposes them, here, in this place. Not a theme or a quest description: a scene. The player is stuck in it until they solve it.",\n` +
-      `  "winCondition": "ONE sentence in ${eLang} naming the objectively checkable state of the world that ends this situation. It must be answerable yes/no by looking at the world — e.g. 'Aran is inside the city walls', 'The identity of the traitor is spoken aloud to Aran', 'The seal is in Aran's hands'. NEVER use vague verbs like 'investigate', 'explore', 'confront' or 'uncover' on their own — name the end STATE, not the activity.",\n` +
-      `  "approaches": ["2-4 genuinely different ways in ${eLang} the player could reach the win condition. Each must be concrete and actually workable in this situation. These are hidden from the player — they are a sanity check that the situation is solvable at all, and a menu of hints."]\n` +
-      `}\n` +
-      `The situation and the winCondition must match: solving the situation MUST be exactly what the winCondition describes.\n` +
-      `Return ONLY the JSON object — no wrapping array, no markdown fences, no commentary. Every value MUST be in ${eLang}.`;
-
+      `You are a story architect for an interactive ${genreLabel} adventure. Design the COMPLETE story arc up front, from the premise, as a bible the whole game will follow.\n` +
+      `LANGUAGE: write every value ENTIRELY in ${langDirective}; JSON keys stay English.\n` +
+      `Rules: "chapters" MUST have exactly ${total} entries, n = 1..${total} in order. Each "beat" is the ONE concrete thing that chapter accomplishes in the arc, each building on the previous. Chapter ${total}'s beat resolves the central conflict toward the intended ending. The antagonist is a concrete force with a name, a goal, and a current method (not an abstract theme). keyFigures are 2-4 recurring characters worth planting now. Keep every value tight — one or two sentences.`;
     const parts = [
-      `Chapter ${chNum} of ${total} in a ${genreLabel} adventure.`,
-      `Character: ${char.name}${char.skills.length ? `, skilled in ${char.skills.join(", ")}` : ""}.`,
-      cfg.storyPrompt ? `Premise: ${cfg.storyPrompt}` : "",
-      summaryContext ? `Story so far: ${summaryContext}` : "This is the very beginning of the adventure.",
-      `Design chapter ${chNum} of ${total}. ${chNum === 1 ? "This is the opening chapter — establish the world and the first concrete predicament." : chNum === total ? "This is the final chapter — its situation resolves the whole story." : "Build on events so far, escalate stakes."}`,
-    ].filter(Boolean);
-
+      `Premise: ${cfg.storyPrompt || "(invent a compelling one for the genre)"}`,
+      `Protagonist: ${char.name}${char.skills?.length ? `, skilled in ${char.skills.join(", ")}` : ""}.`,
+      `Genre: ${genreLabel}. Chapters: ${total}.`,
+    ];
     try {
-      let result = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 700, turnCount });
-      // Unwrap if model returned [{...}] instead of {...}
-      if (Array.isArray(result) && result[0]) result = result[0];
-      const approaches = Array.isArray(result?.approaches)
-        ? result.approaches.filter(a => typeof a === "string" && a.trim())
+      let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 1800, turnCount: 0, schema: BIBLE_SCHEMA });
+      if (Array.isArray(r) && r[0]) r = r[0];
+      const chapters = Array.isArray(r?.chapters)
+        ? r.chapters.filter(c => c && typeof c.beat === "string").map((c, i) => ({ n: i + 1, beat: c.beat }))
         : [];
-      // Accept a single approach: one workable route still makes a playable
-      // chapter, and blocking the game over a cosmetic shortfall is worse.
-      if (result?.title && result?.situation && result?.winCondition && approaches.length >= 1) {
+      if (r?.logline && r?.centralConflict && r?.antagonist?.name && r?.intendedEnding && chapters.length) {
+        // Trust the arc's own chapter count if it disagrees with `total`; the
+        // beats are what matter and totalChapters is derived from config anyway.
         return {
-          title:        result.title,
-          situation:    result.situation,
-          winCondition: result.winCondition,
-          approaches:   approaches.slice(0, 4),
+          logline:         r.logline,
+          centralConflict: r.centralConflict,
+          antagonist:      { name: r.antagonist.name, goal: r.antagonist.goal || "", method: r.antagonist.method || "" },
+          stakes:          r.stakes || "",
+          keyFigures:      Array.isArray(r.keyFigures) ? r.keyFigures.filter(f => f?.name).map(f => ({ name: f.name, role: f.role || "" })) : [],
+          intendedEnding:  r.intendedEnding,
+          chapters,
         };
       }
-      console.warn("Chapter brief: malformed shape", result);
+      console.warn("Story bible: malformed shape", r);
       return null;
     } catch (e) {
-      console.warn("Chapter brief generation failed:", e);
+      console.warn("Story bible generation failed:", e);
       return null;
     }
-  }, [config, character, turnCount]);
+  }, [config, character]);
 
-  // ─── CHAPTER START ────────────────────────────────────────────
-  // Advances to chNum and installs its brief. Play is BLOCKED while this runs —
-  // the situation must be on screen and in the system prompt before the player
-  // can act, so this is the one background call we deliberately wait on.
-  //
-  // chapterNumber is bumped up front, NOT after the brief lands: it used to be
-  // set inside the brief's success handler, so a failed brief silently left the
-  // player stuck in the previous chapter forever.
-  // Returns the installed brief (or null) so a caller that must build a prompt in
-  // the same tick can pass it as an override — setChapterBrief has not landed yet.
-  const startChapter = useCallback(async (chNum, summaryCtx, cfgOv, charOv, totalOv) => {
-    const total = totalOv ?? totalChapters;
+  // ─── CHAPTER GENERATOR (brief + prologue) ─────────────────────
+  // One call produces both the hidden solving contract (brief) and the
+  // player-facing prologue card + its opening choices. The brief REALIZES this
+  // chapter's beat from the bible, so chapters serve the arc instead of being
+  // freshly invented. Pure producer — returns { brief, prologueText, choices } | null.
+  const generateChapter = useCallback(async (chNum, total, summaryContext, cfgOverride, charOverride, bibleOverride) => {
+    const cfg   = cfgOverride  ?? config;
+    const char  = charOverride ?? character;
+    const bible = bibleOverride ?? bibleRef.current ?? storyBible;
+    const genreLabel = THEMES[cfg.genre]?.nameKey || "fantasy";
+    const eLang = cfg.language || "English";
+    const langDirective = langDirectiveFor(eLang);
+    const beat = bible?.chapters?.find(c => c.n === chNum)?.beat;
+    const SYSTEM =
+      `You are a story architect for an interactive ${genreLabel} adventure. Set up chapter ${chNum} of ${total}: a concrete SITUATION the player must solve, decided NOW, plus the player-facing prologue that opens it.\n` +
+      `LANGUAGE: write every value ENTIRELY in ${langDirective}; JSON keys stay English.\n` +
+      `Return two objects:\n` +
+      `"brief" (the hidden solving contract):\n` +
+      `  title: evocative chapter title (3-6 words).\n` +
+      `  situation: 1-2 sentences — the specific, concrete predicament facing the player RIGHT NOW, here, in this place. A scene, not a theme.\n` +
+      `  winCondition: ONE sentence naming the objectively checkable end-state that resolves it (answerable yes/no by looking at the world, e.g. 'Aran is inside the city walls'). Never a vague verb like 'investigate' on its own — name the STATE.\n` +
+      `  approaches: 2-4 genuinely different concrete routes to the win condition. HIDDEN from the player.\n` +
+      `"prologue" (what the player reads to open the chapter):\n` +
+      `  text: ${proseLenFor(cfg.responseLength)} that drops the player into the situation and makes clear, in the fiction, what they must achieve here and hints at how — WITHOUT listing the approaches. Rich and atmospheric.\n` +
+      `  choices: 2-5 concrete opening actions (plain strings), each a real move on the situation.\n` +
+      `The situation and winCondition must match, and both must realize this chapter's role in the arc.`;
+    const parts = [
+      bible ? `STORY BIBLE: ${JSON.stringify({ logline: bible.logline, centralConflict: bible.centralConflict, antagonist: bible.antagonist, stakes: bible.stakes, intendedEnding: bible.intendedEnding })}` : "",
+      beat ? `THIS CHAPTER'S BEAT (what it must accomplish in the arc): ${beat}` : "",
+      `Character: ${char.name}${char.skills?.length ? `, skilled in ${char.skills.join(", ")}` : ""}.`,
+      cfg.storyPrompt ? `Premise: ${cfg.storyPrompt}` : "",
+      summaryContext ? `Story so far: ${summaryContext}` : "This is the very beginning of the adventure.",
+      `${chNum === 1 ? "Opening chapter — establish the world and the first concrete predicament." : chNum === total ? "Final chapter — its situation resolves the whole story." : "Build on events so far; escalate."}`,
+    ].filter(Boolean);
+    try {
+      let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 1300, turnCount: 0, schema: CHAPTER_SCHEMA });
+      if (Array.isArray(r) && r[0]) r = r[0];
+      const b = r?.brief, p = r?.prologue;
+      const approaches = Array.isArray(b?.approaches) ? b.approaches.filter(a => typeof a === "string" && a.trim()) : [];
+      const choices    = Array.isArray(p?.choices)    ? p.choices.filter(c => typeof c === "string" && c.trim())    : [];
+      if (b?.title && b?.situation && b?.winCondition && approaches.length >= 1 && p?.text) {
+        return {
+          brief: { title: b.title, situation: b.situation, winCondition: b.winCondition, approaches: approaches.slice(0, 4) },
+          prologueText: p.text,
+          choices: choices.length ? choices.slice(0, 5) : [t("continue_")],
+        };
+      }
+      console.warn("Chapter generation: malformed shape", r);
+      return null;
+    } catch (e) {
+      console.warn("Chapter generation failed:", e);
+      return null;
+    }
+  }, [config, character, storyBible, t]);
+
+  // ─── CHAPTER RESOLVE (closure + bounded bible update) ─────────
+  // On solve: a rich closure card for the player + advisory downstream tweaks to
+  // the bible. clampBibleUpdate decides what actually changes. Returns
+  // { closureText, update } | null.
+  const resolveChapter = useCallback(async (chNum, total, whatHappened, cfgOverride, bibleOverride) => {
+    const cfg   = cfgOverride  ?? config;
+    const bible = bibleOverride ?? bibleRef.current ?? storyBible;
+    const genreLabel = THEMES[cfg.genre]?.nameKey || "fantasy";
+    const eLang = cfg.language || "English";
+    const langDirective = langDirectiveFor(eLang);
+    const isLast = chNum >= total;
+    const SYSTEM =
+      `You are the story architect maintaining the bible for a ${genreLabel} adventure. The player just SOLVED chapter ${chNum} of ${total}.\n` +
+      `LANGUAGE: write every value ENTIRELY in ${langDirective}; JSON keys stay English.\n` +
+      `closureText: ${proseLenFor(cfg.responseLength)} — a satisfying closure of THIS chapter that reflects how the player actually solved it and points toward what's coming.${isLast ? " This is the FINAL chapter: make it the ending of the whole story." : ""}\n` +
+      `Then propose SMALL downstream adjustments, changing as little as the player's actions truly require. You may adjust: the antagonist's goal and method, the stakes, the intended ending, and the beats of chapters AFTER ${chNum}. NEVER restate or change chapter ${chNum} or earlier. futureChapters: entries with n > ${chNum} only (may be empty if nothing needs to change).`;
+    const parts = [
+      bible ? `CURRENT BIBLE: ${JSON.stringify(bible)}` : "",
+      `WHAT HAPPENED IN CHAPTER ${chNum}: ${whatHappened}`,
+    ].filter(Boolean);
+    try {
+      let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 1200, turnCount: 0, schema: RESOLVE_SCHEMA });
+      if (Array.isArray(r) && r[0]) r = r[0];
+      if (r?.closureText) return { closureText: r.closureText, update: r };
+      console.warn("Chapter resolve: malformed shape", r);
+      return null;
+    } catch (e) {
+      console.warn("Chapter resolve failed:", e);
+      return null;
+    }
+  }, [config, storyBible]);
+
+  // ─── CHAPTER PREPARE ──────────────────────────────────────────
+  // Generates (with retries) the next chapter but does NOT commit it to play —
+  // the prologue card is read first, then enterChapter() commits on Continue.
+  // Sets briefStatus for the blocking spinner / error panel. Returns the prepared
+  // chapter { chNum, brief, prologueText, choices } | null.
+  const prepareChapter = useCallback(async (chNum, total, summaryCtx, cfgOv, charOv, bibleOv) => {
     const req = ++briefReqRef.current;
     lastSummaryCtxRef.current = summaryCtx;
-    setChapterNumber(chNum);
-    setChapterBrief(null);
-    setChapterProgress({ achieved: [], clues: [] });
-    setStuckTurns(0);
-    setHintLevel(0);                 // new chapter — approaches hidden again
+    prepareArgsRef.current = { chNum, total, summaryCtx, cfgOv, charOv, bibleOv }; // for the error-panel retry
     setBriefStatus("loading");
-    // No backoff between attempts: api.chat already retries and has a 25s
-    // per-attempt timeout, so this is plenty of wall time on a blocking screen.
     for (let attempt = 1; attempt <= BRIEF_MAX_ATTEMPTS; attempt++) {
-      const brief = await generateChapterBrief(chNum, total, summaryCtx, cfgOv, charOv);
-      if (req !== briefReqRef.current) return null;  // superseded by reset/load — drop it
-      if (brief) {
-        setChapterBrief(brief);
+      const prepared = await generateChapter(chNum, total, summaryCtx, cfgOv, charOv, bibleOv);
+      if (req !== briefReqRef.current) return null;  // superseded by reset/load
+      if (prepared) {
         setBriefStatus("idle");
-        if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
-        setChapterBanner(brief.title);
-        bannerTimerRef.current = setTimeout(() => setChapterBanner(null), 5000);
-        return brief;
+        return { chNum, ...prepared };
       }
     }
     if (req === briefReqRef.current) setBriefStatus("error");
     return null;
-  }, [generateChapterBrief, totalChapters]);
+  }, [generateChapter]);
+
+  // ─── ADVENTURE PROLOGUE ───────────────────────────────────────
+  // The opening card: draws the player into the world and the plot, from the
+  // bible. Rich. Returns text or null. Not a substitute for chapter 1's prologue.
+  const generateAdventurePrologue = useCallback(async (cfgOverride, charOverride, bibleOverride) => {
+    const cfg   = cfgOverride  ?? config;
+    const char  = charOverride ?? character;
+    const bible = bibleOverride ?? bibleRef.current ?? storyBible;
+    const genreLabel = THEMES[cfg.genre]?.nameKey || "fantasy";
+    const eLang = cfg.language || "English";
+    const langDirective = langDirectiveFor(eLang);
+    const SYSTEM =
+      `You are the narrator opening an interactive ${genreLabel} adventure. Write the PROLOGUE that draws the player into the world and the story about to unfold.\n` +
+      `LANGUAGE: write ENTIRELY in ${langDirective}.\n` +
+      `PERSPECTIVE: second person ("you").\n` +
+      `text: ${proseLenFor(cfg.responseLength)} — establish who ${char.name} is, the world and its tone, and the central tension that sets the story in motion. Atmospheric and inviting. Do NOT resolve anything and do NOT present choices — this only sets the stage.`;
+    const parts = [
+      bible ? `STORY BIBLE: ${JSON.stringify({ logline: bible.logline, centralConflict: bible.centralConflict, antagonist: bible.antagonist, stakes: bible.stakes })}` : "",
+      `Protagonist: ${char.name}${char.skills?.length ? `, skilled in ${char.skills.join(", ")}` : ""}. Age ${char.age || "unknown"}.`,
+      cfg.storyPrompt ? `Premise: ${cfg.storyPrompt}` : "",
+    ].filter(Boolean);
+    try {
+      let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 900, turnCount: 0, schema: TEXT_SCHEMA });
+      if (Array.isArray(r) && r[0]) r = r[0];
+      return typeof r?.text === "string" && r.text.trim() ? r.text : null;
+    } catch (e) {
+      console.warn("Adventure prologue failed:", e);
+      return null;
+    }
+  }, [config, character, storyBible]);
+
+  // Commit a prepared chapter into play: install its brief, reset per-chapter
+  // state, and make its opening choices active. Called when the player continues
+  // past the chapter prologue card.
+  const enterChapter = useCallback((prepared) => {
+    if (!prepared) return;
+    setChapterNumber(prepared.chNum);
+    setChapterBrief(prepared.brief);
+    setChapterProgress({ achieved: [], clues: [] });
+    setStuckTurns(0);
+    setHintLevel(0);                 // new chapter — approaches hidden again
+    setChoices(prepared.choices || []);
+    setBriefStatus("idle");
+    if (bannerTimerRef.current) clearTimeout(bannerTimerRef.current);
+    setChapterBanner(prepared.brief.title);
+    bannerTimerRef.current = setTimeout(() => setChapterBanner(null), 5000);
+  }, []);
 
   // ─── KEY SETUP ────────────────────────────────────────────────
   const handleValidateKey = async () => {
@@ -2550,40 +2799,72 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     setPhase("game");
     setLoading(true);
 
-    // Chapter 1's brief must exist BEFORE the opening call: the opening has to
-    // drop the player into the situation. Previously this was a 5s timer racing
-    // an opening that was therefore written with chapterBrief === null, so the
-    // opening and the chapter routinely described different things.
     const finalTotalChapters = finalCfg.chapterCount;
-    const brief1 = await startChapter(1, "", finalCfg, finalChar, finalTotalChapters);
 
-    const openingLength = {
-      short:  "3-4 sentences",
-      medium: "6-8 sentences (roughly 2 paragraphs)",
-      long:   "4-5 rich, descriptive paragraphs",
-    }[finalCfg.responseLength] || "3-4 sentences";
+    // 1) The whole-arc bible, up front — chapters and prologues all serve it.
+    //    Degrades gracefully to null (unchaptered plot) if generation fails.
+    let bible = null;
+    for (let attempt = 1; attempt <= BRIEF_MAX_ATTEMPTS && !bible; attempt++) {
+      bible = await generateStoryBible(finalTotalChapters, finalCfg, finalChar);
+    }
+    bibleRef.current = bible;
+    setStoryBible(bible);
 
-    const firstMessage = [{ role: "user", content:
-      `Begin the adventure with an opening of ${openingLength}. Cover: ` +
-      `(1) a brief background on ${finalChar.name} — who they are, personality, and what shaped them; ` +
-      `(2) the world — its tone, state, and defining features; ` +
-      `(3) the current situation — what is happening right now that sets the story in motion. ` +
-      (brief1 ? `Land the opening squarely in the CHAPTER SITUATION described in your instructions — by the final sentence the player must be facing it directly. Do not resolve it. ` : "") +
-      `End with 2-5 meaningful choices.`
-    }];
-
-    // Build system prompt with final values (state updates above are async; pass
-    // overrides directly — including the brief we just awaited)
-    const systemPrompt = buildSystemPrompt(finalCfg, finalChar, brief1, 1);
-    const result = await callAPI(firstMessage, { systemPrompt });
-    if (!result) { setLoading(false); return; } // key modal shown
-    setStoryLog([{ role: "narrator", text: result.story }]);
-    setChoices(result.choices?.length ? result.choices : (result.gameOver ? [] : [t("continue_")]));
-    if (result.stats && finalCfg.trackStats) setStats(result.stats);
-    setNextRollRequired({ required: !!result.rollRequired, context: result.rollContext || "" });
-    setCurrentMood(result.mood || "peaceful");
-    setTurnCount(1);
+    // 2) The adventure prologue card — world + plot. First thing the player reads.
+    const advText = await generateAdventurePrologue(finalCfg, finalChar, bible);
+    setStoryLog([{ role: "prologue", kind: "adventure", text: advText || finalCfg.storyPrompt }]);
+    setTurnCount(1);                       // the opening is consumed by the prologue cards
+    setCurrentMood("mysterious");
+    setInterlude({ kind: "advPrologue", ready: false });
     setLoading(false);
+
+    // 3) Prepare chapter 1 in the background while the player reads card 1; the
+    //    card's Continue enables when it's ready.
+    pendingChapterRef.current = null;
+    prepareChapter(1, "", finalCfg, finalChar, finalTotalChapters, bible).then(prep => {
+      pendingChapterRef.current = prep;
+      setInterlude(i => (i && i.kind === "advPrologue") ? { ...i, ready: !!prep } : i);
+    });
+  };
+
+  // ─── INTERLUDE (reading cards between play) ────────────────────
+  // Pushes a chapter prologue card and stashes the prepared chapter for Continue.
+  const showChapterPrologue = (prepared) => {
+    pendingChapterRef.current = prepared;
+    setStoryLog(prev => [...prev, { role: "prologue", kind: "chapter", text: prepared.prologueText, num: prepared.chNum }]);
+    setInterlude({ kind: "chapterPrologue", ready: true });
+  };
+
+  // Continue button on any interlude card. What it does depends on which card.
+  const handleContinue = () => {
+    if (!interlude || interlude.ready === false) return;
+    if (interlude.kind === "closure" && interlude.final) {
+      // The final chapter's closure IS the ending.
+      setInterlude(null);
+      setChoices([]);
+      setGameOver(true);
+    } else if (interlude.kind === "advPrologue" || interlude.kind === "closure") {
+      // Move from a prologue/closure card into the next chapter's prologue card.
+      const prep = pendingChapterRef.current;
+      if (!prep) { setBriefStatus("error"); return; }  // shouldn't happen (Continue gated on ready)
+      showChapterPrologue(prep);
+    } else if (interlude.kind === "chapterPrologue") {
+      // Begin play: commit the chapter and surface its opening choices.
+      enterChapter(pendingChapterRef.current);
+      pendingChapterRef.current = null;
+      setInterlude(null);
+    }
+  };
+
+  // Re-issue the last chapter preparation after a failure, then unblock whatever
+  // card was waiting on it. Backs the error panel's "try again".
+  const retryPrepare = () => {
+    const a = prepareArgsRef.current;
+    if (!a) { setBriefStatus("idle"); return; }
+    prepareChapter(a.chNum, a.total, a.summaryCtx, a.cfgOv, a.charOv, a.bibleOv).then(prep => {
+      pendingChapterRef.current = prep;
+      setInterlude(i => i ? { ...i, ready: !!prep } : i);
+    });
   };
 
   // ─── CHOICE CLICK (checks for dice) ──────────────────────────
@@ -2625,12 +2906,16 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     // Build LLM history — skip roll/chapter entries, and strip error/retry pairs
     const ERROR_MARKERS = ["Something went wrong", "משהו השתבש", "حدث خطأ", "Algo deu errado"];
     const RETRY_TEXTS   = ["Try again", "נסה שוב", "حاول مرة أخرى", "Tentar novamente"];
-    const rawForHistory = storyLog.filter(e => e.role === "narrator" || e.role === "player");
+    // prologue entries are narration the player read — include them as context so
+    // in-chapter turns continue the scene the prologue set. closure/chapter markers
+    // stay display-only (the summary + next brief carry the handoff instead).
+    const rawForHistory = storyLog.filter(e => e.role === "narrator" || e.role === "player" || e.role === "prologue");
     const logForHistory = rawForHistory.filter(e => {
       if (e.role === "narrator" && ERROR_MARKERS.some(m => e.text.includes(m))) return false;
       if (e.role === "player" && RETRY_TEXTS.includes(e.text)) return false;
       return true;
     });
+    const isNarr = (e) => e.role === "narrator" || e.role === "prologue";
 
     // If this is a retry, find the last real player action and resend that instead
     const isRetry = RETRY_TEXTS.includes(choiceText);
@@ -2646,7 +2931,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       if (firstPlayer > 0) windowLog = windowLog.slice(firstPlayer);
       history = [];
       for (const entry of windowLog) {
-        if (entry.role === "narrator") history.push({ role: "assistant", content: JSON.stringify({ story: entry.text, choices: [] }) });
+        if (isNarr(entry)) history.push({ role: "assistant", content: JSON.stringify({ story: entry.text, choices: [] }) });
         else history.push({ role: "user", content: `Player chose: "${entry.text}"` });
       }
       // Ensure the first message is from user (required by most LLM APIs)
@@ -2656,7 +2941,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     } else {
       history = [{ role: "user", content: `Begin the adventure with an opening covering ${character.name}'s background, the world, and the current situation.` }];
       for (const entry of logForHistory) {
-        if (entry.role === "narrator") history.push({ role: "assistant", content: JSON.stringify({ story: entry.text, choices: [] }) });
+        if (isNarr(entry)) history.push({ role: "assistant", content: JSON.stringify({ story: entry.text, choices: [] }) });
         else history.push({ role: "user", content: `Player chose: "${entry.text}"` });
       }
     }
@@ -2730,15 +3015,19 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     const solved = result.chapterSolved ?? result.chapterComplete ?? false;
 
     setStoryLog(prev => [...prev, { role: "narrator", text: result.story }]);
-    setChoices(result.choices?.length ? result.choices : (result.gameOver ? [] : [t("continue_")]));
     if (result.stats && config.trackStats) setStats(result.stats);
-    if (result.gameOver) {
+    if (solved) {
+      // A solve (even on the final chapter) routes through the closure card below,
+      // which owns the gameOver transition — don't end the game here.
+      setChoices([]);
+      setCurrentMood("triumphant");
+    } else if (result.gameOver) {
+      // A non-solve ending (e.g. death mid-chapter) ends immediately, as before.
       setGameOver(true);
       setChoices([]);
       setCurrentMood(result.gameOverReason?.toLowerCase().includes("death") ? "sad" : "triumphant");
-    } else if (solved) {
-      setCurrentMood("triumphant");
     } else {
+      setChoices(result.choices?.length ? result.choices : [t("continue_")]);
       setCurrentMood(result.mood || "neutral");
     }
 
@@ -2779,19 +3068,35 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       }));
     }
 
-    // Chapter solved — drop a permanent marker in the feed, then advance. The old
-    // 10s delay on the brief existed so it wouldn't compete with the main call;
-    // the main call has already resolved here, and startChapter now blocks input,
-    // so the delay would just be dead air.
-    if (solved && !result.gameOver) {
+    // Chapter solved → rich closure card + a bounded, downstream-only bible nudge,
+    // then (unless final) prepare the next chapter in the background while the
+    // player reads the closure. The terse solving turn is already in the feed;
+    // this wraps it. resolveChapter is awaited under the existing spinner.
+    if (solved) {
       const fullLog = [...storyLog, { role: "player", text: choiceText }, { role: "narrator", text: result.story }];
-      const summaryCtx = storySummary.narrative || fullLog.filter(e => e.role !== "roll").map(e => `${e.role}: ${e.text}`).join("\n").slice(0, 600);
-      // Marker uses the OUTGOING chapter — read before startChapter bumps it.
-      setStoryLog(prev => [...prev, { role: "chapter", text: chapterBrief?.title || "", num: chapterNumber, solvedVia: result.solvedVia || "" }]);
-      const nextChap = chapterNumber + 1;
-      if (nextChap <= totalChapters) {
-        setTimeout(() => triggerSummarize(fullLog, storySummary), 2000); // re-ground context for the new chapter
-        startChapter(nextChap, summaryCtx);
+      const summaryCtx = storySummary.narrative || fullLog.filter(e => e.role === "narrator" || e.role === "player").map(e => `${e.role}: ${e.text}`).join("\n").slice(0, 600);
+      const whatHappened = `Solved via: ${result.solvedVia || "the player's own approach"}. Recent events: ${summaryCtx}`;
+      const isLast = chapterNumber >= totalChapters || result.gameOver;
+
+      const resolved = await resolveChapter(chapterNumber, totalChapters, whatHappened, config, bibleRef.current);
+      // Apply the bounded update — clamped so the spine cannot move (see clampBibleUpdate).
+      if (resolved?.update && bibleRef.current) {
+        const nb = clampBibleUpdate(bibleRef.current, chapterNumber, resolved.update);
+        bibleRef.current = nb;
+        setStoryBible(nb);
+      }
+      setStoryLog(prev => [...prev, { role: "closure", text: resolved?.closureText || result.story, num: chapterNumber, solvedVia: result.solvedVia || "" }]);
+
+      if (isLast) {
+        setInterlude({ kind: "closure", ready: true, final: true }); // Continue → gameOver
+      } else {
+        setInterlude({ kind: "closure", ready: false });
+        setTimeout(() => triggerSummarize(fullLog, storySummary), 500); // re-ground for the new chapter
+        pendingChapterRef.current = null;
+        prepareChapter(chapterNumber + 1, summaryCtx, config, character, totalChapters, bibleRef.current).then(prep => {
+          pendingChapterRef.current = prep;
+          setInterlude(i => (i && i.kind === "closure") ? { ...i, ready: !!prep } : i);
+        });
       }
     }
 
@@ -2799,8 +3104,8 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     setTurnCount(newTurnCount);
     setLoading(false);
 
-    // Periodic summarization — fires every 5 turns, short delay so it doesn't race the main call
-    if (newTurnCount % SUMMARY_EVERY === 0) {
+    // Periodic summarization — every 5 turns; skip on a solve (handled above).
+    if (!solved && newTurnCount % SUMMARY_EVERY === 0) {
       const fullNewLog = [...storyLog, { role: "player", text: choiceText }, { role: "narrator", text: result.story }];
       setTimeout(() => triggerSummarize(fullNewLog, storySummary), 3000);
     }
@@ -2822,7 +3127,9 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     setPendingRoll(null); setNextRollRequired({ required: false, context: "" });
     setChapterProgress({ achieved: [], clues: [] });
     setHintLevel(0); setStuckTurns(0);
-    setBriefStatus("idle"); briefReqRef.current++; // invalidate any brief still in flight
+    setBriefStatus("idle"); briefReqRef.current++; // invalidate any brief/chapter still in flight
+    setStoryBible(null); bibleRef.current = null;
+    setInterlude(null); pendingChapterRef.current = null;
   };
 
   const handleExport = () => {
@@ -2831,7 +3138,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
   };
 
   const handleSaveGame = () => {
-    const payload = buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress, stuckTurns, hintLevel });
+    const payload = buildSavePayload({ config, character, stats, storyLog, choices, turnCount, gameOver, storySummary, worldState, chapterNumber, chapterBrief, chapterProgress, stuckTurns, hintLevel, storyBible });
     triggerDownload(`${character.name}-save-${Date.now()}.json`, JSON.stringify(payload, null, 2), "application/json");
   };
 
@@ -2861,6 +3168,8 @@ Return the JSON object above and nothing else — do not add fields, do not nest
         setChapterProgress(save.chapterProgress || { achieved: [], clues: [] });
         setHintLevel(save.hintLevel || 0);   // revealed approaches are earned — restore them
         setStuckTurns(save.stuckTurns || 0);
+        setStoryBible(save.storyBible || null); bibleRef.current = save.storyBible || null;
+        setInterlude(null); pendingChapterRef.current = null; // resume into play, not mid-card
         setBriefStatus("idle");
         briefReqRef.current++;               // invalidate any brief in flight from the abandoned run
         setPhase("game");
@@ -3397,6 +3706,30 @@ Return the JSON object above and nothing else — do not add fields, do not nest
 
           {/* Story log */}
           {storyLog.map((entry, i) => {
+            if (entry.role === "prologue" || entry.role === "closure") {
+              const title = entry.role === "closure"
+                ? t("chapterClosureTitle")
+                : (entry.kind === "adventure" ? t("advPrologueTitle") : t("chapterPrologueTitle"));
+              return (
+                <div key={i} style={{
+                  margin: "22px 0", padding: "20px 24px",
+                  background: `${theme.primary}0C`, border: `1px solid ${theme.primary}33`,
+                  borderRadius: 14, textAlign: isRTL ? "right" : "left",
+                }}>
+                  <div style={{ fontFamily: theme.body, color: theme.primary, fontSize: 11, textTransform: "uppercase", letterSpacing: 2, marginBottom: 10, textAlign: "center" }}>
+                    {title}{entry.num ? ` — ${t("chapterLabel")} ${entry.num}` : ""}
+                  </div>
+                  {String(entry.text).split(/\n+/).filter(Boolean).map((para, pi) => (
+                    <p key={pi} style={{ fontFamily: theme.body, color: theme.text, fontSize: 15, lineHeight: 1.7, margin: pi === 0 ? 0 : "12px 0 0" }}>{para}</p>
+                  ))}
+                  {entry.solvedVia && (
+                    <div style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 12, marginTop: 12, fontStyle: "italic", textAlign: "center" }}>
+                      {t("chapterSolvedMsg")} — {entry.solvedVia}
+                    </div>
+                  )}
+                </div>
+              );
+            }
             if (entry.role === "chapter") {
               return (
                 <div key={i} style={{
@@ -3589,7 +3922,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
             );
           })}
 
-          {(loading || briefStatus === "loading") && (
+          {(loading || (briefStatus === "loading" && !interlude)) && (
             <div style={{ textAlign: "center", padding: 30 }}>
               <div style={{ fontSize: 28, animation: "pulse 1.5s ease-in-out infinite" }}>{theme.icon}</div>
               <p style={{ fontFamily: theme.body, color: theme.textMuted, fontSize: 13, marginTop: 8 }}>
@@ -3615,14 +3948,14 @@ Return the JSON object above and nothing else — do not add fields, do not nest
               <p style={{ fontFamily: theme.body, color: theme.text, fontSize: 13 }}>{t("chapterBriefFailed")}</p>
               <div style={{ display: "flex", gap: 8, justifyContent: "center", marginTop: 12, flexWrap: "wrap" }}>
                 <button
-                  onClick={() => startChapter(chapterNumber, lastSummaryCtxRef.current)}
+                  onClick={retryPrepare}
                   style={{
                     background: theme.primary, border: "none", borderRadius: 6, padding: "6px 14px",
                     color: "#fff", fontFamily: theme.body, fontSize: 12, cursor: "pointer",
                   }}
                 >{t("retryChapterBrief")}</button>
                 <button
-                  onClick={() => setBriefStatus("idle")}
+                  onClick={() => { setBriefStatus("idle"); setInterlude(null); }}
                   style={{
                     background: "transparent", border: `1px solid ${theme.border}`, borderRadius: 6, padding: "6px 14px",
                     color: theme.textMuted, fontFamily: theme.body, fontSize: 12, cursor: "pointer",
@@ -3651,8 +3984,33 @@ Return the JSON object above and nothing else — do not add fields, do not nest
           <div ref={storyEndRef} />
         </div>
 
+        {/* Interlude card — a prologue/closure is being read; the choices panel is
+            replaced by a single Continue, gated on the next chapter being ready. */}
+        {interlude && !loading && !gameOver && briefStatus !== "error" && (
+          <div style={{ textAlign: "center", marginTop: 12 }}>
+            <button
+              onClick={handleContinue}
+              disabled={interlude.ready === false}
+              style={{
+                background: interlude.ready === false ? "transparent" : theme.primary,
+                border: interlude.ready === false ? `1px solid ${theme.border}` : "none",
+                borderRadius: 10, padding: "12px 32px",
+                color: interlude.ready === false ? theme.textMuted : theme.bg,
+                fontFamily: theme.heading, fontSize: 15, fontWeight: 700,
+                cursor: interlude.ready === false ? "default" : "pointer",
+                display: "inline-flex", alignItems: "center", gap: 8,
+                opacity: interlude.ready === false ? 0.7 : 1, transition: "all 0.2s",
+              }}
+            >
+              {interlude.ready === false
+                ? <><span style={{ animation: "pulse 1.5s ease-in-out infinite" }}>{theme.icon}</span> {t("preparingChapter")}</>
+                : <>{interlude.kind === "closure" && interlude.final ? t("theEnd") : t("continueBtn")} <Icon name="chevronRight" size={16} /></>}
+            </button>
+          </div>
+        )}
+
         {/* Choices panel — always show input when game is active, even if LLM returned no suggestions */}
-        {!loading && !gameOver && briefStatus === "idle" && (
+        {!loading && !gameOver && briefStatus === "idle" && !interlude && (
           <div style={{
             background: theme.bgCard, backdropFilter: "blur(20px)", border: `1px solid ${theme.border}`,
             borderRadius: 16, padding: "18px 24px", marginTop: 12, boxShadow: "0 10px 40px rgba(0,0,0,0.2)",
