@@ -2617,7 +2617,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
   // player-facing prologue card + its opening choices. The brief REALIZES this
   // chapter's beat from the bible, so chapters serve the arc instead of being
   // freshly invented. Pure producer — returns { brief, prologueText, choices } | null.
-  const generateChapter = useCallback(async (chNum, total, summaryContext, cfgOverride, charOverride, bibleOverride) => {
+  const generateChapter = useCallback(async (chNum, total, summaryContext, cfgOverride, charOverride, bibleOverride, handoff) => {
     const cfg   = cfgOverride  ?? config;
     const char  = charOverride ?? character;
     const bible = bibleOverride ?? bibleRef.current ?? storyBible;
@@ -2644,7 +2644,9 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       `Character: ${char.name}${char.skills?.length ? `, skilled in ${char.skills.join(", ")}` : ""}.`,
       cfg.storyPrompt ? `Premise: ${cfg.storyPrompt}` : "",
       summaryContext ? `Story so far: ${summaryContext}` : "This is the very beginning of the adventure.",
-      `${chNum === 1 ? "Opening chapter — establish the world and the first concrete predicament." : chNum === total ? "Final chapter — its situation resolves the whole story." : "Build on events so far; escalate."}`,
+      // The previous chapter's closure — the prologue must continue directly from here.
+      handoff ? `HOW THE PREVIOUS CHAPTER JUST ENDED — the player is HERE, NOW:\n${handoff}\nOpen this chapter as a seamless, direct continuation: carry over the place they are in, what they hold, and the momentum; do NOT jump ahead in time or relocate them abruptly, and do NOT repeat what this closure already narrated. The prologue's opening line should feel like the very next moment.` : "",
+      `${chNum === 1 ? "Opening chapter — establish the world and the first concrete predicament." : chNum === total ? "Final chapter — its situation resolves the whole story, following on from the previous chapter." : "Build directly on the previous chapter's ending; escalate."}`,
     ].filter(Boolean);
     try {
       let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 1300, turnCount: 0, schema: CHAPTER_SCHEMA });
@@ -2711,13 +2713,13 @@ Return the JSON object above and nothing else — do not add fields, do not nest
   // the prologue card is read first, then enterChapter() commits on Continue.
   // Sets briefStatus for the blocking spinner / error panel. Returns the prepared
   // chapter { chNum, brief, prologueText, choices } | null.
-  const prepareChapter = useCallback(async (chNum, total, summaryCtx, cfgOv, charOv, bibleOv) => {
+  const prepareChapter = useCallback(async (chNum, total, summaryCtx, cfgOv, charOv, bibleOv, handoff) => {
     const req = ++briefReqRef.current;
     lastSummaryCtxRef.current = summaryCtx;
-    prepareArgsRef.current = { chNum, total, summaryCtx, cfgOv, charOv, bibleOv }; // for the error-panel retry
+    prepareArgsRef.current = { chNum, total, summaryCtx, cfgOv, charOv, bibleOv, handoff }; // for the error-panel retry
     setBriefStatus("loading");
     for (let attempt = 1; attempt <= BRIEF_MAX_ATTEMPTS; attempt++) {
-      const prepared = await generateChapter(chNum, total, summaryCtx, cfgOv, charOv, bibleOv);
+      const prepared = await generateChapter(chNum, total, summaryCtx, cfgOv, charOv, bibleOv, handoff);
       if (req !== briefReqRef.current) return null;  // superseded by reset/load
       if (prepared) {
         setBriefStatus("idle");
@@ -2856,7 +2858,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     // 3) Prepare chapter 1 in the background while the player reads card 1; the
     //    card's Continue enables when it's ready.
     pendingChapterRef.current = null;
-    prepareChapter(1, "", finalCfg, finalChar, finalTotalChapters, bible).then(prep => {
+    prepareChapter(1, finalTotalChapters, "", finalCfg, finalChar, bible).then(prep => {
       pendingChapterRef.current = prep;
       setInterlude(i => (i && i.kind === "advPrologue") ? { ...i, ready: !!prep } : i);
     });
@@ -2896,7 +2898,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
   const retryPrepare = () => {
     const a = prepareArgsRef.current;
     if (!a) { setBriefStatus("idle"); return; }
-    prepareChapter(a.chNum, a.total, a.summaryCtx, a.cfgOv, a.charOv, a.bibleOv).then(prep => {
+    prepareChapter(a.chNum, a.total, a.summaryCtx, a.cfgOv, a.charOv, a.bibleOv, a.handoff).then(prep => {
       pendingChapterRef.current = prep;
       setInterlude(i => i ? { ...i, ready: !!prep } : i);
     });
@@ -3128,7 +3130,10 @@ Return the JSON object above and nothing else — do not add fields, do not nest
         setInterlude({ kind: "closure", ready: false });
         setTimeout(() => triggerSummarize(fullLog, storySummary), 500); // re-ground for the new chapter
         pendingChapterRef.current = null;
-        prepareChapter(chapterNumber + 1, summaryCtx, config, character, totalChapters, bibleRef.current).then(prep => {
+        // Hand the actual closure to the next chapter so its prologue continues
+        // directly from how this one ended, instead of re-deriving from a summary.
+        const handoff = resolved?.closureText || "";
+        prepareChapter(chapterNumber + 1, totalChapters, summaryCtx, config, character, bibleRef.current, handoff).then(prep => {
           pendingChapterRef.current = prep;
           setInterlude(i => (i && i.kind === "closure") ? { ...i, ready: !!prep } : i);
         });
