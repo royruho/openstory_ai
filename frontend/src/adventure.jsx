@@ -770,6 +770,26 @@ const TEXT_SCHEMA = {
   schema: { type: "object", additionalProperties: false, required: ["text"], properties: { text: { type: "string" } } },
 };
 
+// The language directive on structured generators (bible/chapter/prologue) is
+// intermittently ignored for the prose fields — a Hebrew game gets an English
+// prologue. json_schema can't enforce language, so we verify in code and retry.
+// Only checkable for non-Latin scripts; Latin-script targets (English,
+// Portuguese) can't be told apart cheaply, so they're always accepted.
+const SCRIPT_RANGES = {
+  Hebrew: /[֐-׿]/g,
+  Arabic: /[؀-ۿݐ-ݿ]/g,
+};
+function wrongLanguage(text, eLang) {
+  const re = SCRIPT_RANGES[eLang];
+  if (!re) return false;
+  const s = String(text || "");
+  const target = (s.match(re) || []).length;
+  const latin  = (s.match(/[A-Za-z]/g) || []).length;
+  // Substantial Latin prose with the target script in the minority = wrong
+  // language. A few English proper nouns in otherwise-Hebrew text pass fine.
+  return latin > 8 && target < latin;
+}
+
 // Apply a solve-time update to the bible, clamped so the spine physically cannot
 // move: logline, centralConflict, the antagonist's NAME, and every already-played
 // chapter's beat are carried over untouched. Only the antagonist's goal/method,
@@ -2568,6 +2588,10 @@ Return the JSON object above and nothing else — do not add fields, do not nest
         ? r.chapters.filter(c => c && typeof c.beat === "string").map((c, i) => ({ n: i + 1, beat: c.beat }))
         : [];
       if (r?.logline && r?.centralConflict && r?.antagonist?.name && r?.intendedEnding && chapters.length) {
+        if (wrongLanguage(r.logline, eLang) || wrongLanguage(chapters[0]?.beat, eLang)) {
+          console.warn("Story bible: wrong language, retrying");
+          return null;   // startAdventure's loop retries
+        }
         // Trust the arc's own chapter count if it disagrees with `total`; the
         // beats are what matter and totalChapters is derived from config anyway.
         return {
@@ -2603,17 +2627,17 @@ Return the JSON object above and nothing else — do not add fields, do not nest
     const beat = bible?.chapters?.find(c => c.n === chNum)?.beat;
     const SYSTEM =
       `You are a story architect for an interactive ${genreLabel} adventure. Set up chapter ${chNum} of ${total}: a concrete SITUATION the player must solve, decided NOW, plus the player-facing prologue that opens it.\n` +
-      `LANGUAGE: write every value ENTIRELY in ${langDirective}; JSON keys stay English.\n` +
       `Return two objects:\n` +
       `"brief" (the hidden solving contract):\n` +
       `  title: evocative chapter title (3-6 words).\n` +
       `  situation: 1-2 sentences — the specific, concrete predicament facing the player RIGHT NOW, here, in this place. A scene, not a theme.\n` +
-      `  winCondition: ONE sentence naming the objectively checkable end-state that resolves it (answerable yes/no by looking at the world, e.g. 'Aran is inside the city walls'). Never a vague verb like 'investigate' on its own — name the STATE.\n` +
+      `  winCondition: ONE sentence naming the objectively checkable end-state that resolves it (answerable yes/no by looking at the world — name the STATE, never a vague verb like the equivalent of 'investigate'. Illustrative shape only, shown in English: "the hero is inside the city walls" — yours must be written in ${eLang}).\n` +
       `  approaches: 2-4 genuinely different concrete routes to the win condition. HIDDEN from the player.\n` +
       `"prologue" (what the player reads to open the chapter):\n` +
       `  text: ${proseLenFor(cfg.responseLength)} that drops the player into the situation and makes clear, in the fiction, what they must achieve here and hints at how — WITHOUT listing the approaches. Rich and atmospheric.\n` +
       `  choices: 2-5 concrete opening actions (plain strings), each a real move on the situation.\n` +
-      `The situation and winCondition must match, and both must realize this chapter's role in the arc.`;
+      `The situation and winCondition must match, and both must realize this chapter's role in the arc.\n` +
+      `CRITICAL LANGUAGE RULE: EVERY string value — title, situation, winCondition, every approach, the prologue text, and every choice — MUST be written entirely in ${langDirective}. Only the JSON keys stay in English. Any English inside a value is a failure.`;
     const parts = [
       bible ? `STORY BIBLE: ${JSON.stringify({ logline: bible.logline, centralConflict: bible.centralConflict, antagonist: bible.antagonist, stakes: bible.stakes, intendedEnding: bible.intendedEnding })}` : "",
       beat ? `THIS CHAPTER'S BEAT (what it must accomplish in the arc): ${beat}` : "",
@@ -2629,6 +2653,12 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       const approaches = Array.isArray(b?.approaches) ? b.approaches.filter(a => typeof a === "string" && a.trim()) : [];
       const choices    = Array.isArray(p?.choices)    ? p.choices.filter(c => typeof c === "string" && c.trim())    : [];
       if (b?.title && b?.situation && b?.winCondition && approaches.length >= 1 && p?.text) {
+        // Wrong-language prose → return null so prepareChapter retries. The
+        // prologue is the biggest chunk of reading, so it's the tell.
+        if (wrongLanguage(p.text, eLang) || wrongLanguage(b.situation, eLang)) {
+          console.warn("Chapter generation: wrong language, retrying");
+          return null;
+        }
         return {
           brief: { title: b.title, situation: b.situation, winCondition: b.winCondition, approaches: approaches.slice(0, 4) },
           prologueText: p.text,
@@ -2663,16 +2693,17 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       bible ? `CURRENT BIBLE: ${JSON.stringify(bible)}` : "",
       `WHAT HAPPENED IN CHAPTER ${chNum}: ${whatHappened}`,
     ].filter(Boolean);
-    try {
-      let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 1200, turnCount: 0, schema: RESOLVE_SCHEMA });
-      if (Array.isArray(r) && r[0]) r = r[0];
-      if (r?.closureText) return { closureText: r.closureText, update: r };
-      console.warn("Chapter resolve: malformed shape", r);
-      return null;
-    } catch (e) {
-      console.warn("Chapter resolve failed:", e);
-      return null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 1200, turnCount: 0, schema: RESOLVE_SCHEMA });
+        if (Array.isArray(r) && r[0]) r = r[0];
+        if (r?.closureText && !wrongLanguage(r.closureText, eLang)) return { closureText: r.closureText, update: r };
+        console.warn(`Chapter resolve attempt ${attempt}: ${r?.closureText ? "wrong language" : "malformed"}`);
+      } catch (e) {
+        console.warn(`Chapter resolve attempt ${attempt} failed:`, e);
+      }
     }
+    return null;
   }, [config, storyBible]);
 
   // ─── CHAPTER PREPARE ──────────────────────────────────────────
@@ -2717,14 +2748,18 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       `Protagonist: ${char.name}${char.skills?.length ? `, skilled in ${char.skills.join(", ")}` : ""}. Age ${char.age || "unknown"}.`,
       cfg.storyPrompt ? `Premise: ${cfg.storyPrompt}` : "",
     ].filter(Boolean);
-    try {
-      let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 900, turnCount: 0, schema: TEXT_SCHEMA });
-      if (Array.isArray(r) && r[0]) r = r[0];
-      return typeof r?.text === "string" && r.text.trim() ? r.text : null;
-    } catch (e) {
-      console.warn("Adventure prologue failed:", e);
-      return null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        let r = await api.chat(SYSTEM, [{ role: "user", content: parts.join("\n") }], { max_tokens_override: 900, turnCount: 0, schema: TEXT_SCHEMA });
+        if (Array.isArray(r) && r[0]) r = r[0];
+        const txt = typeof r?.text === "string" && r.text.trim() ? r.text : null;
+        if (txt && !wrongLanguage(txt, eLang)) return txt;
+        console.warn(`Adventure prologue attempt ${attempt}: ${txt ? "wrong language" : "empty"}`);
+      } catch (e) {
+        console.warn(`Adventure prologue attempt ${attempt} failed:`, e);
+      }
     }
+    return null;
   }, [config, character, storyBible]);
 
   // Commit a prepared chapter into play: install its brief, reset per-chapter
