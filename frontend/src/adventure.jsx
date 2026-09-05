@@ -2630,8 +2630,8 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       `Return two objects:\n` +
       `"brief" (the hidden solving contract):\n` +
       `  title: evocative chapter title (3-6 words).\n` +
-      `  situation: 1-2 sentences — the specific, concrete predicament facing the player RIGHT NOW, here, in this place. A scene, not a theme.\n` +
-      `  winCondition: ONE sentence naming the objectively checkable end-state that resolves it (answerable yes/no by looking at the world — name the STATE, never a vague verb like the equivalent of 'investigate'. Illustrative shape only, shown in English: "the hero is inside the city walls" — yours must be written in ${eLang}).\n` +
+      `  situation: 1-2 sentences — the specific, concrete predicament that OPENS this chapter's beat, facing the player RIGHT NOW, here. A scene, not a theme.\n` +
+      `  winCondition: ONE sentence naming the objectively checkable end-state that COMPLETES THIS CHAPTER'S BEAT IN FULL — the LAST milestone the beat describes. It must be answerable yes/no by looking at the world (name the STATE, never a vague verb like the equivalent of 'investigate'; illustrative shape only, in English: "the hero is inside the city walls" — yours must be in ${eLang}). CRITICAL: do NOT pick an early sub-step of the beat. If the beat says "return to the tribe, convince the elders, then reach the witch and learn the truth", the win condition is learning the truth from the witch — NOT merely convincing the elders. Solving this chapter must mean everything the beat covers has actually happened in play, so the next chapter never has to assume off-screen events.\n` +
       `  approaches: 2-4 genuinely different concrete routes to the win condition. HIDDEN from the player.\n` +
       `"prologue" (what the player reads to open the chapter):\n` +
       `  text: ${proseLenFor(cfg.responseLength)} that drops the player into the situation and makes clear, in the fiction, what they must achieve here and hints at how — WITHOUT listing the approaches. Rich and atmospheric.\n` +
@@ -2640,7 +2640,7 @@ Return the JSON object above and nothing else — do not add fields, do not nest
       `CRITICAL LANGUAGE RULE: EVERY string value — title, situation, winCondition, every approach, the prologue text, and every choice — MUST be written entirely in ${langDirective}. Only the JSON keys stay in English. Any English inside a value is a failure.`;
     const parts = [
       bible ? `STORY BIBLE: ${JSON.stringify({ logline: bible.logline, centralConflict: bible.centralConflict, antagonist: bible.antagonist, stakes: bible.stakes, intendedEnding: bible.intendedEnding })}` : "",
-      beat ? `THIS CHAPTER'S BEAT (what it must accomplish in the arc): ${beat}` : "",
+      beat ? `THIS CHAPTER'S BEAT (the chapter is not solved until this ENTIRE beat has played out — the winCondition is its final milestone, never a partial step): ${beat}` : "",
       `Character: ${char.name}${char.skills?.length ? `, skilled in ${char.skills.join(", ")}` : ""}.`,
       cfg.storyPrompt ? `Premise: ${cfg.storyPrompt}` : "",
       summaryContext ? `Story so far: ${summaryContext}` : "This is the very beginning of the adventure.",
